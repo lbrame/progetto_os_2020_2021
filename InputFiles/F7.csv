@@ -1,0 +1,5 @@
+Id;Delay;Target;Action
+1;3;S1;IncreaseDelay
+2;4;S2;RemoveMSG
+3;7;R2;SendMSG
+4;10;all;
