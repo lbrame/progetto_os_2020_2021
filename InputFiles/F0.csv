@@ -1,4 +1,0 @@
-Id;Message;IdSender;IdReceiver;DelS1;DelS2;DelS3;Type
-1;Ciao;S3;R2;2;5;3;Q
-2;Come va?;S2;R2;1;1;-;SH
-3;MyMsg;S3;R3;3;2;4;FIFO
