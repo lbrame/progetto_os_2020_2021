@@ -8,6 +8,7 @@
 #include <fcntl.h>
 #include <malloc.h>
 #include <string.h>
+#include "defines.h"
 
 typedef struct {
     char* id;
@@ -17,22 +18,6 @@ typedef struct {
     char* time_arrival;
     char* time_departure;
 } hackler_struct;
-
-
-/**
- * count the number of messages in the file
- * @param input the buffer of read text
- * @param fileSize the size of the buffer
- * @return the number of messages in the file
- * */
-int count_messages(char *input, int fileSize) {
-    int counter = 0;
-    for (int i = 0; i < fileSize + 1; i++) {
-        if (input[i] == '\n')
-            counter++;
-    }
-    return counter;
-}
 
 
 /**
@@ -46,7 +31,7 @@ void print_message(hackler_struct m) {
     printf("id_sender: %s\n", m.id_sender);
     printf("id_receiver: %s\n", m.id_receiver);
     printf("time_arrival: %s\n", m.time_arrival);
-    printf("time_departure: %s\n\n", m.time_arrival);
+    printf("time_departure: %s\n\n", m.time_departure);
 }
 
 /**
@@ -55,8 +40,8 @@ void print_message(hackler_struct m) {
  * @param fileSize the size of the buffer
  * @return a pointer to a list of hackler_struct
  */
-hackler_struct* parse_file(char *inputBuffer, int fileSize) {
-    hackler_struct *messages = malloc(count_messages(inputBuffer, fileSize) * sizeof(hackler_struct));
+hackler_struct *parse_file(char *inputBuffer, int fileSize, int message_number) {
+    hackler_struct *messages = malloc(message_number * (int)sizeof(hackler_struct));
     char *row_context;
     char *field_context;
     int row_counter = 0;
@@ -92,47 +77,87 @@ hackler_struct* parse_file(char *inputBuffer, int fileSize) {
                 field_counter++;
             }
             messages[row_counter-1] = *message;
+            // TODO: remove
             print_message(messages[row_counter-1]);
         }
         row_counter++;
     }
-
     return messages;
 }
 
 /**
- * get the size of the file
- * @param rPath the relative path to the file that need to be read
- * @return the number of character contained into the file
+ * joins two strings
+ * @param str1
+ * @param str2
+ * @param join_character
+ * @return
  */
-int get_file_size(char *rPath) {
-    // Get file fileSize
-    struct stat st;
-    int statStatus = stat(rPath, &st);
-    if (statStatus == -1) {
-        ErrExit("stat");
+char* join (char* str1, char* str2, char join_character) {
+    int malloc_size = (int) (strlen(str1)+sizeof(join_character)+strlen(str2)+sizeof(join_character));
+    char* buffer = malloc(malloc_size);
+    strcpy(buffer, str1);
+    if (strcmp(str1, "") != 0 && strcmp(str2, "") != 0 && join_character) {
+        buffer[malloc_size-strlen(str2)-2] = join_character;
     }
-    return st.st_size;
+    strcat(buffer, str2);
+    return buffer;
 }
 
-/**
- * read the file and put read data into a buffer
- * @param inputBuffer the buffer where to store the read data
- * @param rPath the relative path to the file that need to be read
- * @param fileSize the size of file
- */
-void read_file(char *inputBuffer, char *rPath, int fileSize) {
-    int fd = open(rPath, O_RDONLY);
-    if (fd == -1)
-        ErrExit("open");
-    ssize_t numRead;
-    numRead = read(fd, inputBuffer, fileSize);
-    if (numRead == -1) {
-        ErrExit("read");
-    }
-    // insert terminator character
-    inputBuffer[numRead] = '\0';
-    close(fd);
+char *concatenation(hackler_struct *messages, char *starter, int message_number) {
+    char* outputBuffer;
+    char* old_outputBuffer;
+    for(int row = message_number - 1; row >= 0; row--){
+        for(int field_n = 0; field_n <= 6; field_n++) {
+            switch (field_n) {
+                case 0:
+                    if(row == message_number-1) {
+                        outputBuffer = join(messages[row].id, "", NULL);
+                    } else {
+                        old_outputBuffer = outputBuffer;
+                        outputBuffer = join(outputBuffer, messages[row].id, NULL);
+                        free(old_outputBuffer);
+                    }
+                    break;
+                case 1:
+                    old_outputBuffer = outputBuffer;
+                    outputBuffer = join( outputBuffer, messages[row].message, ';');
+                    free(old_outputBuffer);
+                    break;
+                case 2:
+                    old_outputBuffer = outputBuffer;
+                    outputBuffer = join(outputBuffer, messages[row].id_sender, ';');
+                    free(old_outputBuffer);
+                    break;
+                case 3:
+                    old_outputBuffer = outputBuffer;
+                    outputBuffer = join( outputBuffer,messages[row].id_receiver, ';');
+                    free(old_outputBuffer);
+                    break;
+                case 4:
+                    old_outputBuffer = outputBuffer;
+                    outputBuffer = join( outputBuffer,messages[row].time_arrival, ';');
+                    free(old_outputBuffer);
+                    break;
+                case 5:
+                    old_outputBuffer = outputBuffer;
+                    outputBuffer = join( outputBuffer,messages[row].time_departure, ';');
+                    free(old_outputBuffer);
+                    break;
+                case 6:
+                    old_outputBuffer = outputBuffer;
+                    if (row > 0)
+                        outputBuffer = join( outputBuffer, "\n", NULL);
+                    else
+                        outputBuffer = join( outputBuffer,"\0", ';');
+                    free(old_outputBuffer);
+                    break;
+                }
+            }
+        }
+        outputBuffer = join(starter, outputBuffer, NULL);
+        outputBuffer = join(outputBuffer, "\n", NULL);
+        printf("%s", outputBuffer);
+        return outputBuffer;
 }
 
 int main(int argc, char *argv[]) {
@@ -144,6 +169,12 @@ int main(int argc, char *argv[]) {
         ErrExit("malloc");
     }
     read_file(inputBuffer, argv[1], fileSize);
-    hackler_struct* messages = parse_file(inputBuffer, fileSize);
+    int message_number = count_messages(inputBuffer, fileSize);
+    hackler_struct* messages = parse_file(inputBuffer, fileSize, message_number);
+    free(inputBuffer);
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    char firstRow[] = "Id;Message;Id_Sender;Id_Receiver;Time_arrival;Time_departure\n";
+    char* BUFFER = concatenation(messages, firstRow, message_number);
+    // TODO free all memory
     return 0;
 }
