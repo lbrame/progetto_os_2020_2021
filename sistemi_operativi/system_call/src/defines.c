@@ -74,7 +74,7 @@ char* join (char* str1, char* str2, char join_character) {
     //allocated the space needed for both the strings, the odd character and the \0
     int malloc_size = (int) (strlen(str1)+sizeof(join_character)+strlen(str2)+1);
     char* buffer = malloc(malloc_size);
-    //array filled with 0
+    // clean buffer
     for (int i=0; i<malloc_size; i++) buffer[i]=0;
     //copied the content of str1 in buffer
     strcpy(buffer, str1);
@@ -104,21 +104,20 @@ char* get_out_file_rpath(char *in_file_path) {
 
 /**
  * writes data to the output file
- * @param in_file_path the relative path to the input file
+ * @param out_file_path the relative path to the output file
  * @param outputBuffer the buffer where is stored the data to write
  */
-void write_file(char in_file_path[], char* outputBuffer) {
-    char* r_path = get_out_file_rpath(in_file_path);
+void write_file(char out_file_path[], char* outputBuffer) {
     // check if file exists
-    if (access(r_path, F_OK) == 0){
+    if (access(out_file_path, F_OK) == 0){
         // delete file
-        int result = unlink(r_path);
+        int result = unlink(out_file_path);
         if (result == -1) {
             ErrExit("unlink");
         }
     }
     // create file and open it in write mode
-    int fd = open(r_path, O_WRONLY | O_CREAT | O_EXCL | O_TRUNC, S_IRWXU);
+    int fd = open(out_file_path, O_WRONLY | O_CREAT | O_EXCL | O_TRUNC, S_IRWXU);
     if (fd == -1)
         ErrExit("open");
 
@@ -130,4 +129,24 @@ void write_file(char in_file_path[], char* outputBuffer) {
     // insert terminator character
     outputBuffer[numWrite] = '\0';
     close(fd);
+}
+
+char* itoa(int val){
+    int buffer_dim = 0;
+    int new = val;
+    // count the number of digits
+    while(new != 0) {
+        new = new/10;
+        buffer_dim++;
+    }
+    char* buffer = malloc(sizeof(char) * buffer_dim);
+    // itoa && assign values to buffer
+    for (int i = 0; val > 0; i++)
+    {
+        new = 0;
+        new = val%10;
+        buffer[i] = (char)(new + 48);
+        val = val/10;
+    }
+    return buffer;
 }
