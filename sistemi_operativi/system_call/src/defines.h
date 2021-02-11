@@ -9,3 +9,4 @@ void read_file(char *inputBuffer, char *rPath, int fileSize);
 void write_file(char in_file_path[], char* outputBuffer);
 char* get_out_file_rpath(char *in_file_path);
 char* join (char* str1, char* str2, char join_character);
+char* itoa(int val);

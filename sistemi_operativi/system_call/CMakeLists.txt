@@ -51,7 +51,28 @@ add_executable(
     ${CMAKE_CURRENT_SOURCE_DIR}/src/hackler.c
 )
 
+add_executable(
+    S1
+
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/S1.c
+)
+
+add_executable(
+    S2
+
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/S2.c
+)
+
+add_executable(
+    S3
+
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/S3.c
+)
+
 
 target_link_libraries(senderManager PUBLIC os_core)
 target_link_libraries(receiverManager PUBLIC os_core)
 target_link_libraries(hackler PUBLIC os_core)
+target_link_libraries(S1 PUBLIC os_core)
+target_link_libraries(S2 PUBLIC os_core)
+target_link_libraries(S3 PUBLIC os_core)

@@ -157,6 +157,7 @@ char *concatenation(hackler_struct *messages, char *starter, int message_number)
 }
 
 int main(int argc, char *argv[]) {
+
     // argv[1] is the relative path to the input file and it is passes as a keyboard argument
     int fileSize = get_file_size(argv[1]);
     // allocate buffer to read file of size fileSize + 1(space for /0)
@@ -171,7 +172,8 @@ int main(int argc, char *argv[]) {
 
     char firstRow[] = "Id;Message;Id_Sender;Id_Receiver;Time_arrival;Time_departure\n";
     char* BUFFER = concatenation(messages, firstRow, message_number);
-    write_file(argv[1], BUFFER);
+    char* r_path = get_out_file_rpath(argv[1]);
+    write_file(r_path, BUFFER);
 
     free(BUFFER);
     free(messages);
