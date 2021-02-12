@@ -131,6 +131,11 @@ void write_file(char out_file_path[], char* outputBuffer) {
     close(fd);
 }
 
+/**
+ * converts integer value to string
+ * @param val the value to convert
+ * @return the input transformed into a string
+ */
 char* itoa(int val){
     int buffer_dim = 0;
     int new = val;
@@ -141,9 +146,7 @@ char* itoa(int val){
     }
     char* buffer = malloc(sizeof(char) * buffer_dim);
     // itoa && assign values to buffer
-    for (int i = 0; val > 0; i++)
-    {
-        new = 0;
+    for (int i = 0; val > 0; i++) {
         new = val%10;
         buffer[i] = (char)(new + 48);
         val = val/10;

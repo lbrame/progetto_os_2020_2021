@@ -2,9 +2,7 @@
 /// @brief Contiene l'implementazione del processo S1 chiamato da SenderManager.
 
 #include "unistd.h"
-#include "malloc.h"
 #include "defines.h"
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "err_exit.h"
@@ -21,7 +19,12 @@ typedef struct {
     char* Type;
 } S1_struct;
 
-
+/**
+ *
+ * @param inputBuffer
+ * @param message_number
+ * @return
+ */
 S1_struct *parse_string(char *inputBuffer, int message_number) {
     S1_struct *messages = malloc(message_number * (int)sizeof(S1_struct));
     char *row_context;
@@ -73,6 +76,13 @@ S1_struct *parse_string(char *inputBuffer, int message_number) {
     return messages;
 }
 
+/**
+ *
+ * @param info_children
+ * @param counter
+ * @param starter
+ * @return
+ */
 char *concatenate(S1_struct *info_children, int counter, char *starter) {
     char *outputBuffer;
     char *old_outputBuffer;

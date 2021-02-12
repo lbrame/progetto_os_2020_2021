@@ -21,7 +21,13 @@ typedef struct {
     pid_t pid;
 } child_struct;
 
-
+/**
+ * append a struct to the given array
+ * @param info_children a list where to put the data of the chi
+ * @param sender_id the id of the child
+ * @param pid the pid of the process
+ * @param i the index where to put the struct
+ */
 void add_child(child_struct *info_children, char sender_id[], pid_t pid, int i) {
     child_struct* child = malloc(sizeof(child_struct));
     child->sender_id = sender_id;
@@ -29,6 +35,10 @@ void add_child(child_struct *info_children, char sender_id[], pid_t pid, int i) 
     info_children[i-1] = *child;
 }
 
+/**
+ * wrapper for fork funcion, generates a process and the gives it some code to exute
+ * @param info_children a list where to put the data of the child
+ */
 void generate_child(child_struct *info_children) {
     static int i = 0;
     char *i_str = itoa(i + 1);
@@ -58,6 +68,13 @@ void generate_child(child_struct *info_children) {
 
 }
 
+/**
+ * join all messages preparing the text to be outputted to file
+ * @param info_children a list containing the data of the children
+ * @param counter the number of children of the process
+ * @param starter the header of the file
+ * @return the string to be outputted to file
+ */
 char *concatenate(child_struct *info_children, int counter, char *starter) {
     char *outputBuffer;
     char *old_outputBuffer;
