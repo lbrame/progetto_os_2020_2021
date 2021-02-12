@@ -37,12 +37,11 @@ void print_child(child_struct* c) {
 }
 
 
-child_struct* add_child(child_struct *info_children, char sender_id[], pid_t pid, int i) {
+void add_child(child_struct *info_children, char sender_id[], pid_t pid, int i) {
     child_struct* child = malloc(sizeof(child_struct));
     child->sender_id = sender_id;
     child->pid = pid;
     info_children[i-1] = *child;
-    return child;
 }
 
 void generate_child(child_struct *info_children) {
@@ -56,7 +55,7 @@ void generate_child(child_struct *info_children) {
         ErrExit("Fork");
     i++;
     if (S_ != 0) {
-        child_struct* child = add_child(info_children, sender_id, S_, i);
+        add_child(info_children, sender_id, S_, i);
     } else {
         // figlio esegue
         printf("iteratore %d\n", i);
