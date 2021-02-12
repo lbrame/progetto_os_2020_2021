@@ -5,6 +5,7 @@
 #include <malloc.h>
 #include <string.h>
 #include <unistd.h>
+#include <sys/stat.h>
 #include "defines.h"
 
 typedef struct {
@@ -16,21 +17,6 @@ typedef struct {
     char* time_departure;
 } hackler_struct;
 
-
-///**
-// * DEBUG FUNCTION
-// TODO: REMOVE ON FINISHED PROJECT
-// * prints the data contained into the parameter structure
-// * @param m a structure containing message data
-// * */
-//void print_message(hackler_struct m) {
-//    printf("id: %s\n", m.id);
-//    printf("message: %s\n", m.message);
-//    printf("id_sender: %s\n", m.id_sender);
-//    printf("id_receiver: %s\n", m.id_receiver);
-//    printf("time_arrival: %s\n", m.time_arrival);
-//    printf("time_departure: %s\n\n", m.time_departure);
-//}
 
 /**
  * parse the read text to create a list of structures
@@ -157,6 +143,10 @@ char *concatenation(hackler_struct *messages, char *starter, int message_number)
 }
 
 int main(int argc, char *argv[]) {
+    struct stat sb;
+    // If ./OutputFiles does not exist, create it
+    if (stat("OutputFiles", &sb) != 0)
+        mkdir("OutputFiles", S_IRWXU);
 
     // argv[1] is the relative path to the input file and it is passes as a keyboard argument
     int fileSize = get_file_size(argv[1]);
