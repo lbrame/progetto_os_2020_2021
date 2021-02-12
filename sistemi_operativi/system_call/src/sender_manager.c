@@ -14,6 +14,7 @@
 #include <errno.h>
 #include "stdio.h"
 #include "stdlib.h"
+#include <sys/stat.h>
 
 /**
  * Struct that defines a child process
@@ -24,17 +25,6 @@ typedef struct {
     char *sender_id;
     pid_t pid;
 } child_struct;
-
-/**
- * DEBUG FUNCTION
- * TODO: REMOVE ON FINISHED PROJECT
- * prints the data contained into the parameter structure
- * @param c a structure containing child data
- * */
-void print_child(child_struct* c) {
-    printf("sender_id: %s\n", c->sender_id);
-    printf("pid: %d\n", c->pid);
-}
 
 
 void add_child(child_struct *info_children, char sender_id[], pid_t pid, int i) {
@@ -58,16 +48,13 @@ void generate_child(child_struct *info_children) {
         add_child(info_children, sender_id, S_, i);
     } else {
         // figlio esegue
-        printf("iteratore %d\n", i);
-        printf("Sono il figlio %s\n", sender_id);
         char *execl_path = join("./", sender_id, NULL);
         int r = execl(execl_path, sender_id, (char *)NULL);
         if (r == -1)
             perror("execl");
     }
 
-    while ((S_ = wait(NULL)) != -1)
-        printf("wait() returned child %s of PID %d\n\n", sender_id, S_);
+    while ((S_ = wait(NULL)) != -1);
 
     if (errno != ECHILD) {
         char *err_string = join("Child ", sender_id, NULL);
@@ -93,7 +80,7 @@ char *concatenate(child_struct *info_children, int counter, char *starter) {
                     break;
                 case 1:
                     old_outputBuffer = outputBuffer;
-                    char* pid_s = itoa(info_children[row].pid);
+                    char *pid_s = itoa(info_children[row].pid);
                     outputBuffer = join(outputBuffer, pid_s, ';');
                     free(old_outputBuffer);
                     break;
@@ -107,26 +94,38 @@ char *concatenate(child_struct *info_children, int counter, char *starter) {
             }
         }
     }
-
+    //Added the static string to outputBuffer
     outputBuffer = join(starter, outputBuffer, '\n');
     outputBuffer = join(outputBuffer, "\0", NULL);
     return outputBuffer;
 }
 
+
 int main(int argc, char *argv[]) {
+    // Dynamic allocation of the memory
     child_struct *info_children = (child_struct *) malloc(sizeof(child_struct) * 3);
     if (info_children == NULL) {
         ErrExit("malloc");
     }
-    int number_of_children = 3;
+
+    struct stat sb;
+    // If ./OutputFiles does not exist, create it
+    if (stat("OutputFiles", &sb) != 0)
+        mkdir("OutputFiles", S_IRWXU);
+
+    // Generation of 3 children
     generate_child(info_children);
     generate_child(info_children);
     generate_child(info_children);
 
+    int number_of_children = 3;
     char *starter = "Sender Id;PID";
     char *outputBuffer = concatenate(info_children, number_of_children, starter);
-    // Create F8.csv
+    // outputBuffer written on F8.csv
     write_file("OutputFiles/F8.csv", outputBuffer);
-    // TODO: finish S1
+
+    // Free up old buffers
+    free(outputBuffer);
+    free(info_children);
     return 0;
 }

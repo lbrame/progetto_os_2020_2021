@@ -6,7 +6,6 @@
 #include "stdio.h"
 
 int main(int argc, char * argv[]) {
-    printf("Yo sono S2, ma dopo exec!\n");
     char data[] = "Id;Message;Id_Sender;Id_Receiver;Time_arrival;Time_departure";
     write_file("OutputFiles/F2.csv", data);
     sleep(2);
