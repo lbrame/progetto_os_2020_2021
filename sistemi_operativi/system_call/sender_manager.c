@@ -44,7 +44,7 @@ void add_child(child_struct *info_children, char sender_id[], pid_t pid, int i) 
  * wrapper for fork funcion, generates a process and the gives it some code to exute
  * @param info_children a list where to put the data of the child
  */
-void generate_child(child_struct *info_children) {
+void generate_child(child_struct *info_children, char* inputFile) {
     static int i = 0;
     char *i_str = itoa(i + 1);
 
@@ -59,7 +59,12 @@ void generate_child(child_struct *info_children) {
     } else {
         // figlio esegue
         char *execl_path = join("./", sender_id, NULL);
-        int r = execl(execl_path, sender_id, (char *)NULL);
+        int r;
+        if (i == 1){
+            r = execl(execl_path, sender_id, inputFile,(char *)NULL);
+        } else {
+            r = execl(execl_path, sender_id, (char *)NULL);
+        }
         if (r == -1)
             perror("execl");
     }
@@ -131,9 +136,9 @@ int main(int argc, char *argv[]) {
         mkdir("OutputFiles", S_IRWXU);
 
     // Generation of 3 children
-    generate_child(info_children);
-    generate_child(info_children);
-    generate_child(info_children);
+    generate_child(info_children, argv[1]);
+    generate_child(info_children, argv[1]);
+    generate_child(info_children, argv[1]);
 
     int number_of_children = 3;
     char *starter = "Sender Id;PID";
