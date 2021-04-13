@@ -6,7 +6,7 @@
 #include <stdio.h>
 
 int main(int argc, char * argv[]) {
-    char data[] = "Id;Message;Id_Sender;Id_Receiver;Time_arrival;Time_departure";
+    char data[] = "ID;Message;IDSender;IDReceiver;TimeArrival;TimeDeparture";
     write_file("OutputFiles/F3.csv", data);
     sleep(3);
     return 0;

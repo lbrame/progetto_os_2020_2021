@@ -160,7 +160,7 @@ int main(int argc, char * argv[]) {
     read_file(inputBuffer, rPath,file_size);
     int message_number = count_messages(inputBuffer, file_size);
     S1_struct* messages = parse_string(inputBuffer, message_number);
-    char*starter = "Id;Message;IdSender;IdReceiver;DelS1;DelS2;DelS3;Type";
+    char*starter = "ID;Message;IDSender;IDReceiver;TimeArrival;TimeDeparture";
     //Creation of the outputBuffer that will be written in F1.csv
     char* outputBuffer = concatenate(messages, message_number, starter);
     write_file("OutputFiles/F1.csv", outputBuffer);

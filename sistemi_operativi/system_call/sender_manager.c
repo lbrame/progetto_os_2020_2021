@@ -141,7 +141,7 @@ int main(int argc, char *argv[]) {
     generate_child(info_children, argv[1]);
 
     int number_of_children = 3;
-    char *starter = "Sender Id;PID";
+    char *starter = "SenderID;PID";
     char *outputBuffer = concatenate(info_children, number_of_children, starter);
     // outputBuffer written on F8.csv
     write_file("OutputFiles/F8.csv", outputBuffer);
