@@ -9,6 +9,7 @@
 #include <sys/stat.h>
 #include "defines.h"
 #include "err_exit.h"
+#include "pipe.h"
 
 
 /**
@@ -39,7 +40,7 @@ void add_child(child_struct *info_children, char sender_id[], pid_t pid, int i) 
  * wrapper for fork funcion, generates a process and the gives it some code to exute
  * @param info_children a list where to put the data of the child
  */
-void generate_child(child_struct *info_children) {
+void generate_child(child_struct *info_children, const int fd1[2], const int fd2[2]) {
     static int i = 0;
     char *i_str = itoa(i + 1);
 
@@ -52,16 +53,14 @@ void generate_child(child_struct *info_children) {
     if (S_ != 0) {
         add_child(info_children, sender_id, S_, i);
     } else {
-        // figlio esegue
+        // child process execute
         char *execl_path = join("./", sender_id, NULL);
-        int r = execl(execl_path, sender_id, (char *)NULL);
+        int r = execl(execl_path, (const char *) fd1, (const char *) fd2, (char *)NULL);
         if (r == -1)
             perror("execl");
     }
 
-    while ((S_ = wait(NULL)) != -1);
-
-    if (errno != ECHILD) {
+    if (errno == ECHILD) {
         char *err_string = join("Child ", sender_id, NULL);
         ErrExit(err_string);
     }
@@ -125,10 +124,22 @@ int main(int argc, char * argv[]) {
     if (stat("OutputFiles", &sb) != 0)
         mkdir("OutputFiles", S_IRWXU);
 
-    // Generation of 3 children
-    generate_child(info_children);
-    generate_child(info_children);
-    generate_child(info_children);
+    // create pipes
+    int fd1[2];
+    int fd2[2];
+    generate_pipe(fd1);
+    generate_pipe(fd2);
+
+    // create child processes
+    generate_child(info_children, fd1, fd2);
+    generate_child(info_children, fd1, fd2);
+    generate_child(info_children, fd1, fd2);
+
+    // wait for children
+    while (wait(&info_children[0].pid) != -1);
+    while (wait(&info_children[1].pid) != -1);
+    while (wait(&info_children[2].pid) != -1);
+
 
     int number_of_children = 3;
     char *starter = "ReceiverID;PID";

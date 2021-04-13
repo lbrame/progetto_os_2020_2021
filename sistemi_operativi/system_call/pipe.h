@@ -3,3 +3,5 @@
 ///         funzioni specifiche per la gestione delle PIPE.
 
 #pragma once
+void generate_pipe(int fd[]);
+void close_pipe(int fd[]);

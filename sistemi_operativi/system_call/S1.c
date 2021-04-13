@@ -5,6 +5,7 @@
 #include "defines.h"
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 #include "err_exit.h"
 
 
@@ -152,6 +153,8 @@ char *concatenate(S1_struct *info_children, int counter, char *starter) {
 int main(int argc, char * argv[]) {
     // Reading of F0
     char* rPath = argv[0];
+    int* fd1 = (int *) argv[1];
+
     //Getting the file size
     int file_size = get_file_size(rPath);
     //Memory allocated on the size of file_size

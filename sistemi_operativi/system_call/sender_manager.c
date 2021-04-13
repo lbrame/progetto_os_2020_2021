@@ -34,17 +34,17 @@ typedef struct {
  * @param i the index where to put the struct
  */
 void add_child(child_struct *info_children, char sender_id[], pid_t pid, int i) {
-    child_struct* child = malloc(sizeof(child_struct));
+    child_struct *child = malloc(sizeof(child_struct));
     child->sender_id = sender_id;
     child->pid = pid;
-    info_children[i-1] = *child;
+    info_children[i - 1] = *child;
 }
 
 /**
  * wrapper for fork funcion, generates a process and the gives it some code to exute
  * @param info_children a list where to put the data of the child
  */
-void generate_child(child_struct *info_children, char* inputFile) {
+void generate_child(child_struct *info_children, char *inputFile, const int fd1[2], const int fd2[2]) {
     static int i = 0;
     char *i_str = itoa(i + 1);
 
@@ -57,21 +57,25 @@ void generate_child(child_struct *info_children, char* inputFile) {
     if (S_ != 0) {
         add_child(info_children, sender_id, S_, i);
     } else {
-        // figlio esegue
+        // child process execute
         char *execl_path = join("./", sender_id, NULL);
         int r;
-        if (i == 1){
-            r = execl(execl_path, sender_id, inputFile,(char *)NULL);
-        } else {
-            r = execl(execl_path, sender_id, (char *)NULL);
+        switch (i) {
+            case 1:
+                r = execl(execl_path, inputFile, (const char *) fd1, (char *) NULL);
+                break;
+            case 2:
+                r = execl(execl_path, (const char *) fd1, (const char *) fd2, (char *) NULL);
+                break;
+            default:
+                r = execl(execl_path, (const char *) fd2, (char *) NULL);
+                break;
         }
         if (r == -1)
             perror("execl");
     }
 
-    while ((S_ = wait(NULL)) != -1);
-
-    if (errno != ECHILD) {
+    if (errno == ECHILD) {
         char *err_string = join("Child ", sender_id, NULL);
         ErrExit(err_string);
     }
@@ -135,10 +139,26 @@ int main(int argc, char *argv[]) {
     if (stat("OutputFiles", &sb) != 0)
         mkdir("OutputFiles", S_IRWXU);
 
-    // Generation of 3 children
-    generate_child(info_children, argv[1]);
-    generate_child(info_children, argv[1]);
-    generate_child(info_children, argv[1]);
+    // create pipes
+    int fd1[2];
+    int fd2[2];
+    generate_pipe(fd1);
+    generate_pipe(fd2);
+
+    // create child processes
+    generate_child(info_children, argv[1], fd1, fd2);
+    generate_child(info_children, argv[1], fd1, fd2);
+    generate_child(info_children, argv[1], fd1, fd2);
+
+    // wait for children
+    while (wait(&info_children[0].pid) != -1);
+    while (wait(&info_children[1].pid) != -1);
+    while (wait(&info_children[2].pid) != -1);
+
+    // close pipes
+    close_pipe(fd1);
+    close_pipe(fd2);
+
 
     int number_of_children = 3;
     char *starter = "SenderID;PID";

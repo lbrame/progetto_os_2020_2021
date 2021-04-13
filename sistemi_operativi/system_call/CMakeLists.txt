@@ -12,8 +12,8 @@ add_library(
     # Sorgenti non ancora implementati 
     #   ${CMAKE_CURRENT_SOURCE_DIR}/fifo.c
     #   ${CMAKE_CURRENT_SOURCE_DIR}/fifo.h
-    #   ${CMAKE_CURRENT_SOURCE_DIR}/pipe.c
-    #   ${CMAKE_CURRENT_SOURCE_DIR}/pipe.h
+       ${CMAKE_CURRENT_SOURCE_DIR}/pipe.c
+       ${CMAKE_CURRENT_SOURCE_DIR}/pipe.h
     #   ${CMAKE_CURRENT_SOURCE_DIR}/semaphore.c
     #   ${CMAKE_CURRENT_SOURCE_DIR}/semaphore.h
 )
@@ -87,6 +87,19 @@ add_executable(
     ${CMAKE_CURRENT_SOURCE_DIR}/R3.c
 )
 
+add_dependencies(
+        senderManager
+        S1
+        S2
+        S3
+)
+
+add_dependencies(
+        receiverManager
+        R1
+        R2
+        R3
+)
 
 target_link_libraries(senderManager PUBLIC os_core)
 target_link_libraries(receiverManager PUBLIC os_core)
