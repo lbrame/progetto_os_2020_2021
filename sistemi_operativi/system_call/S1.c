@@ -150,8 +150,8 @@ char *concatenate(S1_struct *info_children, int counter, char *starter) {
 
 
 int main(int argc, char * argv[]) {
-    //Reading of F0
-    char rPath[] = "InputFiles/F0.csv";
+    // Reading of F0
+    char* rPath = argv[0];
     //Getting the file size
     int file_size = get_file_size(rPath);
     //Memory allocated on the size of file_size

@@ -80,7 +80,6 @@ out/
 *.old
 /cmake_install.cmake
 /CMakeCache.txt
-Makefile
 /progetto_os_2020_2021.cbp
 CMakeFiles/
 hackler
