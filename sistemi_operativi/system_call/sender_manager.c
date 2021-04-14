@@ -140,15 +140,15 @@ int main(int argc, char *argv[]) {
         mkdir("OutputFiles", S_IRWXU);
 
     // create pipes
-    int fd1[2];
-    int fd2[2];
-    generate_pipe(fd1);
-    generate_pipe(fd2);
+    int pipe1[2];
+    int pipe2[2];
+    generate_pipe(pipe1);
+    generate_pipe(pipe2);
 
     // create child processes
-    generate_child(info_children, argv[1], fd1, fd2);
-    generate_child(info_children, argv[1], fd1, fd2);
-    generate_child(info_children, argv[1], fd1, fd2);
+    generate_child(info_children, argv[1], pipe1, pipe2);
+    generate_child(info_children, argv[1], pipe1, pipe2);
+    generate_child(info_children, argv[1], pipe1, pipe2);
 
     // wait for children
     while (wait(&info_children[0].pid) != -1);
@@ -156,8 +156,8 @@ int main(int argc, char *argv[]) {
     while (wait(&info_children[2].pid) != -1);
 
     // close pipes
-    close_pipe(fd1);
-    close_pipe(fd2);
+    close_pipe(pipe1);
+    close_pipe(pipe2);
 
 
     int number_of_children = 3;

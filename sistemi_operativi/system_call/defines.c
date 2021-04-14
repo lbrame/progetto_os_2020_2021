@@ -153,3 +153,24 @@ char* itoa(int val){
     }
     return buffer;
 }
+
+char* read_line(const int* fd) {
+    static int start = 0;
+    char* buffer  = (char *) malloc(8 * 50);
+    buffer[0] = 0;
+    if (buffer == NULL)
+        ErrExit("malloc");
+
+    off_t current = lseek(*fd, start, SEEK_SET);
+    if(current == -1)
+        ErrExit("lseek");
+
+    while(buffer[start] != EOF || buffer[start] != '\n') {
+        int numRead = read(*fd, &buffer[start], 1);
+        if(numRead != 1)
+            ErrExit("read");
+        start++;
+    }
+
+    return buffer;
+}
