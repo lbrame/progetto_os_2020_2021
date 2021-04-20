@@ -19,3 +19,4 @@ void close_pipe(int fd[]) {
     if (pipe(&fd[1]) == -1)
         ErrExit("close PIPE WRITE");
 }
+

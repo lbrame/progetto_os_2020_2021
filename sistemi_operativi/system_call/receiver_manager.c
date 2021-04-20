@@ -55,7 +55,15 @@ void generate_child(child_struct *info_children, const int fd1[2], const int fd2
     } else {
         // child process execute
         char *execl_path = join("./", sender_id, NULL);
-        int r = execl(execl_path, (const char *) fd1, (const char *) fd2, (char *)NULL);
+        int r;
+        switch (i) {
+            case 1:
+                r = execl(execl_path, (const char *) fd1, (char *)NULL);
+            case 2:
+                r = execl(execl_path, (const char *) fd1, (const char *) fd2, (char *)NULL);
+            default:
+                r = execl(execl_path,(const char *) fd2, (char *)NULL);
+        }
         if (r == -1)
             perror("execl");
     }
@@ -64,7 +72,6 @@ void generate_child(child_struct *info_children, const int fd1[2], const int fd2
         char *err_string = join("Child ", sender_id, NULL);
         ErrExit(err_string);
     }
-
 }
 
 /**
