@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <fcntl.h>
 #include "err_exit.h"
 
 
@@ -29,16 +30,10 @@ typedef struct {
 S1_struct *parse_message(char *inputBuffer) {
     static char *row_context;
     char *field_context;
-    static int row_counter = 0;
-    char *row_token = NULL;
-    if (row_counter == 0) {
-        row_token = strtok_r(inputBuffer, "\n", &row_context);
-        row_token = strtok_r(NULL, "\n", &row_context);
-    }
     int field_counter = 0;
     S1_struct *message = malloc(sizeof(S1_struct));
     // iterate over the fields
-    for (char *field_token = strtok_r(row_token, ";", &field_context); field_token; field_token = strtok_r(NULL, ";", &field_context)) {
+    for (char *field_token = strtok_r(inputBuffer, ";", &field_context); field_token; field_token = strtok_r(NULL, ";", &field_context)) {
         switch (field_counter) {
             case 0:
                 message->Id = field_token;
@@ -69,8 +64,6 @@ S1_struct *parse_message(char *inputBuffer) {
         }
         field_counter++;
     }
-    row_counter++;
-    row_token = strtok_r(NULL, "\n", &row_context);
     return message;
 }
 
@@ -151,14 +144,23 @@ int main(int argc, char * argv[]) {
     // Reading of F0
     char* rPath = argv[0];
     int* pipe1 = (int *) argv[1];
-
+    int fd = open(rPath, O_RDONLY);
+    if (fd == -1)
+        ErrExit("open");
     char *starter = "ID;Message;IDSender;IDReceiver;TimeArrival;TimeDeparture";
-    S1_struct *message;
+    char* row = read_line(fd);
+    while (row != NULL) {
+        row = read_line(fd);
+        S1_struct *message = parse_message(row);
+        if (message == NULL)
+            continue;
+        free(row);
+    }
+    close(fd);
     //Creation of the outputBuffer that will be written in F1.csv
 //    char* outputBuffer = concatenate(messages, message_number, starter);
 //    write_file("OutputFiles/F1.csv", outputBuffer);
 //    //Free the memory allocated
-//    free(outputBuffer);
 //    free(message);
     sleep(1);
     return 0;

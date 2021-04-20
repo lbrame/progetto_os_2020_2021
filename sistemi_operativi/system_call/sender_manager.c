@@ -62,7 +62,7 @@ void generate_child(child_struct *info_children, char *inputFile, const int fd1[
         int r;
         switch (i) {
             case 1:
-                r = execl(execl_path, inputFile, (const char *) fd1, (char *) NULL);
+                r = execl(execl_path, inputFile, (char *) fd1, (char *) NULL);
                 break;
             case 2:
                 r = execl(execl_path, (const char *) fd1, (const char *) fd2, (char *) NULL);

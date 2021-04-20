@@ -17,15 +17,15 @@
  * @param fileSize the size of the buffer
  * @return the number of messages in the file
  * */
-int count_messages(const char* input, int fileSize) {
+int count_messages(const char *input, int fileSize) {
     int counter = 0;
     for (int i = 1; i < fileSize + 1; i++) {
         //if after a letter or a number there's a \n, it's the beginning of a new message and the counter is incremented
-        if (input[i] == '\n' && input[i-1] >= '0' && input[i-1] <= 'z')
+        if (input[i] == '\n' && input[i - 1] >= '0' && input[i - 1] <= 'z')
             counter++;
     }
 
-    return counter-1;
+    return counter - 1;
 }
 
 /**
@@ -70,17 +70,17 @@ void read_file(char *inputBuffer, char *rPath, int fileSize) {
  * @param join_character the character to place between str1 and str2
  * @return a string composed of str1, join_character, str2
  */
-char* join (char* str1, char* str2, char join_character) {
+char *join(char *str1, char *str2, char join_character) {
     //allocated the space needed for both the strings, the odd character and the \0
-    int malloc_size = (int) (strlen(str1)+sizeof(join_character)+strlen(str2)+1);
-    char* buffer = malloc(malloc_size);
+    int malloc_size = (int) (strlen(str1) + sizeof(join_character) + strlen(str2) + 1);
+    char *buffer = malloc(malloc_size);
     // clean buffer
-    for (int i=0; i<malloc_size; i++) buffer[i]=0;
+    for (int i = 0; i < malloc_size; i++) buffer[i] = 0;
     //copied the content of str1 in buffer
     strcpy(buffer, str1);
     //if the strings are non zero -> calculate the position of join_character
     if (strcmp(str1, "") != 0 && strcmp(str2, "") != 0 && join_character) {
-        buffer[malloc_size-strlen(str2)-2] = join_character;
+        buffer[malloc_size - strlen(str2) - 2] = join_character;
     }
     //append str2 to buffer
     strcat(buffer, str2);
@@ -92,13 +92,13 @@ char* join (char* str1, char* str2, char join_character) {
  * @param in_file_path the relative path to the input file
  * @return the relative path to the output file
  */
-char* get_out_file_rpath(char *in_file_path) {
-    char* fileDestination = strtok(in_file_path, "/");
-    char* file_name_w_ext = strtok(NULL, "/");
-    char* file_name = strtok(file_name_w_ext, ".");
-    char* final_name = join(file_name, "out", '_');
+char *get_out_file_rpath(char *in_file_path) {
+    char *fileDestination = strtok(in_file_path, "/");
+    char *file_name_w_ext = strtok(NULL, "/");
+    char *file_name = strtok(file_name_w_ext, ".");
+    char *final_name = join(file_name, "out", '_');
     final_name = join(final_name, "csv", '.');
-    final_name = join("OutputFiles",final_name, '/');
+    final_name = join("OutputFiles", final_name, '/');
     return final_name;
 }
 
@@ -107,9 +107,9 @@ char* get_out_file_rpath(char *in_file_path) {
  * @param out_file_path the relative path to the output file
  * @param outputBuffer the buffer where is stored the data to write
  */
-void write_file(char out_file_path[], char* outputBuffer) {
+void write_file(char out_file_path[], char *outputBuffer) {
     // check if file exists
-    if (access(out_file_path, F_OK) == 0){
+    if (access(out_file_path, F_OK) == 0) {
         // delete file
         int result = unlink(out_file_path);
         if (result == -1) {
@@ -136,41 +136,43 @@ void write_file(char out_file_path[], char* outputBuffer) {
  * @param val the value to convert
  * @return the input transformed into a string
  */
-char* itoa(int val){
+char *itoa(int val) {
     int buffer_dim = 0;
     int new = val;
     // count the number of digits
-    while(new != 0) {
-        new = new/10;
+    while (new != 0) {
+        new = new / 10;
         buffer_dim++;
     }
-    char* buffer = malloc(sizeof(char) * buffer_dim);
+    char *buffer = malloc(sizeof(char) * buffer_dim);
     // itoa && assign values to buffer
     for (int i = 0; val > 0; i++) {
-        new = val%10;
-        buffer[i] = (char)(new + 48);
-        val = val/10;
+        new = val % 10;
+        buffer[i] = (char) (new + 48);
+        val = val / 10;
     }
     return buffer;
 }
 
-char* read_line(const int* fd) {
+char *read_line(int fd) {
     static int start = 0;
-    char* buffer  = (char *) malloc(8 * 50);
-    buffer[0] = 0;
+    int index = 0;
+    // suppose each of the 8 fields has a maximum size of 50bytes
+    char *buffer = (char *) malloc(8 * 50);
     if (buffer == NULL)
         ErrExit("malloc");
 
-    off_t current = lseek(*fd, start, SEEK_SET);
-    if(current == -1)
+    off_t current = lseek(fd, start, SEEK_SET);
+    if (current == -1)
         ErrExit("lseek");
 
-    while(buffer[start] != EOF || buffer[start] != '\n') {
-        int numRead = read(*fd, &buffer[start], 1);
-        if(numRead != 1)
-            ErrExit("read");
-        start++;
+    while (buffer[index - 1] != '\n' && buffer[index - 1] != EOF) {
+        size_t numRead = read(fd, &buffer[index], 1);
+        if (numRead == 0)
+            return NULL;
+        index++;
     }
-
+    start += index;
+    buffer[index-1] = '\0';
     return buffer;
 }
