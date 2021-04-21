@@ -34,14 +34,12 @@ target_compile_features(
 )
 
 add_executable(
-    senderManager
-
+    sender_manager
     ${CMAKE_CURRENT_SOURCE_DIR}/sender_manager.c
 )
 
 add_executable(
-    receiverManager
-
+    receiver_manager
     ${CMAKE_CURRENT_SOURCE_DIR}/receiver_manager.c
 )
 
@@ -88,21 +86,21 @@ add_executable(
 )
 
 add_dependencies(
-        senderManager
+        sender_manager
         S1
         S2
         S3
 )
 
 add_dependencies(
-        receiverManager
+        receiver_manager
         R1
         R2
         R3
 )
 
-target_link_libraries(senderManager PUBLIC os_core)
-target_link_libraries(receiverManager PUBLIC os_core)
+target_link_libraries(sender_manager PUBLIC os_core)
+target_link_libraries(receiver_manager PUBLIC os_core)
 target_link_libraries(hackler PUBLIC os_core)
 target_link_libraries(S1 PUBLIC os_core)
 target_link_libraries(S2 PUBLIC os_core)
