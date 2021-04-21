@@ -8,9 +8,9 @@ typedef struct {
     char* Message;
     char* IdSender;
     char* IdReceiver;
-    char* DelS1;
-    char* DelS2;
-    char* DelS3;
+    int DelS1;
+    int DelS2;
+    int DelS3;
     char* Type;
 } Message_struct;
 
@@ -22,3 +22,4 @@ char* get_out_file_rpath(char *in_file_path);
 char* join (char* str1, char* str2, char join_character);
 char* itoa(int val);
 char* read_line(int fd);
+Message_struct *parse_message(char *inputBuffer);

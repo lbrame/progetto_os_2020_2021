@@ -10,6 +10,7 @@
 #include <fcntl.h>
 #include <string.h>
 #include <malloc.h>
+#include <stdlib.h>
 
 /**
  * count the number of messages in the file
@@ -175,4 +176,50 @@ char *read_line(int fd) {
     start += index;
     buffer[index-1] = '\0';
     return buffer;
+}
+
+/**
+ *
+ * @param inputBuffer
+ * @param message_number
+ * @return
+ */
+Message_struct *parse_message(char *inputBuffer) {
+    static char *row_context;
+    char *field_context;
+    int field_counter = 0;
+    Message_struct *message = malloc(sizeof(Message_struct));
+    // iterate over the fields
+    for (char *field_token = strtok_r(inputBuffer, ";", &field_context); field_token; field_token = strtok_r(NULL, ";", &field_context)) {
+        switch (field_counter) {
+            case 0:
+                message->Id = field_token;
+                break;
+            case 1:
+                message->Message = field_token;
+                break;
+            case 2:
+                message->IdSender = field_token;
+                break;
+            case 3:
+                message->IdReceiver = field_token;
+                break;
+            case 4:
+                message->DelS1 = atoi(field_token);
+                break;
+            case 5:
+                message->DelS2 = atoi(field_token);
+                break;
+            case 6:
+                message->DelS3 = atoi(field_token);
+                break;
+            case 7:
+                message->Type = field_token;
+                break;
+            default:
+                ErrExit("parse_file");
+        }
+        field_counter++;
+    }
+    return message;
 }
