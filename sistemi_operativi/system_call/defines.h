@@ -23,3 +23,4 @@ char* join (char* str1, char* str2, char join_character);
 char* itoa(int val);
 char* read_line(int fd);
 Message_struct *parse_message(char *inputBuffer);
+off_t get_file_size_from_fd(int fd);

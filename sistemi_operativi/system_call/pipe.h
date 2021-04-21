@@ -5,3 +5,5 @@
 #pragma once
 void generate_pipe(int fd[]);
 void close_pipe(int fd[]);
+void read_pipe(int fd);
+void write_pipe(int fd, char *buffer);

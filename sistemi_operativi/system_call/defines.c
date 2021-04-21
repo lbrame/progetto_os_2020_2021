@@ -44,6 +44,10 @@ int get_file_size(char *rPath) {
     return st.st_size;
 }
 
+off_t get_file_size_from_fd(int fd) {
+    return lseek(fd, 0, SEEK_END);
+}
+
 /**
  * read the file and put read data into a buffer
  * @param inputBuffer the buffer where to store the read data

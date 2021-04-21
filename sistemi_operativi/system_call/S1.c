@@ -87,6 +87,7 @@ int main(int argc, char * argv[]) {
     // Reading of F0
     char* rPath = argv[0];
     int pipe1_write = atoi(&argv[1][1]);
+    int pipe1_read = atoi(&argv[1][0]);
     int fd = open(rPath, O_RDONLY);
     if (fd == -1)
         ErrExit("open");
