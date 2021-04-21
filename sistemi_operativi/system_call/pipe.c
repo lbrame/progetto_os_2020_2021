@@ -15,28 +15,29 @@ void generate_pipe(int fd[]) {
         ErrExit("PIPE");
 }
 
-void close_pipe(int fd[]) {
-    if (pipe(&fd[0]) == -1)
-        ErrExit("close PIPE READ");
-
-    if (pipe(&fd[1]) == -1)
-        ErrExit("close PIPE WRITE");
+void close_pipe(int fd) {
+    if (close(fd) == -1)
+        ErrExit("close PIPE");
 }
 
-void read_pipe(int fd) {
-    off_t size = get_file_size_from_fd(fd);
+char *read_pipe(int fd) {
+    long size = 8 * 50;
     char *content = (char *) malloc(size);
     if (content == NULL)
-        ErrExit("malloc");
+        ErrExit("malloc read_pipe");
 
     ssize_t status = read(fd, content, size);
-    if(status == -1)
+    printf("content: %s\n", content);
+    if (status == -1)
         ErrExit("read");
+    else if(status < 0)
+        return NULL;
+    return content;
 }
 
 void write_pipe(int fd, char *buffer) {
     size_t size = strlen(buffer);
     ssize_t numWrite = write(fd, buffer, size);
-    if(numWrite == -1)
+    if (numWrite == -1)
         ErrExit("write");
 }

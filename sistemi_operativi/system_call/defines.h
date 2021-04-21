@@ -21,6 +21,6 @@ void write_file(char in_file_path[], char* outputBuffer);
 char* get_out_file_rpath(char *in_file_path);
 char* join (char* str1, char* str2, char join_character);
 char* itoa(int val);
-char* read_line(int fd);
+int read_line(int fd, char* buffer);
 Message_struct *parse_message(char *inputBuffer);
-off_t get_file_size_from_fd(int fd);
+long get_file_size_from_fd(int fd);

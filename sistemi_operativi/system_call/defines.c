@@ -44,10 +44,6 @@ int get_file_size(char *rPath) {
     return st.st_size;
 }
 
-off_t get_file_size_from_fd(int fd) {
-    return lseek(fd, 0, SEEK_END);
-}
-
 /**
  * read the file and put read data into a buffer
  * @param inputBuffer the buffer where to store the read data
@@ -159,27 +155,32 @@ char *itoa(int val) {
     return buffer;
 }
 
-char *read_line(int fd) {
+/**
+ *
+ * @param fd
+ * @param buffer
+ * @return
+ */
+int read_line(int fd, char* buffer) {
     static int start = 0;
     int index = 0;
-    // suppose each of the 8 fields has a maximum size of 50bytes
-    char *buffer = (char *) malloc(8 * 50);
-    if (buffer == NULL)
-        ErrExit("malloc");
-
     off_t current = lseek(fd, start, SEEK_SET);
     if (current == -1)
         ErrExit("lseek");
 
     while (buffer[index - 1] != '\n' && buffer[index - 1] != EOF) {
         size_t numRead = read(fd, &buffer[index], 1);
-        if (numRead == 0)
-            return NULL;
+        if (numRead == 0){
+            buffer[index] = '\0';
+            return 0;
+        }
+        else if(numRead == -1)
+            ErrExit("read");
         index++;
     }
     start += index;
     buffer[index-1] = '\0';
-    return buffer;
+    return 1;
 }
 
 /**
