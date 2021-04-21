@@ -152,6 +152,7 @@ int main(int argc, char * argv[]) {
     while (row != NULL) {
         row = read_line(fd);
         S1_struct *message = parse_message(row);
+        //@TODO save messages in a buffer
         if (message == NULL)
             continue;
         free(row);

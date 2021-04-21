@@ -44,7 +44,7 @@ void add_child(child_struct *info_children, char sender_id[], pid_t pid, int i) 
  * wrapper for fork funcion, generates a process and the gives it some code to exute
  * @param info_children a list where to put the data of the child
  */
-void generate_child(child_struct *info_children, char *inputFile, const int fd1[2], const int fd2[2]) {
+void generate_child(child_struct *info_children, char *inputFile, const int fd1[2], const int fd2[2], const int fifo) {
     static int i = 0;
     char *i_str = itoa(i + 1);
 
@@ -68,7 +68,7 @@ void generate_child(child_struct *info_children, char *inputFile, const int fd1[
                 r = execl(execl_path, (const char *) fd1, (const char *) fd2, (char *) NULL);
                 break;
             default:
-                r = execl(execl_path, (const char *) fd2, (char *) NULL);
+                r = execl(execl_path, (const char *) fd2, (const char*) fifo, (char *) NULL);
                 break;
         }
         if (r == -1)
@@ -145,10 +145,14 @@ int main(int argc, char *argv[]) {
     generate_pipe(pipe1);
     generate_pipe(pipe2);
 
+    //creates fifo
+    int fifo = mkfifo(argv[0], S_IFIFO);
+    generate_fifo(fifo);
+
     // create child processes
-    generate_child(info_children, argv[1], pipe1, pipe2);
-    generate_child(info_children, argv[1], pipe1, pipe2);
-    generate_child(info_children, argv[1], pipe1, pipe2);
+    generate_child(info_children, argv[1], pipe1, pipe2, NULL);
+    generate_child(info_children, argv[1], pipe1, pipe2, NULL);
+    generate_child(info_children, argv[1], pipe1, pipe2, fifo);
 
     // wait for children
     while (wait(&info_children[0].pid) != -1);
@@ -158,7 +162,9 @@ int main(int argc, char *argv[]) {
     // close pipes
     close_pipe(pipe1);
     close_pipe(pipe2);
-
+    
+    //close fifo
+    close_fifo(fifo);
 
     int number_of_children = 3;
     char *starter = "SenderID;PID";
