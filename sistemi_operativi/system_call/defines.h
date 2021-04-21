@@ -3,6 +3,17 @@
 ///         e funzioni specifiche del progetto.
 
 #pragma once
+typedef struct {
+    char* Id;
+    char* Message;
+    char* IdSender;
+    char* IdReceiver;
+    char* DelS1;
+    char* DelS2;
+    char* DelS3;
+    char* Type;
+} Message_struct;
+
 int count_messages(const char *input, int fileSize);
 int get_file_size(char *rPath);
 void read_file(char *inputBuffer, char *rPath, int fileSize);

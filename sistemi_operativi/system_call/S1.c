@@ -10,28 +10,17 @@
 #include "err_exit.h"
 
 
-typedef struct {
-    char* Id;
-    char* Message;
-    char* IdSender;
-    char* IdReceiver;
-    char* DelS1;
-    char* DelS2;
-    char* DelS3;
-    char* Type;
-} S1_struct;
-
 /**
  *
  * @param inputBuffer
  * @param message_number
  * @return
  */
-S1_struct *parse_message(char *inputBuffer) {
+Message_struct *parse_message(char *inputBuffer) {
     static char *row_context;
     char *field_context;
     int field_counter = 0;
-    S1_struct *message = malloc(sizeof(S1_struct));
+    Message_struct *message = malloc(sizeof(Message_struct));
     // iterate over the fields
     for (char *field_token = strtok_r(inputBuffer, ";", &field_context); field_token; field_token = strtok_r(NULL, ";", &field_context)) {
         switch (field_counter) {
@@ -74,7 +63,7 @@ S1_struct *parse_message(char *inputBuffer) {
  * @param starter
  * @return
  */
-char *concatenate(S1_struct *info_children, int counter, char *starter) {
+char *concatenate(Message_struct *info_children, int counter, char *starter) {
     char *outputBuffer;
     char *old_outputBuffer;
     for (int row = 0; row < counter; row++) {
@@ -151,7 +140,7 @@ int main(int argc, char * argv[]) {
     char* row = read_line(fd);
     while (row != NULL) {
         row = read_line(fd);
-        S1_struct *message = parse_message(row);
+        Message_struct *message = parse_message(row);
         if (message == NULL)
             continue;
         free(row);
