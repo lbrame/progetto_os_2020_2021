@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <fcntl.h>
 #include "err_exit.h"
+#include "pipe.h"
 
 
 /**
@@ -86,19 +87,38 @@
 int main(int argc, char * argv[]) {
     // Reading of F0
     char* rPath = argv[0];
-    int pipe1_write = atoi(&argv[1][1]);
-    int pipe1_read = atoi(&argv[1][0]);
+    int pipe1_write = atoi(argv[1]);
     int fd = open(rPath, O_RDONLY);
     if (fd == -1)
         ErrExit("open");
-    char* row = read_line(fd);
-    while (row != NULL) {
-        row = read_line(fd);
-        Message_struct *message = parse_message(row);
-
-        free(row);
+    // suppose each of the 8 fields has a maximum size of 50bytes
+    char *buffer = (char *) malloc(8 * 50);
+    char* row_copy = (char *) malloc(8 * 50);
+    if (buffer == NULL || row_copy == NULL)
+        ErrExit("malloc S1");
+    int row_status = read_line(fd, buffer);
+    while (1) {
+        row_status = read_line(fd, buffer);
+        strcpy(row_copy, buffer);
+        Message_struct *message = parse_message(buffer);
+        sleep(message->DelS1);
+        if(strcmp(message->Type, "Q") == 0) {
+            // TODO send with queue
+        }
+        else if(strcmp(message->Type, "SH") == 0) {
+            // TODO send with shared memory
+        }
+        else if(strcmp(message->Type, "FIFO") == 0)
+            write_pipe(pipe1_write, row_copy);
+            printf("written %s\n", row_copy);
+        if(row_status == 0)
+            break;
     }
+//    write_pipe(pipe1_write, "finished");
+    free(row_copy);
+    free(buffer);
     close(fd);
+    close_pipe(pipe1_write);
     sleep(1);
     return 0;
 }
