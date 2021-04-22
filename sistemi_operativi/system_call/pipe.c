@@ -20,19 +20,12 @@ void close_pipe(int fd) {
         ErrExit("close PIPE");
 }
 
-char *read_pipe(int fd) {
+ssize_t read_pipe(int fd, char* content) {
     long size = 8 * 50;
-    char *content = (char *) malloc(size);
-    if (content == NULL)
-        ErrExit("malloc read_pipe");
-
     ssize_t status = read(fd, content, size);
-    printf("content: %s\n", content);
     if (status == -1)
         ErrExit("read");
-    else if(status < 0)
-        return NULL;
-    return content;
+    return status;
 }
 
 void write_pipe(int fd, char *buffer) {

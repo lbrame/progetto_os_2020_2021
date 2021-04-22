@@ -97,7 +97,7 @@ int main(int argc, char * argv[]) {
     if (buffer == NULL || row_copy == NULL)
         ErrExit("malloc S1");
     int row_status = read_line(fd, buffer);
-    while (1) {
+    while (row_copy > 0) {
         row_status = read_line(fd, buffer);
         strcpy(row_copy, buffer);
         Message_struct *message = parse_message(buffer);
@@ -110,11 +110,7 @@ int main(int argc, char * argv[]) {
         }
         else if(strcmp(message->Type, "FIFO") == 0)
             write_pipe(pipe1_write, row_copy);
-            printf("written %s\n", row_copy);
-        if(row_status == 0)
-            break;
     }
-//    write_pipe(pipe1_write, "finished");
     free(row_copy);
     free(buffer);
     close(fd);

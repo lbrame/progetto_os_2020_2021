@@ -7,20 +7,35 @@
 #include "defines.h"
 #include "unistd.h"
 #include "pipe.h"
+#include "err_exit.h"
 
 int main(int argc, char * argv[]) {
     int pipe1_read = atoi(argv[0]);
     int pipe2_write = atoi(argv[1]);
-    char *message;
-    // TODO: find a way to read a message once it's written
-    do { // Read until it returns 0 (EOF) or -1 (error)
-        message = read_pipe(pipe1_read);
-        printf("read content: %s", message);
-    } while (message != NULL);
-//    char data[] = "ID;Message;IDSender;IDReceiver;TimeArrival;TimeDeparture";
-//    write_file("OutputFiles/F2.csv", data);
-//    sleep(2);
+
+    char *content = (char *) malloc(8 * 50);
+    char* content_copy = (char*) malloc(8 * 50);
+    if (content == NULL || content_copy == NULL)
+        ErrExit("malloc S2");
+    ssize_t status;
+    do { // Read until it returns 0 (EOF)
+        status = read_pipe(pipe1_read, content);
+        strcpy(content_copy, content);
+        Message_struct* message = parse_message(content);
+        sleep(message->DelS2);
+
+//        if(strcmp(message->Type, "Q") == 0) {
+//            // TODO send with queue
+//        }
+//        else if(strcmp(message->Type, "SH") == 0) {
+//            // TODO send with shared memory
+//        }
+//        else if(strcmp(message->Type, "FIFO") == 0)
+//            write_pipe(pipe2_write, content_copy);
+    } while (status > 0);
+
     close_pipe(pipe1_read);
     close_pipe(pipe2_write);
+    sleep(2);
     return 0;
 }

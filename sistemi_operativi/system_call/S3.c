@@ -11,8 +11,9 @@ int main(int argc, char * argv[]) {
     int pipe2_read = atoi(&argv[0][0]);
     char data[] = "ID;Message;IDSender;IDReceiver;TimeArrival;TimeDeparture";
     write_file("OutputFiles/F3.csv", data);
-    sleep(3);
     close_pipe(pipe2_read);
+    sleep(3);
+
     return 0;
 
 }

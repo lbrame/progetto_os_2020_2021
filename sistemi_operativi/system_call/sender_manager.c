@@ -63,12 +63,20 @@ void generate_child(child_struct *info_children, char *inputFile, const int fd1[
         int r;
         switch (i) {
             case 1:
+                close_pipe(fd1[0]);
+                close_pipe(fd2[0]);
+                close_pipe(fd2[1]);
                 r = execl(execl_path, inputFile, itoa(fd1[1]), (char *) NULL);
                 break;
             case 2:
+                close_pipe(fd1[1]);
+                close_pipe(fd2[0]);
                 r = execl(execl_path, itoa(fd1[0]), itoa(fd2[1]), (char *) NULL);
                 break;
             default:
+                close_pipe(fd1[0]);
+                close_pipe(fd1[1]);
+                close_pipe(fd2[1]);
                 r = execl(execl_path, itoa(fd2[0]), (char *) NULL);
                 break;
         }
@@ -150,6 +158,11 @@ int main(int argc, char *argv[]) {
     generate_child(info_children, argv[1], pipe1, pipe2);
     generate_child(info_children, argv[1], pipe1, pipe2);
     generate_child(info_children, argv[1], pipe1, pipe2);
+
+    close_pipe(pipe1[0]);
+    close_pipe(pipe1[1]);
+    close_pipe(pipe2[0]);
+    close_pipe(pipe2[1]);
 
     // wait for children
     while (wait(&info_children[0].pid) != -1);
