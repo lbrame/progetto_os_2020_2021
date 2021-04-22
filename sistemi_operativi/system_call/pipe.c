@@ -20,16 +20,16 @@ void close_pipe(int fd) {
         ErrExit("close PIPE");
 }
 
-ssize_t read_pipe(int fd, char* content) {
-    long size = 8 * 50;
+ssize_t read_pipe(int fd, Message_struct *content) {
+    long size = sizeof(Message_struct);
     ssize_t status = read(fd, content, size);
     if (status == -1)
         ErrExit("read");
     return status;
 }
 
-void write_pipe(int fd, char *buffer) {
-    size_t size = strlen(buffer);
+void write_pipe(int fd,  Message_struct *buffer) {
+    size_t size = sizeof(Message_struct);
     ssize_t numWrite = write(fd, buffer, size);
     if (numWrite == -1)
         ErrExit("write");

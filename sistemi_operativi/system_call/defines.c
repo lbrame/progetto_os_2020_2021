@@ -198,16 +198,16 @@ Message_struct *parse_message(char *inputBuffer) {
     for (char *field_token = strtok_r(inputBuffer, ";", &field_context); field_token; field_token = strtok_r(NULL, ";", &field_context)) {
         switch (field_counter) {
             case 0:
-                message->Id = field_token;
+                message->Id = atoi(field_token);
                 break;
             case 1:
-                message->Message = field_token;
+                strcpy(message->Message, field_token);
                 break;
             case 2:
-                message->IdSender = field_token;
+                strcpy(message->IdSender, field_token);
                 break;
             case 3:
-                message->IdReceiver = field_token;
+                strcpy(message->IdReceiver, field_token);
                 break;
             case 4:
                 message->DelS1 = atoi(field_token);
@@ -222,7 +222,7 @@ Message_struct *parse_message(char *inputBuffer) {
                 message->Type = field_token;
                 break;
             default:
-                ErrExit("parse_file");
+                ErrExit("parse_message");
         }
         field_counter++;
     }

@@ -4,10 +4,10 @@
 
 #pragma once
 typedef struct {
-    char* Id;
-    char* Message;
-    char* IdSender;
-    char* IdReceiver;
+    int Id;
+    char Message[51];
+    char IdSender[3];
+    char IdReceiver[3];
     int DelS1;
     int DelS2;
     int DelS3;
@@ -23,4 +23,3 @@ char* join (char* str1, char* str2, char join_character);
 char* itoa(int val);
 int read_line(int fd, char* buffer);
 Message_struct *parse_message(char *inputBuffer);
-long get_file_size_from_fd(int fd);

@@ -97,19 +97,21 @@ int main(int argc, char * argv[]) {
     if (buffer == NULL || row_copy == NULL)
         ErrExit("malloc S1");
     int row_status = read_line(fd, buffer);
-    while (row_copy > 0) {
+    while (row_status > 0) {
         row_status = read_line(fd, buffer);
         strcpy(row_copy, buffer);
         Message_struct *message = parse_message(buffer);
         sleep(message->DelS1);
-        if(strcmp(message->Type, "Q") == 0) {
+        if((strcmp(message->Type, "FIFO") == 0) || (strcmp(message->IdSender, "S1") != 0)) {
+            write_pipe(pipe1_write, message);
+            printf("S1 write: %s\n", row_copy);
+        }
+        else if(strcmp(message->Type, "Q") == 0) {
             // TODO send with queue
         }
         else if(strcmp(message->Type, "SH") == 0) {
             // TODO send with shared memory
         }
-        else if(strcmp(message->Type, "FIFO") == 0)
-            write_pipe(pipe1_write, row_copy);
     }
     free(row_copy);
     free(buffer);
