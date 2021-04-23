@@ -40,7 +40,7 @@ void add_child(child_struct *info_children, char sender_id[], pid_t pid, int i) 
  * wrapper for fork funcion, generates a process and the gives it some code to exute
  * @param info_children a list where to put the data of the child
  */
-void generate_child(child_struct *info_children, const int fd1[2], const int fd2[2]) {
+void generate_child(child_struct *info_children, const int fd3[2], const int fd4[2]) {
     static int i = 0;
     char *i_str = itoa(i + 1);
 
@@ -58,11 +58,22 @@ void generate_child(child_struct *info_children, const int fd1[2], const int fd2
         int r;
         switch (i) {
             case 1:
-                r = execl(execl_path, (const char *) fd1, (char *)NULL);
+                close_pipe(fd3[0]);
+                close_pipe(fd3[1]);
+                close_pipe(fd4[1]);
+                r = execl(execl_path, itoa(fd4[1]), (char *)NULL);
+                break;
             case 2:
-                r = execl(execl_path, (const char *) fd1, (const char *) fd2, (char *)NULL);
+                close_pipe(fd3[1]);
+                close_pipe(fd4[0]);
+                r = execl(execl_path, itoa(fd3[0]), itoa(fd4[1]), (char *)NULL);
+                break;
             default:
-                r = execl(execl_path,(const char *) fd2, (char *)NULL);
+                close_pipe(fd3[0]);
+                close_pipe(fd4[0]);
+                close_pipe(fd4[1]);
+                r = execl(execl_path, itoa(fd3[1]), (char *)NULL);
+                break;
         }
         if (r == -1)
             perror("execl");
@@ -132,21 +143,25 @@ int main(int argc, char * argv[]) {
         mkdir("OutputFiles", S_IRWXU);
 
     // create pipes
-    int fd1[2];
-    int fd2[2];
-    generate_pipe(fd1);
-    generate_pipe(fd2);
+    int pipe3[2];
+    int pipe4[2];
+    generate_pipe(pipe3);
+    generate_pipe(pipe4);
 
     // create child processes
-    generate_child(info_children, fd1, fd2);
-    generate_child(info_children, fd1, fd2);
-    generate_child(info_children, fd1, fd2);
+    generate_child(info_children, pipe3, pipe4);
+    generate_child(info_children, pipe3, pipe4);
+    generate_child(info_children, pipe3, pipe4);
 
     // wait for children
     while (wait(&info_children[0].pid) != -1);
     while (wait(&info_children[1].pid) != -1);
     while (wait(&info_children[2].pid) != -1);
 
+    close_pipe(pipe3[0]);
+    close_pipe(pipe3[1]);
+    close_pipe(pipe4[0]);
+    close_pipe(pipe4[1]);
 
     int number_of_children = 3;
     char *starter = "ReceiverID;PID";
