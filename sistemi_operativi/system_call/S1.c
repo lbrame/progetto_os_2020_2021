@@ -109,6 +109,7 @@ int main(int argc, char * argv[]) {
         else if(strcmp(message->Type, "SH") == 0) {
             // TODO send with shared memory
         }
+        free(message);
     }
 
     free(buffer);

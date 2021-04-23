@@ -38,6 +38,8 @@ int main(int argc, char * argv[]) {
 
     close_pipe(pipe1_read);
     close_pipe(pipe2_write);
+    free(content);
+    free(last_content);
     sleep(2);
     return 0;
 }

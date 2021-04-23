@@ -37,6 +37,8 @@ int main(int argc, char * argv[]) {
     } while (status > 0);
 
     close_pipe(pipe2_read);
+    free(content);
+    free(last_content);
     sleep(3);
 
     return 0;
