@@ -7,8 +7,6 @@
 #include "semaphore.h"
 #include "fifo.h"
 #include "pipe.h"
-
-// Custom includes
 #include "unistd.h"
 #include <sys/wait.h>
 #include <errno.h>
@@ -23,7 +21,7 @@
  */
 typedef struct {
     char *sender_id;
-    pid_t pid;
+    int pid;
 } child_struct;
 
 /**
@@ -35,8 +33,11 @@ typedef struct {
  */
 void add_child(child_struct *info_children, char sender_id[], pid_t pid, int i) {
     child_struct *child = malloc(sizeof(child_struct));
+    if (info_children == NULL) {
+        ErrExit("malloc addChild");
+    }
     child->sender_id = sender_id;
-    child->pid = pid;
+    child->pid = (int) pid;
     info_children[i - 1] = *child;
 }
 
@@ -62,13 +63,21 @@ void generate_child(child_struct *info_children, char *inputFile, const int fd1[
         int r;
         switch (i) {
             case 1:
-                r = execl(execl_path, inputFile, (char *) fd1, (char *) NULL);
+                close_pipe(fd1[0]);
+                close_pipe(fd2[0]);
+                close_pipe(fd2[1]);
+                r = execl(execl_path, inputFile, itoa(fd1[1]), (char *) NULL);
                 break;
             case 2:
-                r = execl(execl_path, (const char *) fd1, (const char *) fd2, (char *) NULL);
+                close_pipe(fd1[1]);
+                close_pipe(fd2[0]);
+                r = execl(execl_path, itoa(fd1[0]), itoa(fd2[1]), (char *) NULL);
                 break;
             default:
-                r = execl(execl_path, (const char *) fd2, (char *) NULL);
+                close_pipe(fd1[0]);
+                close_pipe(fd1[1]);
+                close_pipe(fd2[1]);
+                r = execl(execl_path, itoa(fd2[0]), (char *) NULL);
                 break;
         }
         if (r == -1)
@@ -131,7 +140,7 @@ int main(int argc, char *argv[]) {
     // Dynamic allocation of the memory
     child_struct *info_children = (child_struct *) malloc(sizeof(child_struct) * 3);
     if (info_children == NULL) {
-        ErrExit("malloc");
+        ErrExit("malloc senderManager");
     }
 
     struct stat sb;
@@ -150,14 +159,15 @@ int main(int argc, char *argv[]) {
     generate_child(info_children, argv[1], pipe1, pipe2);
     generate_child(info_children, argv[1], pipe1, pipe2);
 
+    close_pipe(pipe1[0]);
+    close_pipe(pipe1[1]);
+    close_pipe(pipe2[0]);
+    close_pipe(pipe2[1]);
+
     // wait for children
     while (wait(&info_children[0].pid) != -1);
     while (wait(&info_children[1].pid) != -1);
     while (wait(&info_children[2].pid) != -1);
-
-    // close pipes
-    close_pipe(pipe1);
-    close_pipe(pipe2);
 
 
     int number_of_children = 3;
