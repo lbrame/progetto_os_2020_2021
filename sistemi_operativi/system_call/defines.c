@@ -219,7 +219,7 @@ Message_struct *parse_message(char *inputBuffer) {
                 message->DelS3 = atoi(field_token);
                 break;
             case 7:
-                message->Type = field_token;
+                strcpy(message->Type, field_token);
                 break;
             default:
                 ErrExit("parse_message");

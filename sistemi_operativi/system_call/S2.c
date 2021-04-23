@@ -6,8 +6,8 @@
 #include <string.h>
 #include "defines.h"
 #include "unistd.h"
-#include "pipe.h"
 #include "err_exit.h"
+#include "pipe.h"
 
 int main(int argc, char * argv[]) {
     int pipe1_read = atoi(argv[0]);

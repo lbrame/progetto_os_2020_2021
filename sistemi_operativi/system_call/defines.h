@@ -11,7 +11,7 @@ typedef struct {
     int DelS1;
     int DelS2;
     int DelS3;
-    char* Type;
+    char Type[5];
 } Message_struct;
 
 int count_messages(const char *input, int fileSize);

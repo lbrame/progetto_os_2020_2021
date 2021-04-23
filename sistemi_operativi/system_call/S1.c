@@ -99,11 +99,14 @@ int main(int argc, char * argv[]) {
     int row_status = read_line(fd, buffer);
     while (row_status > 0) {
         row_status = read_line(fd, buffer);
+        // TODO: remove in future
         strcpy(row_copy, buffer);
+
         Message_struct *message = parse_message(buffer);
         sleep(message->DelS1);
         if((strcmp(message->Type, "FIFO") == 0) || (strcmp(message->IdSender, "S1") != 0)) {
             write_pipe(pipe1_write, message);
+            // TODO: remove in future
             printf("S1 write: %s\n", row_copy);
         }
         else if(strcmp(message->Type, "Q") == 0) {
@@ -113,10 +116,11 @@ int main(int argc, char * argv[]) {
             // TODO send with shared memory
         }
     }
+    sleep(1);
+
     free(row_copy);
     free(buffer);
     close(fd);
     close_pipe(pipe1_write);
-    sleep(1);
     return 0;
 }

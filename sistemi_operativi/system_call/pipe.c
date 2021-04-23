@@ -28,7 +28,7 @@ ssize_t read_pipe(int fd, Message_struct *content) {
     return status;
 }
 
-void write_pipe(int fd,  Message_struct *buffer) {
+void write_pipe(int fd, Message_struct *buffer) {
     size_t size = sizeof(Message_struct);
     ssize_t numWrite = write(fd, buffer, size);
     if (numWrite == -1)
