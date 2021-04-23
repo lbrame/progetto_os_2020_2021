@@ -11,7 +11,7 @@ int main(int argc, char * argv[]) {
     // TODO remove after merge
     char* rPath = "InputFiles/F0_test.csv";
     // get fd of the pipe
-    int pipe4_write = atoi(argv[0]);
+    int pipe3_write = atoi(argv[0]);
     // TODO remove after merge from here
     int fd = open(rPath, O_RDONLY);
     if (fd == -1)
@@ -29,14 +29,13 @@ int main(int argc, char * argv[]) {
         // TODO read fifo
         sleep(message->DelS1);
         if(strcmp(message->IdReceiver, "R3") != 0) {
-//            write_pipe(pipe4_write, message);
-            printf("sent message %d\n", message->Id);
+            write_pipe(pipe3_write, message);
         }
     }
 
     free(buffer);
     close(fd);
-    close_pipe(pipe4_write);
+    close_pipe(pipe3_write);
     sleep(3);
     return 0;
 }
