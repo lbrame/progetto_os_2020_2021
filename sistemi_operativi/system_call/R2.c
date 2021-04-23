@@ -22,7 +22,7 @@ int main(int argc, char * argv[]) {
             continue;
         sleep(content->DelS2);
         if(strcmp(content->IdReceiver, "R2") != 0) {
-//            write_pipe(pipe4_write, content);
+            write_pipe(pipe4_write, content);
         }
 
     } while (status > 0);
