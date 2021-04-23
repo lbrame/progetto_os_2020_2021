@@ -41,15 +41,17 @@ void add_child(child_struct *info_children, char sender_id[], pid_t pid, int i) 
  * @param info_children a list where to put the data of the child
  */
 void generate_child(child_struct *info_children, const int fd3[2], const int fd4[2]) {
-    static int i = 0;
-    char *i_str = itoa(i + 1);
+    // the execution order should be R3, R2, R1 since R3
+    // should receive messages from fifo
+    static int i = 4;
+    char *i_str = itoa(i-1);
 
     char *sender_id = join("R", i_str, NULL);
     // Generate child process S*
     pid_t S_ = fork();
     if (S_ == -1)
         ErrExit("Fork");
-    i++;
+    i--;
     if (S_ != 0) {
         add_child(info_children, sender_id, S_, i);
     } else {
@@ -61,7 +63,7 @@ void generate_child(child_struct *info_children, const int fd3[2], const int fd4
                 close_pipe(fd3[0]);
                 close_pipe(fd3[1]);
                 close_pipe(fd4[1]);
-                r = execl(execl_path, itoa(fd4[1]), (char *)NULL);
+                r = execl(execl_path, itoa(fd4[0]), (char *)NULL);
                 break;
             case 2:
                 close_pipe(fd3[1]);
@@ -153,15 +155,15 @@ int main(int argc, char * argv[]) {
     generate_child(info_children, pipe3, pipe4);
     generate_child(info_children, pipe3, pipe4);
 
-    // wait for children
-    while (wait(&info_children[0].pid) != -1);
-    while (wait(&info_children[1].pid) != -1);
-    while (wait(&info_children[2].pid) != -1);
-
     close_pipe(pipe3[0]);
     close_pipe(pipe3[1]);
     close_pipe(pipe4[0]);
     close_pipe(pipe4[1]);
+
+    // wait for children
+    while (wait(&info_children[0].pid) != -1);
+    while (wait(&info_children[1].pid) != -1);
+    while (wait(&info_children[2].pid) != -1);
 
     int number_of_children = 3;
     char *starter = "ReceiverID;PID";
