@@ -2,87 +2,87 @@ cmake_minimum_required(VERSION 3.17)
 project(progetto_os_2020_2021 C)
 
 add_library(
-    os_core
+        os_core
 
-    ${CMAKE_CURRENT_SOURCE_DIR}/defines.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/defines.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/err_exit.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/err_exit.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/defines.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/defines.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/err_exit.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/err_exit.h
 
-    # Sorgenti non ancora implementati 
-    #   ${CMAKE_CURRENT_SOURCE_DIR}/fifo.c
-    #   ${CMAKE_CURRENT_SOURCE_DIR}/fifo.h
-       ${CMAKE_CURRENT_SOURCE_DIR}/pipe.c
-       ${CMAKE_CURRENT_SOURCE_DIR}/pipe.h
-    #   ${CMAKE_CURRENT_SOURCE_DIR}/semaphore.c
-    #   ${CMAKE_CURRENT_SOURCE_DIR}/semaphore.h
+        # Sorgenti non ancora implementati
+        #   ${CMAKE_CURRENT_SOURCE_DIR}/fifo.c
+        #   ${CMAKE_CURRENT_SOURCE_DIR}/fifo.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/pipe.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/pipe.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/semaphore.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/semaphore.h
 )
 
 target_include_directories(
-    os_core
-    SYSTEM
-    PUBLIC
+        os_core
+        SYSTEM
+        PUBLIC
 
-    ${CMAKE_CURRENT_SOURCE_DIR}/
+        ${CMAKE_CURRENT_SOURCE_DIR}/
 )
 
 target_compile_features(
-    os_core
-    PUBLIC
+        os_core
+        PUBLIC
 
-    c_std_99
+        c_std_99
 )
 
 add_executable(
-    sender_manager
-    ${CMAKE_CURRENT_SOURCE_DIR}/sender_manager.c
+        sender_manager
+        ${CMAKE_CURRENT_SOURCE_DIR}/sender_manager.c
 )
 
 add_executable(
-    receiver_manager
-    ${CMAKE_CURRENT_SOURCE_DIR}/receiver_manager.c
+        receiver_manager
+        ${CMAKE_CURRENT_SOURCE_DIR}/receiver_manager.c
 )
 
 add_executable(
-    hackler
+        hackler
 
-    ${CMAKE_CURRENT_SOURCE_DIR}/hackler.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/hackler.c
 )
 
 add_executable(
-    S1
+        S1
 
-    ${CMAKE_CURRENT_SOURCE_DIR}/S1.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/S1.c
 )
 
 add_executable(
-    S2
+        S2
 
-    ${CMAKE_CURRENT_SOURCE_DIR}/S2.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/S2.c
 )
 
 add_executable(
-    S3
+        S3
 
-    ${CMAKE_CURRENT_SOURCE_DIR}/S3.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/S3.c
 )
 
 add_executable(
-    R1
+        R1
 
-    ${CMAKE_CURRENT_SOURCE_DIR}/R1.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/R1.c
 )
 
 add_executable(
-    R2
+        R2
 
-    ${CMAKE_CURRENT_SOURCE_DIR}/R2.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/R2.c
 )
 
 add_executable(
-    R3
+        R3
 
-    ${CMAKE_CURRENT_SOURCE_DIR}/R3.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/R3.c
 )
 
 add_dependencies(
