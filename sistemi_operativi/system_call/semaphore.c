@@ -17,3 +17,27 @@ void semOp(int semid, unsigned short sem_num, short sem_op) {
     if (semop(semid, &sop, 1) != -1)
         ErrExit("semop failed in semOp wrapper");
 }
+
+/**
+ * Wait
+ * @param semid
+ * @param sem_num
+ */
+void P(int semid, unsigned short sem_num) {
+    struct sembuf sop = {.sem_num = sem_num, .sem_op = -1, .sem_flg = 0};
+
+    if (semop(semid, &sop, 1) != -1)
+        ErrExit("semop failed in semOp wrapper");
+}
+
+/**
+ * Signal
+ * @param semid
+ * @param sem_num
+ */
+void V(int semid, unsigned short sem_num) {
+    struct sembuf sop = {.sem_num = sem_num, .sem_op = 1, .sem_flg = 0};
+
+    if (semop(semid, &sop, 1) != -1)
+        ErrExit("semop failed in semOp wrapper");
+}

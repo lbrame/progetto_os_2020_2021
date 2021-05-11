@@ -16,3 +16,9 @@ union semun {
 };
 
 #endif
+
+void semOp(int semid, unsigned short sem_num, short sem_op);
+
+void P(int semid, unsigned short sem_num);
+
+void V(int semid, unsigned short sem_num);
