@@ -142,11 +142,11 @@ char *concatenate(S1_struct *info_children, int counter, char *starter) {
 
 int main(int argc, char * argv[]) {
     // Reading of F0
-    char* rPath = argv[0];
+    /*char* rPath = argv[0];
     int* pipe1 = (int *) argv[1];
     int fd = open(rPath, O_RDONLY);
     if (fd == -1)
-        ErrExit("open");
+        ErrExit("open S1");
     char *starter = "ID;Message;IDSender;IDReceiver;TimeArrival;TimeDeparture";
     char* row = read_line(fd);
     while (row != NULL) {
@@ -157,12 +157,11 @@ int main(int argc, char * argv[]) {
             continue;
         free(row);
     }
-    close(fd);
+    close(fd);*/
     //Creation of the outputBuffer that will be written in F1.csv
 //    char* outputBuffer = concatenate(messages, message_number, starter);
 //    write_file("OutputFiles/F1.csv", outputBuffer);
 //    //Free the memory allocated
-//    free(message);
-    sleep(1);
+//    free(message)
     return 0;
 }

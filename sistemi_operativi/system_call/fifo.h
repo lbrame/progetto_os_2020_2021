@@ -3,5 +3,6 @@
 ///         funzioni specifiche per la gestione delle FIFO.
 
 #pragma once
-void generate_fifo(int fd);
+int generate_fifo(char* string);
+int open_fifo(char* string, int type);
 void close_fifo(int fd);

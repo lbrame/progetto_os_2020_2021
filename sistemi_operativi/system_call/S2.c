@@ -5,11 +5,10 @@
 #include "unistd.h"
 
 int main(int argc, char * argv[]) {
-    int* pipe1 = (int *) argv[0];
-    int* pipe2 = (int *) argv[1];
+//    int* pipe1 = (int *) argv[0];
+//    int* pipe2 = (int *) argv[1];
 
     char data[] = "ID;Message;IDSender;IDReceiver;TimeArrival;TimeDeparture";
-    write_file("OutputFiles/F2.csv", data);
-    sleep(2);
+//    write_file("OutputFiles/F2.csv", da
     return 0;
 }

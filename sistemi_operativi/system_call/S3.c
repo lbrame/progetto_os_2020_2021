@@ -8,21 +8,11 @@
 #include <stdio.h>
 #include <fcntl.h>
 #include "err_exit.h"
+#include "fifo.h"
 
 int main(int argc, char * argv[]) {
-    int* pipe2 = (int *) argv[1];
-    int* fifo = (int *) argv[2];
-    int fd_fifo = open(fifo, O_WRONLY);
-    //check open fifo
-    if(fd_fifo == -1)
-        ErrExit("FIFO OPEN");
-    //open pipe 2 in readonly mode
-    int fd = open(pipe2, O_RDONLY);
-    //check open error
-    if (fd == -1)
-        ErrExit("open");
+    printf("EHI SONO QUI\n");
+    int fd_fifo = open_fifo("OutputFiles/my_fifo.txt", O_RDWR);
     char data[] = "ID;Message;IDSender;IDReceiver;TimeArrival;TimeDeparture";
-    write_file("OutputFiles/F3.csv", data);
-    sleep(3);
     return 0;
 }

@@ -5,11 +5,24 @@
 #include "unistd.h"
 #include "err_exit.h"
 #include "fifo.h"
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
-void generate_fifo(int fd)
+int generate_fifo(char* string)
 {
+    int fd = mkfifo("OutputFiles/my_fifo.txt", S_IRUSR|S_IWUSR|O_NONBLOCK);
     if(fd == -1)
         ErrExit("Fifo creation");
+    return fd;
+}
+
+int open_fifo(char* string, int type)
+{
+    int fd = open(string, type);
+    if(fd == -1)
+        ErrExit("FIFO OPEN S3");
+    return fd;
 }
 
 void close_fifo(int fd)

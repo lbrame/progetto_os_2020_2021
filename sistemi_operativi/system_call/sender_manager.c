@@ -139,41 +139,33 @@ int main(int argc, char *argv[]) {
     if (stat("OutputFiles", &sb) != 0)
         mkdir("OutputFiles", S_IRWXU);
 
+    //creates fifo
+    int fifo = generate_fifo("OutputFiles/my_fifo.txt");
+    //close fifo
+    close_fifo(fifo);
+
     // create pipes
     int pipe1[2];
     int pipe2[2];
-    generate_pipe(pipe1);
-    generate_pipe(pipe2);
 
-    //creates fifo
-    int fifo = mkfifo(argv[0], S_IFIFO);
-    generate_fifo(fifo);
 
     // create child processes
     generate_child(info_children, argv[1], pipe1, pipe2, NULL);
     generate_child(info_children, argv[1], pipe1, pipe2, NULL);
-    generate_child(info_children, argv[1], pipe1, pipe2, fifo);
+    generate_child(info_children, argv[1], pipe1, pipe2, NULL);
 
     // wait for children
     while (wait(&info_children[0].pid) != -1);
     while (wait(&info_children[1].pid) != -1);
     while (wait(&info_children[2].pid) != -1);
 
-    // close pipes
-    close_pipe(pipe1);
-    close_pipe(pipe2);
-    
-    //close fifo
-    close_fifo(fifo);
 
     int number_of_children = 3;
     char *starter = "SenderID;PID";
     char *outputBuffer = concatenate(info_children, number_of_children, starter);
     // outputBuffer written on F8.csv
     write_file("OutputFiles/F8.csv", outputBuffer);
-
-    // Free up old buffers
-    free(outputBuffer);
+   free(outputBuffer);
     free(info_children);
     return 0;
 }
