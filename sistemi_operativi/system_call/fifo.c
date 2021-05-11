@@ -5,6 +5,7 @@
 #include "unistd.h"
 #include "err_exit.h"
 #include "fifo.h"
+#include "defines.h"
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
