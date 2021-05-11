@@ -174,5 +174,6 @@ int main(int argc, char * argv[]) {
     // Free up old buffers
     free(outputBuffer);
     free(info_children);
+    unlink("OutputFiles/my_fifo.txt");
     return 0;
 }

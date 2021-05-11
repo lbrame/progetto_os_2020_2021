@@ -7,6 +7,20 @@
 #include "pipe.h"
 #include "fifo.h"
 
+void send_message(Message_struct* message, int pipe)
+{
+    pid_t pid = fork();
+    if(pid == 0) {
+        sleep(message->DelS3);
+        if(strcmp(message->IdReceiver, "R3") != 0) {
+            write_pipe(pipe, message);
+            printf("R3 sent id: %d\n", message->Id);
+        }
+        close_pipe(pipe);
+        exit(0);
+    }
+}
+
 int main(int argc, char * argv[]) {
     int pipe3_write = atoi(argv[0]);
 
@@ -19,47 +33,17 @@ int main(int argc, char * argv[]) {
     ssize_t status;
     do{//Read until it returns 0 (EOF)
         // ROBA FIFO
-        memcpy(last_message, message, sizeof(Message_struct));
+//        memcpy(last_message, message, sizeof(Message_struct));
         //using read_pipe as a reader also for fifo (they works the same way)
         status = read_pipe(fd_fifo, message);
         if(message->Id == last_message->Id)
-            sleep(message->DelS3);// fine roba fifo
-
-        if(strcmp(message->IdReceiver, "R3") != 0) {
-
-            write_pipe(pipe3_write, message);
-        }
-
+            continue;
+        send_message(message, pipe3_write);
+        printf("status: %d\n", status);
     }while(status > 0);
+    printf("R3 E' USCITO DAL WHILE\n");
 
-/*
-// TODO remove after merge
-    char* rPath = "InputFiles/F0_test.csv";
-    // get fd of the pipe
-    int pipe3_write = atoi(argv[0]);
-    // TODO remove after merge from here
-    int fd = open(rPath, O_RDONLY);
-    if (fd == -1)
-        ErrExit("open");
-    // suppose each of the 8 fields has a maximum size of 50bytes
-    char *buffer = (char *) malloc(8 * 50);
-    if (buffer == NULL)
-        ErrExit("malloc S1");
-    int row_status = read_line(fd, buffer);
-    // TODO remove after merge until here
-    while (row_status > 0) {
-        // TODO remove after merge
-        row_status = read_line(fd, buffer);
-        Message_struct *message = parse_message(buffer);
-        sleep(message->DelS1);
-        if(strcmp(message->IdReceiver, "R3") != 0) {
-            write_pipe(pipe3_write, message);
-        }
-    }
-    */
-    //free(buffer);
-    close(fd_fifo);
-    //close_pipe(pipe3_write);
-    unlink("OutputFiles/my_fifo.txt");
+    close_pipe(pipe3_write);
+    printf("IO R3 HO FINITO IL IO LAVORO\n");
     return 0;
 }

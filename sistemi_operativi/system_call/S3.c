@@ -28,14 +28,13 @@ void send_message(Message_struct* message)
         else if(strcmp(message->Type, "SH") == 0) {
             // TODO send with shared memory
         }
-        close_fifo(fd_fifo);
+        close(fd_fifo);
         exit(0);
     }
 }
 
 int main(int argc, char * argv[]) {
     int pipe2_read = atoi(&argv[0][0]);
-    //int fd_fifo = open_fifo("OutputFiles/my_fifo.txt", O_RDWR);
 
     Message_struct *content = (Message_struct *) malloc(sizeof(Message_struct));
     Message_struct *last_content = (Message_struct *) malloc(sizeof(Message_struct));
@@ -53,6 +52,7 @@ int main(int argc, char * argv[]) {
     } while (status > 0);
 
     close_pipe(pipe2_read);
+
     free(content);
     free(last_content);
     sleep(3);
