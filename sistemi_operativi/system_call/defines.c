@@ -11,6 +11,7 @@
 #include <string.h>
 #include <malloc.h>
 #include <stdlib.h>
+#include "pipe.h";
 
 /**
  * count the number of messages in the file
@@ -107,7 +108,17 @@ char *get_out_file_rpath(char *in_file_path) {
  * writes data to the output file
  * @param out_file_path the relative path to the output file
  * @param outputBuffer the buffer where is stored the data to write
- */
+ *///        sleep(message->DelS1);
+//        if((strcmp(message->Type, "FIFO") == 0) || (strcmp(message->IdSender, "S1") != 0)) {
+//            write_pipe(pipe1_write, message);
+//        }
+//        else if(strcmp(message->Type, "Q") == 0) {
+//            // TODO send with queue
+//        }
+//        else if(strcmp(message->Type, "SH") == 0) {
+//            // TODO send with shared memory
+//        }
+//        free(message);
 void write_file(char out_file_path[], char *outputBuffer) {
     // check if file exists
     if (access(out_file_path, F_OK) == 0) {

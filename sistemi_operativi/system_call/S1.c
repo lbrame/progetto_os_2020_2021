@@ -83,9 +83,27 @@
 //    return outputBuffer;
 //}
 
+void send_message(Message_struct* message, int pipe)
+{
+    pid_t pid = fork();
+    if(pid == 0) {
+        sleep(message->DelS1);
+        if ((strcmp(message->Type, "FIFO") == 0) || (strcmp(message->IdSender, "S1") != 0)) {
+            write_pipe(pipe, message);
+            printf("S1 sent id: %d\n", message->Id);
+        } else if (strcmp(message->Type, "Q") == 0) {
+            // TODO send with queue
+        } else if (strcmp(message->Type, "SH") == 0) {
+            // TODO send with shared memory
+        }
+        close_pipe(pipe);
+        exit(0);
+    }
+}
+
 
 int main(int argc, char * argv[]) {
-    char* rPath = argv[0];
+    char *rPath = argv[0];
     int pipe1_write = atoi(argv[1]);
     int fd = open(rPath, O_RDONLY);
     if (fd == -1)
@@ -98,17 +116,7 @@ int main(int argc, char * argv[]) {
     while (row_status > 0) {
         row_status = read_line(fd, buffer);
         Message_struct *message = parse_message(buffer);
-        sleep(message->DelS1);
-        if((strcmp(message->Type, "FIFO") == 0) || (strcmp(message->IdSender, "S1") != 0)) {
-            write_pipe(pipe1_write, message);
-        }
-        else if(strcmp(message->Type, "Q") == 0) {
-            // TODO send with queue
-        }
-        else if(strcmp(message->Type, "SH") == 0) {
-            // TODO send with shared memory
-        }
-        free(message);
+        send_message(message, pipe1_write);
     }
 
     free(buffer);

@@ -160,9 +160,11 @@ int main(int argc, char *argv[]) {
     // create pipes
     int pipe1[2];
     int pipe2[2];
+    generate_pipe(pipe1);
+    generate_pipe(pipe2);
 
 
-    // create child processes
+// create child processes
     generate_child(info_children, argv[1], pipe1, pipe2);
     generate_child(info_children, argv[1], pipe1, pipe2);
     generate_child(info_children, argv[1], pipe1, pipe2);
@@ -183,7 +185,7 @@ int main(int argc, char *argv[]) {
     char *outputBuffer = concatenate(info_children, number_of_children, starter);
     // outputBuffer written on F8.csv
     write_file("OutputFiles/F8.csv", outputBuffer);
-   free(outputBuffer);
+    free(outputBuffer);
     free(info_children);
     return 0;
 }

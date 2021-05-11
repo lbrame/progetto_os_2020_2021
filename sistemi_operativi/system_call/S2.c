@@ -9,6 +9,27 @@
 #include "err_exit.h"
 #include "pipe.h"
 
+void send_message(Message_struct* message, int pipe)
+{
+    pid_t pid = fork();
+    if(pid == 0) {
+        
+        sleep(message->DelS2);
+        if((strcmp(message->Type, "FIFO") == 0) || (strcmp(message->IdSender, "S2") != 0)) {
+            write_pipe(pipe, message);
+            printf("S2 sent id: %d\n", message->Id);
+        }
+        else if(strcmp(message->Type, "Q") == 0) {
+            // TODO send with queue
+        }
+        else if(strcmp(message->Type, "SH") == 0) {
+            // TODO send with shared memory
+        }
+        close_pipe(pipe);
+        exit(0);
+    }
+}
+
 int main(int argc, char * argv[]) {
     int pipe1_read = atoi(argv[0]);
     int pipe2_write = atoi(argv[1]);
@@ -23,17 +44,7 @@ int main(int argc, char * argv[]) {
         status = read_pipe(pipe1_read, content);
         if(content->Id == last_content->Id)
             continue;
-        sleep(content->DelS2);
-        if((strcmp(content->Type, "FIFO") == 0) || (strcmp(content->IdSender, "S2") != 0)) {
-            write_pipe(pipe2_write, content);
-        }
-        else if(strcmp(content->Type, "Q") == 0) {
-            // TODO send with queue
-        }
-        else if(strcmp(content->Type, "SH") == 0) {
-            // TODO send with shared memory
-        }
-
+        send_message(content, pipe2_write);
     } while (status > 0);
 
     close_pipe(pipe1_read);
