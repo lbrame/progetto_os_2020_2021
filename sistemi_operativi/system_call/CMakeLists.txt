@@ -9,9 +9,8 @@ add_library(
         ${CMAKE_CURRENT_SOURCE_DIR}/err_exit.c
         ${CMAKE_CURRENT_SOURCE_DIR}/err_exit.h
 
-        # Sorgenti non ancora implementati
-        #   ${CMAKE_CURRENT_SOURCE_DIR}/fifo.c
-        #   ${CMAKE_CURRENT_SOURCE_DIR}/fifo.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/fifo.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/fifo.h
         ${CMAKE_CURRENT_SOURCE_DIR}/pipe.c
         ${CMAKE_CURRENT_SOURCE_DIR}/pipe.h
         ${CMAKE_CURRENT_SOURCE_DIR}/semaphore.c
