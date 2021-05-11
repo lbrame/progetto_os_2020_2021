@@ -36,6 +36,6 @@ int main(int argc, char * argv[]) {
     free(buffer);
     close(fd);
     close_pipe(pipe3_write);
-    sleep(3);
+    unlink("OutputFiles/my_fifo.txt");
     return 0;
 }

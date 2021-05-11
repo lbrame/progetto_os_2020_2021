@@ -53,7 +53,7 @@ int get_file_size(char *rPath) {
 void read_file(char *inputBuffer, char *rPath, int fileSize) {
     int fd = open(rPath, O_RDONLY);
     if (fd == -1)
-        ErrExit("open");
+        ErrExit("open read_file");
     ssize_t numRead;
     numRead = read(fd, inputBuffer, fileSize);
     if (numRead == -1) {
@@ -120,7 +120,7 @@ void write_file(char out_file_path[], char *outputBuffer) {
     // create file and open it in write mode
     int fd = open(out_file_path, O_WRONLY | O_CREAT | O_EXCL | O_TRUNC, S_IRWXU);
     if (fd == -1)
-        ErrExit("open");
+        ErrExit("open write_file");
 
     // write buffer to destination file
     ssize_t numWrite = write(fd, outputBuffer, strlen(outputBuffer));

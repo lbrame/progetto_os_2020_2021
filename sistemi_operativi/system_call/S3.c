@@ -1,16 +1,19 @@
 /// @file S3.c
 /// @brief Contiene l'implementazione del processo S3 chiamato da SenderManager.
 
-#include "defines.h"
-#include "unistd.h"
 #include "pipe.h"
 #include "err_exit.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "defines.h"
+#include <fcntl.h>
+#include "fifo.h"
+#include "unistd.h"
 
 int main(int argc, char * argv[]) {
     int pipe2_read = atoi(&argv[0][0]);
+		int fd_fifo = open_fifo("OutputFiles/my_fifo.txt", O_RDWR);
 
     Message_struct *content = (Message_struct *) malloc(sizeof(Message_struct));
     Message_struct *last_content = (Message_struct *) malloc(sizeof(Message_struct));
@@ -26,6 +29,7 @@ int main(int argc, char * argv[]) {
         sleep(content->DelS3);
         if((strcmp(content->Type, "FIFO") == 0) ) {
             // TODO send with FIFO
+						// TODO puoi usare write_pipe 
         }
         else if(strcmp(content->Type, "Q") == 0) {
             // TODO send with queue

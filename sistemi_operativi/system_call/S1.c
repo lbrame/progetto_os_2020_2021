@@ -85,7 +85,6 @@
 
 
 int main(int argc, char * argv[]) {
-    // Reading of F0
     char* rPath = argv[0];
     int pipe1_write = atoi(argv[1]);
     int fd = open(rPath, O_RDONLY);
@@ -115,6 +114,5 @@ int main(int argc, char * argv[]) {
     free(buffer);
     close(fd);
     close_pipe(pipe1_write);
-    sleep(1);
     return 0;
 }
