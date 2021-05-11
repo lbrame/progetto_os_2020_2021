@@ -10,6 +10,7 @@
 #include <fcntl.h>
 #include <string.h>
 #include <malloc.h>
+#include <stdlib.h>
 
 /**
  * count the number of messages in the file
@@ -154,25 +155,76 @@ char *itoa(int val) {
     return buffer;
 }
 
-char *read_line(int fd) {
+/**
+ *
+ * @param fd
+ * @param buffer
+ * @return
+ */
+int read_line(int fd, char* buffer) {
     static int start = 0;
     int index = 0;
-    // suppose each of the 8 fields has a maximum size of 50bytes
-    char *buffer = (char *) malloc(8 * 50);
-    if (buffer == NULL)
-        ErrExit("malloc");
-
     off_t current = lseek(fd, start, SEEK_SET);
     if (current == -1)
         ErrExit("lseek");
 
     while (buffer[index - 1] != '\n' && buffer[index - 1] != EOF) {
         size_t numRead = read(fd, &buffer[index], 1);
-        if (numRead == 0)
-            return NULL;
+        if (numRead == 0){
+            buffer[index] = '\0';
+            return 0;
+        }
+        else if(numRead == -1)
+            ErrExit("read");
         index++;
     }
     start += index;
     buffer[index-1] = '\0';
-    return buffer;
+    return 1;
+}
+
+/**
+ *
+ * @param inputBuffer
+ * @param message_number
+ * @return
+ */
+Message_struct *parse_message(char *inputBuffer) {
+    static char *row_context;
+    char *field_context;
+    int field_counter = 0;
+    Message_struct *message = malloc(sizeof(Message_struct));
+    // iterate over the fields
+    for (char *field_token = strtok_r(inputBuffer, ";", &field_context); field_token; field_token = strtok_r(NULL, ";", &field_context)) {
+        switch (field_counter) {
+            case 0:
+                message->Id = atoi(field_token);
+                break;
+            case 1:
+                strcpy(message->Message, field_token);
+                break;
+            case 2:
+                strcpy(message->IdSender, field_token);
+                break;
+            case 3:
+                strcpy(message->IdReceiver, field_token);
+                break;
+            case 4:
+                message->DelS1 = atoi(field_token);
+                break;
+            case 5:
+                message->DelS2 = atoi(field_token);
+                break;
+            case 6:
+                message->DelS3 = atoi(field_token);
+                break;
+            case 7:
+                strcpy(message->Type, field_token);
+                break;
+            default:
+                ErrExit("parse_message");
+        }
+        field_counter++;
+    }
+    return message;
 }
