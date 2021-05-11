@@ -148,6 +148,10 @@ int main(int argc, char *argv[]) {
     if (stat("OutputFiles", &sb) != 0)
         mkdir("OutputFiles", S_IRWXU);
 
+    //if my_fifo.txt already exists, remove it
+    struct stat sb2;
+    if (stat("OutputFiles/my_fifo.txt", &sb2) == 0)
+        remove("OutputFiles/my_fifo.txt");
     //creates fifo
     int fifo = generate_fifo("OutputFiles/my_fifo.txt");
     //close fifo
@@ -159,9 +163,9 @@ int main(int argc, char *argv[]) {
 
 
     // create child processes
-    generate_child(info_children, argv[1], pipe1, pipe2, NULL);
-    generate_child(info_children, argv[1], pipe1, pipe2, NULL);
-    generate_child(info_children, argv[1], pipe1, pipe2, NULL);
+    generate_child(info_children, argv[1], pipe1, pipe2);
+    generate_child(info_children, argv[1], pipe1, pipe2);
+    generate_child(info_children, argv[1], pipe1, pipe2);
 
     close_pipe(pipe1[0]);
     close_pipe(pipe1[1]);

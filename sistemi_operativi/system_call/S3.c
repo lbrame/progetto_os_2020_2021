@@ -28,8 +28,8 @@ int main(int argc, char * argv[]) {
         }
         sleep(content->DelS3);
         if((strcmp(content->Type, "FIFO") == 0) ) {
-            // TODO send with FIFO
-						// TODO puoi usare write_pipe 
+            int fd_fifo = open_fifo("OutputFiles/my_fifo.txt", O_RDWR);
+            write_pipe(fd_fifo, content);
         }
         else if(strcmp(content->Type, "Q") == 0) {
             // TODO send with queue
@@ -43,6 +43,7 @@ int main(int argc, char * argv[]) {
     close_pipe(pipe2_read);
     free(content);
     free(last_content);
+    close_fifo(fd_fifo);
     sleep(3);
 
     return 0;
