@@ -25,7 +25,7 @@ int main(int argc, char * argv[]) {
     int pipe3_write = atoi(argv[0]);
 
     //Reading files from my_fifo.txt and saving them with the mechanism of S1
-    int fd_fifo = open_fifo("OutputFiles/my_fifo.txt", O_RDWR);
+    int fd_fifo = open_fifo("OutputFiles/my_fifo.txt", O_RDONLY);
     Message_struct *message = (Message_struct *) malloc(sizeof(Message_struct));
     Message_struct *last_message = (Message_struct *) malloc(sizeof(Message_struct));
     if (message == NULL || last_message == NULL)
