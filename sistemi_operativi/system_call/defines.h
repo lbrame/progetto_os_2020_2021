@@ -2,6 +2,9 @@
 /// @brief Contiene la definizioni di variabili
 ///         e funzioni specifiche del progetto.
 
+#include <sys/types.h>
+#include <sys/ipc.h>
+
 #pragma once
 typedef struct {
     int Id;

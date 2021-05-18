@@ -11,7 +11,9 @@
 #include <string.h>
 #include <malloc.h>
 #include <stdlib.h>
-#include "pipe.h";
+#include "pipe.h"
+#include <sys/types.h>
+#include <sys/ipc.h>
 
 /**
  * count the number of messages in the file

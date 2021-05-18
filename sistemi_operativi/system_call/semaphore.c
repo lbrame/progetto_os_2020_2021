@@ -6,6 +6,30 @@
 #include "semaphore.h"
 
 /**
+ *
+ * @param key
+ * @param sem_num
+ * @param flag
+ * @return
+ */
+int semGet(int sem_num, int flag) {
+    key_t key = 01110011;
+    union semun arg;
+
+    int semid = semget(key, sem_num, flag);
+    if (semid == -1)
+        ErrExit("SemGet ");
+
+    // Initialize semaphore set to 1
+    for(int i=0; i<sem_num; i++) {
+        arg.val = 1;
+        if (semctl(semid, i, SETVAL, arg) == -1)
+            ErrExit("semctl SETVAL in semGet wrapper");
+    }
+    return semid;
+}
+
+/**
  * Wrapper function to run semop() on a specific semaphore more easily.
  * @param semid - id of the semaphore array
  * @param sem_num - semaphore number within the semid array

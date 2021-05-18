@@ -28,4 +28,10 @@ void destroy_shmem(int shmid);
  * @param shmid id of existing shared memory area to attach to
  * @return pointer where shared memory is attached
  */
-int* attach_smem(int* shmid);
+int* attach_smem(int shmid);
+
+/**
+ * Detach current process from shared memory area.
+ * @param ptr Pointer previously used to attach process and shmem area
+ */
+void detach_shmem(int* ptr);

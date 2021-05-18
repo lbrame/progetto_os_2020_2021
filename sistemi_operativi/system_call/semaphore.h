@@ -17,6 +17,8 @@ union semun {
 
 #endif
 
+int semGet(int sem_num, int flag);
+
 void semOp(int semid, unsigned short sem_num, short sem_op);
 
 void P(int semid, unsigned short sem_num);
