@@ -12,6 +12,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+// definition of the union semun
+union semun {
+    int val;
+    struct semid_ds * buf;
+    unsigned short * array;
+} arg;
+
 /**
  * Simply call semget() on selected semaphore.
  *
