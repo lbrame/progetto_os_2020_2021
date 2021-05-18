@@ -10,6 +10,8 @@
 #include "err_exit.h"
 #include "pipe.h"
 #include "semaphore.h"
+#include <time.h>
+#include "assert.h"
 
 
 /**
@@ -84,6 +86,12 @@
 //    return outputBuffer;
 //}
 
+char* concatenate(Message_struct* message, char* time_arrival, char* time_departure)
+{
+    //@TODO rivedere func concatenated
+    return NULL;
+}
+
 void send_message(Message_struct* message, int pipe)
 {
     pid_t pid = fork();
@@ -93,9 +101,26 @@ void send_message(Message_struct* message, int pipe)
         //@TODO usare P(mutex) per bloccare accesso a file
         printf("P mutex\n");
         P(semaphore_array, 7);
+
+
+        time_t current_time;
+        struct tm* time_info;
+        char time_arrival[8];
+        time(&current_time);
+        time_info = localtime(&current_time);
+        strftime(time_arrival, 18, "%H:%M:%S", time_info);
+        printf("%s\n", time_arrival);
         sleep(message->DelS1);
+        char time_departure[8];
+        time(&current_time);
+        time_info = localtime(&current_time);
+        strftime(time_departure, 18, "%H:%M:%S", time_info);
+        printf("%s\n", time_departure);
+
         if ((strcmp(message->Type, "FIFO") == 0) || (strcmp(message->IdSender, "S1") != 0)) {
             write_pipe(pipe, message);
+            //char* concatenated = concatenate(message, &time_arrival, &time_departure);
+            //printf("%s\n", concatenated);
             printf("S1 sent id: %d\n", message->Id);
         } else if (strcmp(message->Type, "Q") == 0) {
             // TODO send with queue
@@ -112,7 +137,6 @@ void send_message(Message_struct* message, int pipe)
 
 
 int main(int argc, char * argv[]) {
-    // @TODO aprire il semaforo per la gestione dei processi figli e la scrittura al file
     char *rPath = argv[0];
     int pipe1_write = atoi(argv[1]);
     int fd = open(rPath, O_RDONLY);
