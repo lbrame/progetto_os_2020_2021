@@ -164,7 +164,7 @@ int main(int argc, char *argv[]) {
     generate_pipe(pipe2);
 
 
-// create child processes
+    // create child processes
     generate_child(info_children, argv[1], pipe1, pipe2);
     generate_child(info_children, argv[1], pipe1, pipe2);
     generate_child(info_children, argv[1], pipe1, pipe2);
@@ -187,5 +187,10 @@ int main(int argc, char *argv[]) {
     write_file("OutputFiles/F8.csv", outputBuffer);
     free(outputBuffer);
     free(info_children);
+
+
+    // Create semaphore set for all processes
+    int semaphore_array = semGet(7, IPC_CREAT | S_IRUSR | S_IWUSR);
+
     return 0;
 }
