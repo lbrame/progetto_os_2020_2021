@@ -13,11 +13,13 @@ union semun {
     int val;
     struct semid_ds * buf;
     unsigned short * array;
-};
+} arg;
 
 #endif
 
-int semGet(int sem_num, int flag);
+int semGet(int sem_num);
+
+int createSem(int sem_num);
 
 void semOp(int semid, unsigned short sem_num, short sem_op);
 

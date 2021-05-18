@@ -33,7 +33,7 @@ int main(int argc, char * argv[]) {
     ssize_t status;
     do{//Read until it returns 0 (EOF)
         // ROBA FIFO
-//        memcpy(last_message, message, sizeof(Message_struct));
+        memcpy(last_message, message, sizeof(Message_struct));
         //using read_pipe as a reader also for fifo (they works the same way)
         status = read_pipe(fd_fifo, message);
         if(message->Id == last_message->Id)

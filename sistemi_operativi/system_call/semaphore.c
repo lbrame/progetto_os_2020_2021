@@ -4,19 +4,42 @@
 
 #include "err_exit.h"
 #include "semaphore.h"
+#include <sys/ipc.h>
+#include <sys/sem.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include "unistd.h"
+#include <stdio.h>
+#include <stdlib.h>
 
 /**
+ * Simply call semget() on selected semaphore.
  *
  * @param key
- * @param sem_num
- * @param flag
- * @return
+ * @param sem_num number of semaphore to call semget() to
+ * @return id of created semaphore
  */
-int semGet(int sem_num, int flag) {
+int semGet(int sem_num) {
     key_t key = 01110011;
-    union semun arg;
 
-    int semid = semget(key, sem_num, flag);
+    int semid = semget(key, sem_num, S_IRUSR | S_IWUSR);
+    if (semid == -1)
+        ErrExit("SemGet ");
+
+    return semid;
+}
+
+
+/**
+ * Create sem with IPC_EXCL so that it only creates a semaphore if none exists.
+ * Call this function in sender_manager and receiver_manager
+ * @param sem_num
+ * @return id of created semaphore
+ */
+int createSem(int sem_num) {
+    key_t key = 01110011;
+
+    int semid = semget(key, sem_num, IPC_CREAT | IPC_EXCL | S_IRUSR | S_IWUSR);
     if (semid == -1)
         ErrExit("SemGet ");
 
@@ -26,6 +49,7 @@ int semGet(int sem_num, int flag) {
         if (semctl(semid, i, SETVAL, arg) == -1)
             ErrExit("semctl SETVAL in semGet wrapper");
     }
+
     return semid;
 }
 
@@ -51,7 +75,7 @@ void P(int semid, unsigned short sem_num) {
     struct sembuf sop = {.sem_num = sem_num, .sem_op = -1, .sem_flg = 0};
 
     if (semop(semid, &sop, 1) != -1)
-        ErrExit("semop failed in semOp wrapper");
+        ErrExit("semop failed in P wrapper");
 }
 
 /**
@@ -63,5 +87,5 @@ void V(int semid, unsigned short sem_num) {
     struct sembuf sop = {.sem_num = sem_num, .sem_op = 1, .sem_flg = 0};
 
     if (semop(semid, &sop, 1) != -1)
-        ErrExit("semop failed in semOp wrapper");
+        ErrExit("semop failed in V wrapper");
 }

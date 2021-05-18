@@ -137,6 +137,9 @@ char *concatenate(child_struct *info_children, int counter, char *starter) {
 
 
 int main(int argc, char *argv[]) {
+    // Create semaphore set
+    int semaphore_array = createSem(7);
+
     // Dynamic allocation of the memory
     child_struct *info_children = (child_struct *) malloc(sizeof(child_struct) * 3);
     if (info_children == NULL) {
@@ -152,6 +155,7 @@ int main(int argc, char *argv[]) {
     struct stat sb2;
     if (stat("OutputFiles/my_fifo.txt", &sb2) == 0)
         remove("OutputFiles/my_fifo.txt");
+
     //creates fifo
     int fifo = generate_fifo("OutputFiles/my_fifo.txt");
     //close fifo
@@ -161,10 +165,9 @@ int main(int argc, char *argv[]) {
     int pipe1[2];
     int pipe2[2];
     generate_pipe(pipe1);
-    generate_pipe(pipe2);
+    generate_pipe(pipe);
 
-
-    // create child processes
+// create child processes
     generate_child(info_children, argv[1], pipe1, pipe2);
     generate_child(info_children, argv[1], pipe1, pipe2);
     generate_child(info_children, argv[1], pipe1, pipe2);
@@ -187,10 +190,6 @@ int main(int argc, char *argv[]) {
     write_file("OutputFiles/F8.csv", outputBuffer);
     free(outputBuffer);
     free(info_children);
-
-
-    // Create semaphore set for all processes
-    int semaphore_array = semGet(7, IPC_CREAT | S_IRUSR | S_IWUSR);
 
     return 0;
 }

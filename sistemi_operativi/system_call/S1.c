@@ -9,6 +9,7 @@
 #include <fcntl.h>
 #include "err_exit.h"
 #include "pipe.h"
+#include "semaphore.h"
 
 
 /**
@@ -86,7 +87,10 @@
 void send_message(Message_struct* message, int pipe)
 {
     pid_t pid = fork();
+    //come parametro verrà passato l'id del semaforo
     if(pid == 0) {
+        //@TODO usare P(mutex) per bloccare accesso a file
+        // P(semaphore_array);
         sleep(message->DelS1);
         if ((strcmp(message->Type, "FIFO") == 0) || (strcmp(message->IdSender, "S1") != 0)) {
             write_pipe(pipe, message);
@@ -96,13 +100,15 @@ void send_message(Message_struct* message, int pipe)
         } else if (strcmp(message->Type, "SH") == 0) {
             // TODO send with shared memory
         }
+        //@TODO V(mutex) per sbloccare l'accesso a un altro figlio
         close_pipe(pipe);
         exit(0);
     }
 }
 
 
-int main(int argc, char * argv[]) {
+int main(int argc, char * argv[], int semaphore_array) {
+    // @TODO aprire il semaforo per la gestione dei processi figli e la scrittura al file
     char *rPath = argv[0];
     int pipe1_write = atoi(argv[1]);
     int fd = open(rPath, O_RDONLY);
@@ -118,7 +124,6 @@ int main(int argc, char * argv[]) {
         Message_struct *message = parse_message(buffer);
         send_message(message, pipe1_write);
     }
-
     free(buffer);
     close(fd);
     close_pipe(pipe1_write);
