@@ -107,7 +107,7 @@ void send_message(Message_struct* message, int pipe)
 }
 
 
-int main(int argc, char * argv[], int semaphore_array) {
+int main(int argc, char * argv[]) {
     // @TODO aprire il semaforo per la gestione dei processi figli e la scrittura al file
     char *rPath = argv[0];
     int pipe1_write = atoi(argv[1]);

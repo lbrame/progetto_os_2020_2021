@@ -31,23 +31,22 @@ int semGet(int sem_num) {
 
 
 /**
- * Create sem with IPC_EXCL so that it only creates a semaphore if none exists.
- * Call this function in sender_manager and receiver_manager
- * @param sem_num
- * @return id of created semaphore
- */
+* Create sem with IPC_EXCL so that it only creates a semaphore if none exists.
+* Call this function in sender_manager and receiver_manager
+* @param sem_num
+* @return id of created semaphore
+*/
 int createSem(int sem_num) {
     key_t key = 01110011;
 
     int semid = semget(key, sem_num, IPC_CREAT | IPC_EXCL | S_IRUSR | S_IWUSR);
-    if (semid == -1)
-        ErrExit("SemGet ");
-
-    // Initialize semaphore set to 1
-    for(int i=0; i<sem_num; i++) {
-        arg.val = 1;
-        if (semctl(semid, i, SETVAL, arg) == -1)
-            ErrExit("semctl SETVAL in semGet wrapper");
+    if (semid != -1) {
+        // Initialize semaphore set to 1
+        for(int i=0; i<sem_num; i++) {
+            arg.val = 1;
+            if (semctl(semid, i, SETVAL, arg) == -1)
+                ErrExit("semctl SETVAL in semGet wrapper");
+        }
     }
 
     return semid;
@@ -88,4 +87,9 @@ void V(int semid, unsigned short sem_num) {
 
     if (semop(semid, &sop, 1) != -1)
         ErrExit("semop failed in V wrapper");
+}
+
+void delete_sem(int semid){
+    if (semctl(semid, 0/*ignored*/, IPC_RMID, 0/*ignored*/) == -1)
+        ErrExit("semctl IPC_RMID");
 }

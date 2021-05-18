@@ -10,6 +10,7 @@
 #include "defines.h"
 #include "err_exit.h"
 #include "pipe.h"
+#include "semaphore.h"
 
 
 /**
@@ -133,6 +134,20 @@ char *concatenate(child_struct *info_children, int counter, char *starter) {
 
 
 int main(int argc, char * argv[]) {
+    /* 0 -> shmem
+     * 1 -> S1
+     * 2 -> S2
+     * 3 -> S3
+     * 4 -> R3
+     * 5 -> R2
+     * 6 -> R1
+     * */
+    int semaphore_array = createSem(7);
+    if (semaphore_array == -1){
+        semaphore_array = semGet(7);
+    }
+
+
     // Dynamic allocation of the memory
     child_struct *info_children = (child_struct *) malloc(sizeof(child_struct) * 3);
     if (info_children == NULL) {

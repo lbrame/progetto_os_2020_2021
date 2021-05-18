@@ -138,6 +138,14 @@ char *concatenate(child_struct *info_children, int counter, char *starter) {
 
 int main(int argc, char *argv[]) {
     // Create semaphore set
+    /* 0 -> shmem
+     * 1 -> S1
+     * 2 -> S2
+     * 3 -> S3
+     * 4 -> R3
+     * 5 -> R2
+     * 6 -> R1
+     * */
     int semaphore_array = createSem(7);
 
     // Dynamic allocation of the memory
@@ -165,7 +173,7 @@ int main(int argc, char *argv[]) {
     int pipe1[2];
     int pipe2[2];
     generate_pipe(pipe1);
-    generate_pipe(pipe);
+    generate_pipe(pipe2);
 
 // create child processes
     generate_child(info_children, argv[1], pipe1, pipe2);
