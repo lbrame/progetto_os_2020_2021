@@ -91,7 +91,8 @@ void send_message(Message_struct* message, int pipe)
     if(pid == 0) {
         int semaphore_array = semGet(7);
         //@TODO usare P(mutex) per bloccare accesso a file
-        // P(semaphore_array);
+        printf("P mutex\n");
+        P(semaphore_array, 7);
         sleep(message->DelS1);
         if ((strcmp(message->Type, "FIFO") == 0) || (strcmp(message->IdSender, "S1") != 0)) {
             write_pipe(pipe, message);
@@ -102,6 +103,8 @@ void send_message(Message_struct* message, int pipe)
             // TODO send with shared memory
         }
         //@TODO V(mutex) per sbloccare l'accesso a un altro figlio
+        printf("V mutex\n");
+        V(semaphore_array, 7);
         close_pipe(pipe);
         exit(0);
     }
