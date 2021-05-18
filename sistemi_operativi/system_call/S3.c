@@ -10,12 +10,13 @@
 #include <fcntl.h>
 #include "fifo.h"
 #include "unistd.h"
+#include "semaphore.h"
 
 void send_message(Message_struct* message)
 {
     pid_t pid = fork();
     if(pid == 0) {
-
+        int semaphore_array = semGet(7);
         int fd_fifo = open_fifo("OutputFiles/my_fifo.txt", O_RDWR);
         sleep(message->DelS3);
         if(strcmp(message->Type, "FIFO") == 0){

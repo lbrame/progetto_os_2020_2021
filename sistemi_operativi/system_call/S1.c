@@ -89,6 +89,7 @@ void send_message(Message_struct* message, int pipe)
     pid_t pid = fork();
     //come parametro verrà passato l'id del semaforo
     if(pid == 0) {
+        int semaphore_array = semGet(7);
         //@TODO usare P(mutex) per bloccare accesso a file
         // P(semaphore_array);
         sleep(message->DelS1);

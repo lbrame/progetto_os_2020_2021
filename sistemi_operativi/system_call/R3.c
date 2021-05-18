@@ -6,11 +6,13 @@
 #include "err_exit.h"
 #include "pipe.h"
 #include "fifo.h"
+#include "semaphore.h"
 
 void send_message(Message_struct* message, int pipe)
 {
     pid_t pid = fork();
     if(pid == 0) {
+        int semaphore_array = semGet(7);
         sleep(message->DelS3);
         if(strcmp(message->IdReceiver, "R3") != 0) {
             write_pipe(pipe, message);
@@ -39,7 +41,7 @@ int main(int argc, char * argv[]) {
         if(message->Id == last_message->Id)
             continue;
         send_message(message, pipe3_write);
-        printf("status: %d\n", status);
+        printf("R3 sent id: %d\n", message->Id);
     }while(status > 0);
     printf("R3 E' USCITO DAL WHILE\n");
 

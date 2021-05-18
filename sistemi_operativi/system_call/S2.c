@@ -8,12 +8,13 @@
 #include "unistd.h"
 #include "err_exit.h"
 #include "pipe.h"
+#include "semaphore.h"
 
 void send_message(Message_struct* message, int pipe)
 {
     pid_t pid = fork();
     if(pid == 0) {
-        
+        int semaphore_array = semGet(7);
         sleep(message->DelS2);
         if((strcmp(message->Type, "FIFO") == 0) || (strcmp(message->IdSender, "S2") != 0)) {
             write_pipe(pipe, message);

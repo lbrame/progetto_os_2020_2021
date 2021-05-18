@@ -180,6 +180,8 @@ int main(int argc, char * argv[]) {
     while (wait(&info_children[1].pid) != -1);
     while (wait(&info_children[2].pid) != -1);
 
+    delete_sem(semaphore_array);
+
     int number_of_children = 3;
     char *starter = "ReceiverID;PID";
     char *outputBuffer = concatenate(info_children, number_of_children, starter);
