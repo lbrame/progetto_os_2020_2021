@@ -26,3 +26,4 @@ char* join (char* str1, char* str2, char join_character);
 char* itoa(int val);
 int read_line(int fd, char* buffer);
 Message_struct *parse_message(char *inputBuffer);
+char* getTime(char* time_a);

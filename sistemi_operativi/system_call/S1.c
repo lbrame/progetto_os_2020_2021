@@ -10,8 +10,6 @@
 #include "err_exit.h"
 #include "pipe.h"
 #include "semaphore.h"
-#include <time.h>
-#include "assert.h"
 
 
 /**
@@ -88,8 +86,13 @@
 
 char* concatenate(Message_struct* message, char* time_arrival, char* time_departure)
 {
-    //@TODO rivedere func concatenated
-    return NULL;
+    char* outputBuffer;
+    char* old_outputBuffer;
+    old_outputBuffer = outputBuffer;
+    outputBuffer = join(outputBuffer, message->Id, NULL);
+    free(old_outputBuffer);
+    printf("OutputBuffer: %s\n");
+    return " ";
 }
 
 void send_message(Message_struct* message, int pipe)
@@ -102,25 +105,13 @@ void send_message(Message_struct* message, int pipe)
         printf("P mutex\n");
         P(semaphore_array, 7);
 
+        char* time_arrival = malloc(sizeof (char*) * 8);
+        char* time_departure = malloc(sizeof (char*) * 8);
+        time_arrival = getTime(time_arrival);
 
-        time_t current_time;
-        struct tm* time_info;
-        char time_arrival[8];
-        time(&current_time);
-        time_info = localtime(&current_time);
-        strftime(time_arrival, 18, "%H:%M:%S", time_info);
-        printf("%s\n", time_arrival);
         sleep(message->DelS1);
-        char time_departure[8];
-        time(&current_time);
-        time_info = localtime(&current_time);
-        strftime(time_departure, 18, "%H:%M:%S", time_info);
-        printf("%s\n", time_departure);
-
         if ((strcmp(message->Type, "FIFO") == 0) || (strcmp(message->IdSender, "S1") != 0)) {
             write_pipe(pipe, message);
-            //char* concatenated = concatenate(message, &time_arrival, &time_departure);
-            //printf("%s\n", concatenated);
             printf("S1 sent id: %d\n", message->Id);
         } else if (strcmp(message->Type, "Q") == 0) {
             // TODO send with queue
@@ -129,6 +120,8 @@ void send_message(Message_struct* message, int pipe)
         }
         //@TODO V(mutex) per sbloccare l'accesso a un altro figlio
         printf("V mutex\n");
+        time_departure = getTime(time_departure);
+        printf("\ntime_arrival: %s; time_departure: %s\n", time_arrival, time_departure);
         V(semaphore_array, 7);
         close_pipe(pipe);
         exit(0);

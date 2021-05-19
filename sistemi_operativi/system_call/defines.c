@@ -14,6 +14,7 @@
 #include "pipe.h"
 #include <sys/types.h>
 #include <sys/ipc.h>
+#include <time.h>
 
 /**
  * count the number of messages in the file
@@ -240,4 +241,17 @@ Message_struct *parse_message(char *inputBuffer) {
         field_counter++;
     }
     return message;
+}
+
+char* getTime(char* time_a)
+{
+    time_t current_time;
+    struct tm* time_info;
+    char timeString[8];
+    time(&current_time);
+    time_info = localtime(&current_time);
+    strftime(timeString, 18, "%H:%M:%S", time_info);
+    for(int i = 0; i < 8; i++)
+        time_a[i] = timeString[i];
+    return time_a;
 }
