@@ -14,101 +14,73 @@
 
 /**
  *
- * @param info_children
+ * @param message
  * @param counter
  * @param starter
  * @return
  */
-//char *concatenate(Message_struct *info_children, int counter, char *starter) {
-//    char *outputBuffer;
-//    char *old_outputBuffer;
-//    for (int row = 0; row < counter; row++) {
-//        for (int field_n = 0; field_n <= 8; field_n++) {
-//            switch (field_n) {
-//                case 0:
-//                    if (row == 0) {
-//                        outputBuffer = join(info_children[row].Id, "", NULL);
-//                    } else {
-//                        old_outputBuffer = outputBuffer;
-//                        outputBuffer = join(outputBuffer, info_children[row].Id, NULL);
-//                        free(old_outputBuffer);
-//                    }
-//                    break;
-//                case 1:
-//                    old_outputBuffer = outputBuffer;
-//                    outputBuffer = join(outputBuffer, info_children[row].Message, ';');
-//                    free(old_outputBuffer);
-//                    break;
-//                case 2:
-//                    old_outputBuffer = outputBuffer;
-//                    outputBuffer = join(outputBuffer, info_children[row].IdSender, ';');
-//                    free(old_outputBuffer);
-//                    break;
-//                case 3:
-//                    old_outputBuffer = outputBuffer;
-//                    outputBuffer = join(outputBuffer, info_children[row].IdReceiver, ';');
-//                    free(old_outputBuffer);
-//                    break;
-//                case 4:
-//                    old_outputBuffer = outputBuffer;
-//                    outputBuffer = join(outputBuffer, info_children[row].DelS1, ';');
-//                    free(old_outputBuffer);
-//                    break;
-//                case 5:
-//                    old_outputBuffer = outputBuffer;
-//                    outputBuffer = join(outputBuffer, info_children[row].DelS2, ';');
-//                    free(old_outputBuffer);
-//                    break;
-//                case 6:
-//                    old_outputBuffer = outputBuffer;
-//                    outputBuffer = join(outputBuffer, info_children[row].DelS3, ';');
-//                    free(old_outputBuffer);
-//                    break;
-//                case 7:
-//                    old_outputBuffer = outputBuffer;
-//                    outputBuffer = join(outputBuffer, info_children[row].Type, ';');
-//                    free(old_outputBuffer);
-//                    break;
-//                case 8:
-//                    old_outputBuffer = outputBuffer;
-//                    outputBuffer = join(outputBuffer, "\n", NULL);
-//                    free(old_outputBuffer);
-//                    break;
-//                default:
-//                    ErrExit("Concatenate");
-//            }
-//        }
-//    }
-//    outputBuffer = join(starter, outputBuffer, '\n');
-//    outputBuffer = join(outputBuffer, "\0", NULL);
-//    return outputBuffer;
-//}
+/*char *concatenate(Message_struct *message, char* time_arrival, char* time_departure) {
+    char *outputBuffer;
+    char *old_outputBuffer;
+    for (int field_n = 0; field_n <= 6; field_n++) {
+        switch (field_n) {
+            case 0:
+                outputBuffer = join(message->Id, "", NULL);
+                break;
+            case 1:
+                old_outputBuffer = outputBuffer;
+                outputBuffer = join(outputBuffer, message->Message, ';');
+                free(old_outputBuffer);
+                break;
+            case 2:
+                old_outputBuffer = outputBuffer;
+                outputBuffer = join(outputBuffer, message->IdSender, ';');
+                free(old_outputBuffer);
+                break;
+            case 3:
+                old_outputBuffer = outputBuffer;
+                outputBuffer = join(outputBuffer, message->IdReceiver, ';');
+                free(old_outputBuffer);
+                break;
+            case 4:
+                old_outputBuffer = outputBuffer;
+                outputBuffer = join(outputBuffer, time_arrival, ';');
+                free(old_outputBuffer);
+                break;
+            case 5:
+                old_outputBuffer = outputBuffer;
+                outputBuffer = join(outputBuffer, time_departure, ' ');
+                break;
+            case 6:
+                old_outputBuffer = outputBuffer;
+                outputBuffer = join(outputBuffer, "\n", NULL);
+                free(old_outputBuffer);
+                break;
+            default:
+                ErrExit("Concatenate");
+        }
+    }
+    return outputBuffer;
+}*/
 
-char* concatenate(Message_struct* message, char* time_arrival, char* time_departure)
-{
-    char* outputBuffer;
-    char* old_outputBuffer;
-    old_outputBuffer = outputBuffer;
-    outputBuffer = join(outputBuffer, message->Id, NULL);
-    free(old_outputBuffer);
-    printf("OutputBuffer: %s\n");
-    return " ";
-}
 
 void send_message(Message_struct* message, int pipe)
 {
     pid_t pid = fork();
     //come parametro verrà passato l'id del semaforo
+    char* time_arrival = (char* )malloc(sizeof (char) * 8);
+    char* time_departure = (char* )malloc(sizeof (char) * 8);
     if(pid == 0) {
-        int semaphore_array = semGet(7);
         //@TODO usare P(mutex) per bloccare accesso a file
+        //getting time from computer
+        int semaphore_array = semGet(2);
+        printSem(7, semaphore_array);
         printf("P mutex\n");
-        P(semaphore_array, 7);
 
-        char* time_arrival = malloc(sizeof (char*) * 8);
-        char* time_departure = malloc(sizeof (char*) * 8);
+        P(semaphore_array, 2);
+
         time_arrival = getTime(time_arrival);
-
+        printf("Time arrival: %s\n", time_arrival);
         sleep(message->DelS1);
         if ((strcmp(message->Type, "FIFO") == 0) || (strcmp(message->IdSender, "S1") != 0)) {
             write_pipe(pipe, message);
@@ -118,11 +90,20 @@ void send_message(Message_struct* message, int pipe)
         } else if (strcmp(message->Type, "SH") == 0) {
             // TODO send with shared memory
         }
+        //printf("output: %s\n", output);
         //@TODO V(mutex) per sbloccare l'accesso a un altro figlio
-        printf("V mutex\n");
         time_departure = getTime(time_departure);
-        printf("\ntime_arrival: %s; time_departure: %s\n", time_arrival, time_departure);
-        V(semaphore_array, 7);
+        printf("Time departure: %s\n", time_departure);
+        printf("V mutex\n");
+
+        /*char* outputBuffer;
+        outputBuffer = concatenate(message, time_arrival, time_departure);
+        printf("outputBuffer\n%s", outputBuffer);*/
+
+        V(semaphore_array, 2);
+
+        free(time_arrival);
+        free(time_departure);
         close_pipe(pipe);
         exit(0);
     }
@@ -130,6 +111,8 @@ void send_message(Message_struct* message, int pipe)
 
 
 int main(int argc, char * argv[]) {
+    /*char* starter = "ID;Message;IDSender;IDReceiver;TimeArrival;TimeDeparture\n";
+    write_file("OutputFiles/F1.csv", starter);*/
     char *rPath = argv[0];
     int pipe1_write = atoi(argv[1]);
     int fd = open(rPath, O_RDONLY);
@@ -145,6 +128,7 @@ int main(int argc, char * argv[]) {
         Message_struct *message = parse_message(buffer);
         send_message(message, pipe1_write);
     }
+    //write_file("OutputFiles/F1.csv", "\0");
     free(buffer);
     close(fd);
     close_pipe(pipe1_write);

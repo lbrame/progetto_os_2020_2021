@@ -192,5 +192,6 @@ int main(int argc, char * argv[]) {
     free(outputBuffer);
     free(info_children);
     unlink("OutputFiles/my_fifo.txt");
+    //delete_sem(7);
     return 0;
 }

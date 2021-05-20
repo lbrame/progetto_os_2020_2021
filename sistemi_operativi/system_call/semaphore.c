@@ -66,9 +66,10 @@ int createSem(int sem_num) {
  * @param sem_op - operation to run on the selected semaphore
  */
 void semOp(int semid, unsigned short sem_num, short sem_op) {
+    printf("Oppure arrivo in semop?\n");
     struct sembuf sop = {.sem_num = sem_num, .sem_op = sem_op, .sem_flg = 0};
 
-    if (semop(semid, &sop, 1) != -1)
+    if (semop(semid, &sop, 1) == -1)
         ErrExit("semop failed in semOp wrapper");
 }
 
@@ -78,9 +79,10 @@ void semOp(int semid, unsigned short sem_num, short sem_op) {
  * @param sem_num
  */
 void P(int semid, unsigned short sem_num) {
+    printf("Arrivo qui?\n");
     struct sembuf sop = {.sem_num = sem_num, .sem_op = -1, .sem_flg = 0};
-
-    if (semop(semid, &sop, 1) != -1)
+    printf("Sono dopo sop\n\n");
+    if (semop(semid, &sop, 1) == -1)
         ErrExit("semop failed in P wrapper");
 }
 
@@ -92,11 +94,21 @@ void P(int semid, unsigned short sem_num) {
 void V(int semid, unsigned short sem_num) {
     struct sembuf sop = {.sem_num = sem_num, .sem_op = 1, .sem_flg = 0};
 
-    if (semop(semid, &sop, 1) != -1)
+    if (semop(semid, &sop, 1) == -1)
         ErrExit("semop failed in V wrapper");
 }
 
 void delete_sem(int semid){
     if (semctl(semid, 0/*ignored*/, IPC_RMID, 0/*ignored*/) == -1)
         ErrExit("semctl IPC_RMID");
+}
+
+void printSem(int sem_num, int semid) {
+    // Print semaphore values
+    for(int i=0; i<sem_num; i++) {
+        int value = semctl(semid, i, GETVAL, 0/*ignored*/);
+        if (value == -1)
+            ErrExit("semctl GETVAL");
+        printf("Semaphore at index %d has value %d\n", i, value);
+    }
 }
