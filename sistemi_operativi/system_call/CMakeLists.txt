@@ -17,6 +17,7 @@ add_library(
         ${CMAKE_CURRENT_SOURCE_DIR}/semaphore.h
         ${CMAKE_CURRENT_SOURCE_DIR}/shared_memory.c
         ${CMAKE_CURRENT_SOURCE_DIR}/shared_memory.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/message_queue.c
 )
 
 target_include_directories(
