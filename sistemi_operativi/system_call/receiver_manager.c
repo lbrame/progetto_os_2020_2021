@@ -38,7 +38,7 @@ void add_child(child_struct *info_children, char sender_id[], pid_t pid, int i) 
 }
 
 /**
- * wrapper for fork funcion, generates a process and the gives it some code to exute
+ * wrapper for fork() function, generates a process and the gives it some code to execute
  * @param info_children a list where to put the data of the child
  */
 void generate_child(child_struct *info_children, const int fd3[2], const int fd4[2]) {
@@ -148,7 +148,7 @@ int main(int argc, char * argv[]) {
     }
 
 
-    // Dynamic allocation of the memory
+    // Dynamic memory allocation
     child_struct *info_children = (child_struct *) malloc(sizeof(child_struct) * 3);
     if (info_children == NULL) {
         ErrExit("malloc");
@@ -185,7 +185,7 @@ int main(int argc, char * argv[]) {
     int number_of_children = 3;
     char *starter = "ReceiverID;PID";
     char *outputBuffer = concatenate(info_children, number_of_children, starter);
-    // outputBuffer written on F9.csv
+    // outputBuffer written to F9.csv
     write_file("OutputFiles/F9.csv", outputBuffer);
 
     // Free up old buffers
