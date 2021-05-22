@@ -22,9 +22,9 @@
  * @param i the index where to put the struct
  */
 void add_child(child_struct *info_children, char sender_id[], pid_t pid, int i) {
-    child_struct *child = malloc(sizeof(child_struct));
+    child_struct *child = (child_struct *) malloc(sizeof(child_struct));
     if (info_children == NULL) {
-        ErrExit("malloc addChild");
+        ErrExit("malloc AddChild sender_manager");
     }
     child->sender_id = sender_id;
     child->pid = (int) pid;
@@ -130,17 +130,18 @@ int main(int argc, char *argv[]) {
     close_pipe(pipe2[0]);
     close_pipe(pipe2[1]);
 
+    int number_of_children = 3;
+    char *starter = "SenderID;PID";
+    char *outputBuffer = manager_concatenate(info_children, number_of_children, starter);
+    // outputBuffer written on F8.csv
+    write_file("OutputFiles/F8.csv", outputBuffer);
+
     // wait for children
     while (wait(&info_children[0].pid) != -1);
     while (wait(&info_children[1].pid) != -1);
     while (wait(&info_children[2].pid) != -1);
 
 
-    int number_of_children = 3;
-    char *starter = "SenderID;PID";
-    char *outputBuffer = manager_concatenate(info_children, number_of_children, starter);
-    // outputBuffer written on F8.csv
-    write_file("OutputFiles/F8.csv", outputBuffer);
     free(outputBuffer);
     free(info_children);
 
