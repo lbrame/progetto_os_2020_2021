@@ -84,3 +84,6 @@ out/
 CMakeFiles/
 hackler
 Testing/
+
+Makefile
+CMakeCache.txt
