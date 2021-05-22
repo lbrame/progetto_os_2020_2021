@@ -125,9 +125,6 @@ void write_file(char out_file_path[], char *outputBuffer) {
 
     // write buffer to destination file
     ssize_t numWrite = my_write(fd, outputBuffer, strlen(outputBuffer));
-
-    // insert terminator character
-    outputBuffer[numWrite] = '\0';
     close(fd);
 }
 
@@ -152,6 +149,7 @@ char *itoa(int val) {
         buffer[i] = (char) (new + 48);
         val = val / 10;
     }
+    buffer[buffer_dim] = '\0';
     return buffer;
 }
 

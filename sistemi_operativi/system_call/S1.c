@@ -26,7 +26,7 @@ char *concatenate(Message_struct *message, char* time_arrival, char* time_depart
     for (int field_n = 0; field_n <= 6; field_n++) {
         switch (field_n) {
             case 0:
-                outputBuffer = join(itoa(message->Id), "", NULL);
+                outputBuffer = itoa(message->Id);
                 break;
             case 1:
                 old_outputBuffer = outputBuffer;
@@ -66,17 +66,13 @@ char *concatenate(Message_struct *message, char* time_arrival, char* time_depart
 }
 
 
-void send_message(Message_struct* message, int pipe)
-{
+void send_message(Message_struct* message, int pipe) {
     pid_t pid = fork();
     //come parametro verrà passato l'id del semaforo
     char* time_arrival = (char* )malloc(sizeof (char) * 8);
     char* time_departure = (char* )malloc(sizeof (char) * 8);
     if(pid == 0) {
-        int semaphore_array = semGet(2);
-        printf("dopo semget\n");
-        printSem(7, semaphore_array);
-
+        int semaphore_array = semGet(7);
 
         time_arrival = getTime(time_arrival);
         printf("Time arrival: %s\n", time_arrival);
@@ -94,13 +90,16 @@ void send_message(Message_struct* message, int pipe)
 
         int fd = my_open("OutputFiles/F1.csv", O_WRONLY);
         char* outputBuffer = concatenate(message, time_arrival, time_departure);
-        printf("outputBuffer\n%s", outputBuffer);
+
+        printf("prima dalla sezione critica\n");
+        printSem(1, semaphore_array);
         P(semaphore_array, 1);
         my_write(fd, outputBuffer, strlen(outputBuffer));
         printf("outputBuffer\n%s", outputBuffer);
         V(semaphore_array, 1);
         printf("uscito dalla sezione critica\n");
         printSem(1, semaphore_array);
+
         close(fd);
         free(time_arrival);
         free(time_departure);

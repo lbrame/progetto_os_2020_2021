@@ -78,9 +78,7 @@ void semOp(int semid, unsigned short sem_num, short sem_op) {
  * @param sem_num
  */
 void P(int semid, unsigned short sem_num) {
-    printf("Arrivo qui?\n");
     struct sembuf sop = {.sem_num = sem_num, .sem_op = -1, .sem_flg = 0};
-    printf("Sono dopo sop\n\n");
     if (semop(semid, &sop, 1) == -1)
         ErrExit("semop failed in P wrapper");
 }
@@ -104,7 +102,7 @@ void delete_sem(int semid){
 
 void printSem(int sem_num, int semid) {
     // Print semaphore values
-    for(int i=0; i<sem_num; i++) {
+    for(int i=0; i<sem_num+1; i++) {
         int value = semctl(semid, i, GETVAL, 0/*ignored*/);
         if (value == -1)
             ErrExit("semctl GETVAL");
