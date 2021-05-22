@@ -12,6 +12,7 @@
 #include "unistd.h"
 #include "semaphore.h"
 #include "files.h"
+#include "shared_memory.h"
 
 void send_message(Message_struct* message)
 {
@@ -19,7 +20,9 @@ void send_message(Message_struct* message)
     char* time_arrival = (char* )malloc(sizeof (char) * 8);
     char* time_departure = (char* )malloc(sizeof (char) * 8);
     if(pid == 0) {
-        int semaphore_array = semGet(7);
+        int semaphore_array = semGet(8);
+        int shmemId = get_shmem(sizeof(Message_struct));
+        Message_struct* shmemPointer = (Message_struct*) attach_shmem(shmemId);
 
         time_arrival = getTime(time_arrival);
         int fd_fifo = open_fifo("OutputFiles/my_fifo.txt", O_RDWR);
@@ -31,7 +34,9 @@ void send_message(Message_struct* message)
             // TODO send with queue
         }
         else if(strcmp(message->Type, "SH") == 0) {
-            // TODO send with shared memory
+            P(semaphore_array, 0);
+            memcpy(shmemPointer, message, sizeof(Message_struct));
+            V(semaphore_array, 7);
         }
 
         int fd = my_open("OutputFiles/F3.csv", O_WRONLY | O_APPEND);
@@ -72,6 +77,9 @@ int main(int argc, char * argv[]) {
     } while (status > 0);
 
     close_pipe(pipe2_read);
+    memcpy(content->Message, "END", 3);
+    // max int
+    content->Id = 2147483647;
 
     free(content);
     free(last_content);

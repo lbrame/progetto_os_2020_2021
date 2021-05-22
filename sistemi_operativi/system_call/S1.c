@@ -5,12 +5,12 @@
 #include "defines.h"
 #include <stdlib.h>
 #include <string.h>
-#include <stdio.h>
 #include <fcntl.h>
 #include "err_exit.h"
 #include "pipe.h"
 #include "semaphore.h"
 #include "files.h"
+#include "shared_memory.h"
 
 
 void send_message(Message_struct* message, int pipe) {
@@ -19,7 +19,9 @@ void send_message(Message_struct* message, int pipe) {
     char* time_arrival = (char* )malloc(sizeof (char) * 8);
     char* time_departure = (char* )malloc(sizeof (char) * 8);
     if(pid == 0) {
-        int semaphore_array = semGet(7);
+        int semaphore_array = semGet(8);
+        int shmemId = get_shmem(sizeof(Message_struct));
+        Message_struct* shmemPointer = (Message_struct*) attach_shmem(shmemId);
 
         time_arrival = getTime(time_arrival);
         sleep(message->DelS1);
@@ -28,7 +30,9 @@ void send_message(Message_struct* message, int pipe) {
         } else if (strcmp(message->Type, "Q") == 0) {
             // TODO send with queue
         } else if (strcmp(message->Type, "SH") == 0) {
-            // TODO send with shared memory
+            P(semaphore_array, 0);
+            memcpy(shmemPointer, message, sizeof(Message_struct));
+            V(semaphore_array, 7);
         }
         time_departure = getTime(time_departure);
 
@@ -40,6 +44,7 @@ void send_message(Message_struct* message, int pipe) {
         V(semaphore_array, 1);
 
         close(fd);
+        detach_shmem((int *) shmemPointer);
         free(time_arrival);
         free(time_departure);
         close_pipe(pipe);
