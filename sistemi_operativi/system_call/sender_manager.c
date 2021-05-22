@@ -32,7 +32,7 @@ void add_child(child_struct *info_children, char sender_id[], pid_t pid, int i) 
 }
 
 /**
- * wrapper for fork funcion, generates a process and the gives it some code to exute
+ * wrapper for fork() function, generates a process and the gives it some code to execute
  * @param info_children a list where to put the data of the child
  */
 void generate_child(child_struct *info_children, char *inputFile, const int fd1[2], const int fd2[2]) {
@@ -81,7 +81,6 @@ void generate_child(child_struct *info_children, char *inputFile, const int fd1[
 
 }
 
-
 int main(int argc, char *argv[]) {
     // Create semaphore set
     /* 0 -> shmem
@@ -94,7 +93,7 @@ int main(int argc, char *argv[]) {
      * */
     int semaphore_array = createSem(7);
 
-    // Dynamic allocation of the memory
+    // Dynamic memory allocation
     child_struct *info_children = (child_struct *) malloc(sizeof(child_struct) * 3);
     if (info_children == NULL) {
         ErrExit("malloc senderManager");
@@ -105,14 +104,14 @@ int main(int argc, char *argv[]) {
     if (stat("OutputFiles", &sb) != 0)
         mkdir("OutputFiles", S_IRWXU);
 
-    //if my_fifo.txt already exists, remove it
+    // if my_fifo.txt already exists, remove it
     struct stat sb2;
     if (stat("OutputFiles/my_fifo.txt", &sb2) == 0)
         remove("OutputFiles/my_fifo.txt");
 
-    //creates fifo
+    // create fifo
     int fifo = generate_fifo("OutputFiles/my_fifo.txt");
-    //close fifo
+    // close fifo
     close_fifo(fifo);
 
     // create pipes
@@ -121,7 +120,7 @@ int main(int argc, char *argv[]) {
     generate_pipe(pipe1);
     generate_pipe(pipe2);
 
-// create child processes
+    // create child processes
     generate_child(info_children, argv[1], pipe1, pipe2);
     generate_child(info_children, argv[1], pipe1, pipe2);
     generate_child(info_children, argv[1], pipe1, pipe2);
