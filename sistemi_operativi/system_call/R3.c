@@ -7,17 +7,36 @@
 #include "pipe.h"
 #include "fifo.h"
 #include "semaphore.h"
+#include "files.h"
 
 void send_message(Message_struct* message, int pipe)
 {
     pid_t pid = fork();
+
+    char* time_arrival = (char* )malloc(sizeof (char) * 8);
+    char* time_departure = (char* )malloc(sizeof (char) * 8);
+
     if(pid == 0) {
         int semaphore_array = semGet(7);
+
+        time_arrival = getTime(time_arrival);
         sleep(message->DelS3);
         if(strcmp(message->IdReceiver, "R3") != 0) {
             write_pipe(pipe, message);
-            printf("R3 sent id: %d\n", message->Id);
         }
+        time_departure = getTime(time_departure);
+
+        int fd = my_open("OutputFiles/F4.csv", O_WRONLY | O_APPEND);
+        char* outputBuffer = concatenate(message, time_arrival, time_departure);
+
+        P(semaphore_array, 4);
+        my_write(fd, outputBuffer, strlen(outputBuffer));
+        V(semaphore_array, 4);
+
+        close(fd);
+        free(time_arrival);
+        free(time_departure);
+
         close_pipe(pipe);
         exit(0);
     }
@@ -25,6 +44,9 @@ void send_message(Message_struct* message, int pipe)
 
 int main(int argc, char * argv[]) {
     int pipe3_write = atoi(argv[0]);
+
+    char* starter = "ID;Message;IDSender;IDReceiver;TimeArrival;TimeDeparture\n";
+    write_file("OutputFiles/F4.csv", starter);
 
     //Reading files from my_fifo.txt and saving them with the mechanism of S1
     int fd_fifo = open_fifo("OutputFiles/my_fifo.txt", O_RDONLY);
@@ -41,7 +63,6 @@ int main(int argc, char * argv[]) {
         if(message->Id == last_message->Id)
             continue;
         send_message(message, pipe3_write);
-        printf("R3 sent id: %d\n", message->Id);
     }while(status > 0);
 
     close_pipe(pipe3_write);
