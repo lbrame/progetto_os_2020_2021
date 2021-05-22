@@ -237,3 +237,99 @@ char* getTime(char* time_a) {
     }
     return time_a;
 }
+
+/**
+ *
+ * @param message
+ * @param counter
+ * @param starter
+ * @return
+ */
+char *concatenate(Message_struct *message, char* time_arrival, char* time_departure) {
+    char *outputBuffer;
+    char *old_outputBuffer;
+    for (int field_n = 0; field_n <= 6; field_n++) {
+        switch (field_n) {
+            case 0:
+                outputBuffer = itoa(message->Id);
+                break;
+            case 1:
+                old_outputBuffer = outputBuffer;
+                outputBuffer = join(outputBuffer, message->Message, ';');
+                free(old_outputBuffer);
+                break;
+            case 2:
+                old_outputBuffer = outputBuffer;
+                outputBuffer = join(outputBuffer, message->IdSender, ';');
+                free(old_outputBuffer);
+                break;
+            case 3:
+                old_outputBuffer = outputBuffer;
+                outputBuffer = join(outputBuffer, message->IdReceiver, ';');
+                free(old_outputBuffer);
+                break;
+            case 4:
+                old_outputBuffer = outputBuffer;
+                outputBuffer = join(outputBuffer, time_arrival, ';');
+                free(old_outputBuffer);
+                break;
+            case 5:
+                old_outputBuffer = outputBuffer;
+                outputBuffer = join(outputBuffer, time_departure, ';');
+                free(old_outputBuffer);
+                break;
+            case 6:
+                old_outputBuffer = outputBuffer;
+                outputBuffer = join(outputBuffer, "\n", NULL);
+                free(old_outputBuffer);
+                break;
+            default:
+                ErrExit("Concatenate");
+        }
+    }
+    return outputBuffer;
+}
+
+/**
+ * join all messages preparing the text to be outputted to file
+ * @param info_children a list containing the data of the children
+ * @param counter the number of children of the process
+ * @param starter the header of the file
+ * @return the string to be outputted to file
+ */
+char *manager_concatenate(child_struct *info_children, int counter, char *starter) {
+    char *outputBuffer;
+    char *old_outputBuffer;
+    for (int row = 0; row < counter; row++) {
+        for (int field_n = 0; field_n <= 2; field_n++) {
+            switch (field_n) {
+                case 0:
+                    if (row == 0) {
+                        outputBuffer = join(info_children[row].sender_id, "", NULL);
+                    } else {
+                        old_outputBuffer = outputBuffer;
+                        outputBuffer = join(outputBuffer, info_children[row].sender_id, NULL);
+                        free(old_outputBuffer);
+                    }
+                    break;
+                case 1:
+                    old_outputBuffer = outputBuffer;
+                    char *pid_s = itoa(info_children[row].pid);
+                    outputBuffer = join(outputBuffer, pid_s, ';');
+                    free(old_outputBuffer);
+                    break;
+                case 2:
+                    old_outputBuffer = outputBuffer;
+                    outputBuffer = join(outputBuffer, "\n", NULL);
+                    free(old_outputBuffer);
+                    break;
+                default:
+                    ErrExit("Manager Concatenate");
+            }
+        }
+    }
+    //Added the static string to outputBuffer
+    outputBuffer = join(starter, outputBuffer, '\n');
+    outputBuffer = join(outputBuffer, "\0", NULL);
+    return outputBuffer;
+}

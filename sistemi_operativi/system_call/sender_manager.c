@@ -15,16 +15,6 @@
 #include <sys/stat.h>
 
 /**
- * Struct that defines a child process
- * @param child_id ID that specifies in what order children are executed
- * @param pid
- */
-typedef struct {
-    char *sender_id;
-    int pid;
-} child_struct;
-
-/**
  * append a struct to the given array
  * @param info_children a list where to put the data of the chi
  * @param sender_id the id of the child
@@ -91,50 +81,6 @@ void generate_child(child_struct *info_children, char *inputFile, const int fd1[
 
 }
 
-/**
- * join all messages preparing the text to be outputted to file
- * @param info_children a list containing the data of the children
- * @param counter the number of children of the process
- * @param starter the header of the file
- * @return the string to be outputted to file
- */
-char *concatenate(child_struct *info_children, int counter, char *starter) {
-    char *outputBuffer;
-    char *old_outputBuffer;
-    for (int row = 0; row < counter; row++) {
-        for (int field_n = 0; field_n <= 2; field_n++) {
-            switch (field_n) {
-                case 0:
-                    if (row == 0) {
-                        outputBuffer = join(info_children[row].sender_id, "", NULL);
-                    } else {
-                        old_outputBuffer = outputBuffer;
-                        outputBuffer = join(outputBuffer, info_children[row].sender_id, NULL);
-                        free(old_outputBuffer);
-                    }
-                    break;
-                case 1:
-                    old_outputBuffer = outputBuffer;
-                    char *pid_s = itoa(info_children[row].pid);
-                    outputBuffer = join(outputBuffer, pid_s, ';');
-                    free(old_outputBuffer);
-                    break;
-                case 2:
-                    old_outputBuffer = outputBuffer;
-                    outputBuffer = join(outputBuffer, "\n", NULL);
-                    free(old_outputBuffer);
-                    break;
-                default:
-                    ErrExit("Concatenate");
-            }
-        }
-    }
-    //Added the static string to outputBuffer
-    outputBuffer = join(starter, outputBuffer, '\n');
-    outputBuffer = join(outputBuffer, "\0", NULL);
-    return outputBuffer;
-}
-
 
 int main(int argc, char *argv[]) {
     // Create semaphore set
@@ -193,7 +139,7 @@ int main(int argc, char *argv[]) {
 
     int number_of_children = 3;
     char *starter = "SenderID;PID";
-    char *outputBuffer = concatenate(info_children, number_of_children, starter);
+    char *outputBuffer = manager_concatenate(info_children, number_of_children, starter);
     // outputBuffer written on F8.csv
     write_file("OutputFiles/F8.csv", outputBuffer);
     free(outputBuffer);

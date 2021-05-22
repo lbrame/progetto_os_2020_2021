@@ -43,9 +43,7 @@ int main(int argc, char * argv[]) {
         send_message(message, pipe3_write);
         printf("R3 sent id: %d\n", message->Id);
     }while(status > 0);
-    printf("R3 E' USCITO DAL WHILE\n");
 
     close_pipe(pipe3_write);
-    printf("IO R3 HO FINITO IL IO LAVORO\n");
     return 0;
 }
