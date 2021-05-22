@@ -4,6 +4,7 @@
 
 #include "defines.h"
 #include <stdio.h>
+#include "files.h"
 #include <sys/stat.h>
 #include "err_exit.h"
 #include <unistd.h>
@@ -55,11 +56,9 @@ int get_file_size(char *rPath) {
  * @param fileSize the size of file
  */
 void read_file(char *inputBuffer, char *rPath, int fileSize) {
-    int fd = open(rPath, O_RDONLY);
-    if (fd == -1)
-        ErrExit("open read_file");
+    int fd = my_open(rPath, O_RDONLY);
     ssize_t numRead;
-    numRead = read(fd, inputBuffer, fileSize);
+    numRead = my_read(fd, inputBuffer, fileSize);
     if (numRead == -1) {
         ErrExit("read");
     }
@@ -111,17 +110,7 @@ char *get_out_file_rpath(char *in_file_path) {
  * writes data to the output file
  * @param out_file_path the relative path to the output file
  * @param outputBuffer the buffer where is stored the data to write
- *///        sleep(message->DelS1);
-//        if((strcmp(message->Type, "FIFO") == 0) || (strcmp(message->IdSender, "S1") != 0)) {
-//            write_pipe(pipe1_write, message);
-//        }
-//        else if(strcmp(message->Type, "Q") == 0) {
-//            // TODO send with queue
-//        }
-//        else if(strcmp(message->Type, "SH") == 0) {
-//            // TODO send with shared memory
-//        }
-//        free(message);
+ */
 void write_file(char out_file_path[], char *outputBuffer) {
     // check if file exists
     if (access(out_file_path, F_OK) == 0) {
@@ -132,19 +121,16 @@ void write_file(char out_file_path[], char *outputBuffer) {
         }
     }
     // create file and open it in write mode
-    int fd = open(out_file_path, O_WRONLY | O_CREAT | O_EXCL | O_TRUNC, S_IRWXU);
-    if (fd == -1)
-        ErrExit("open write_file");
+    int fd = my_open_wmode(out_file_path, O_WRONLY | O_CREAT | O_EXCL | O_TRUNC, S_IRWXU);
 
     // write buffer to destination file
-    ssize_t numWrite = write(fd, outputBuffer, strlen(outputBuffer));
-    if (numWrite == -1)
-        ErrExit("write");
+    ssize_t numWrite = my_write(fd, outputBuffer, strlen(outputBuffer));
 
     // insert terminator character
     outputBuffer[numWrite] = '\0';
     close(fd);
 }
+
 
 /**
  * converts integer value to string
@@ -183,13 +169,11 @@ int read_line(int fd, char* buffer) {
         ErrExit("lseek");
 
     while (buffer[index - 1] != '\n' && buffer[index - 1] != EOF) {
-        size_t numRead = read(fd, &buffer[index], 1);
+        size_t numRead = my_read(fd, &buffer[index], 1);
         if (numRead == 0){
             buffer[index] = '\0';
             return 0;
         }
-        else if(numRead == -1)
-            ErrExit("read");
         index++;
     }
     start += index;
@@ -243,15 +227,15 @@ Message_struct *parse_message(char *inputBuffer) {
     return message;
 }
 
-char* getTime(char* time_a)
-{
+char* getTime(char* time_a) {
     time_t current_time;
     struct tm* time_info;
     char timeString[8];
     time(&current_time);
     time_info = localtime(&current_time);
     strftime(timeString, 18, "%H:%M:%S", time_info);
-    for(int i = 0; i < 8; i++)
+    for(int i = 0; i < 8; i++) {
         time_a[i] = timeString[i];
+    }
     return time_a;
 }

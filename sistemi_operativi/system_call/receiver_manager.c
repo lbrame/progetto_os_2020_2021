@@ -143,7 +143,7 @@ int main(int argc, char * argv[]) {
      * 6 -> R1
      * */
     int semaphore_array = createSem(7);
-    if (semaphore_array == -1){
+    if (semaphore_array == -1) {
         semaphore_array = semGet(7);
     }
 

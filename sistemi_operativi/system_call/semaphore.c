@@ -49,13 +49,12 @@ int createSem(int sem_num) {
     int semid = semget(key, sem_num, IPC_CREAT | IPC_EXCL | S_IRUSR | S_IWUSR);
     if (semid != -1) {
         // Initialize semaphore set to 1
-        for(int i=0; i<sem_num; i++) {
+        for (int i = 0; i < sem_num; i++) {
             arg.val = 1;
             if (semctl(semid, i, SETVAL, arg) == -1)
                 ErrExit("semctl SETVAL in semGet wrapper");
         }
     }
-
     return semid;
 }
 

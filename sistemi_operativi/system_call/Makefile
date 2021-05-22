@@ -462,6 +462,30 @@ fifo.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/os_core.dir/build.make CMakeFiles/os_core.dir/fifo.c.s
 .PHONY : fifo.c.s
 
+files.o: files.c.o
+.PHONY : files.o
+
+# target to build an object file
+files.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/os_core.dir/build.make CMakeFiles/os_core.dir/files.c.o
+.PHONY : files.c.o
+
+files.i: files.c.i
+.PHONY : files.i
+
+# target to preprocess a source file
+files.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/os_core.dir/build.make CMakeFiles/os_core.dir/files.c.i
+.PHONY : files.c.i
+
+files.s: files.c.s
+.PHONY : files.s
+
+# target to generate assembly for a file
+files.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/os_core.dir/build.make CMakeFiles/os_core.dir/files.c.s
+.PHONY : files.c.s
+
 hackler.o: hackler.c.o
 .PHONY : hackler.o
 
@@ -651,6 +675,9 @@ help:
 	@echo "... fifo.o"
 	@echo "... fifo.i"
 	@echo "... fifo.s"
+	@echo "... files.o"
+	@echo "... files.i"
+	@echo "... files.s"
 	@echo "... hackler.o"
 	@echo "... hackler.i"
 	@echo "... hackler.s"

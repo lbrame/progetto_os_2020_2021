@@ -10,6 +10,7 @@
 #include "err_exit.h"
 #include "pipe.h"
 #include "semaphore.h"
+#include "files.h"
 
 
 /**
@@ -19,13 +20,13 @@
  * @param starter
  * @return
  */
-/*char *concatenate(Message_struct *message, char* time_arrival, char* time_departure) {
+char *concatenate(Message_struct *message, char* time_arrival, char* time_departure) {
     char *outputBuffer;
     char *old_outputBuffer;
     for (int field_n = 0; field_n <= 6; field_n++) {
         switch (field_n) {
             case 0:
-                outputBuffer = join(message->Id, "", NULL);
+                outputBuffer = join(itoa(message->Id), "", NULL);
                 break;
             case 1:
                 old_outputBuffer = outputBuffer;
@@ -50,6 +51,7 @@
             case 5:
                 old_outputBuffer = outputBuffer;
                 outputBuffer = join(outputBuffer, time_departure, ' ');
+                free(old_outputBuffer);
                 break;
             case 6:
                 old_outputBuffer = outputBuffer;
@@ -61,7 +63,7 @@
         }
     }
     return outputBuffer;
-}*/
+}
 
 
 void send_message(Message_struct* message, int pipe)
@@ -71,13 +73,10 @@ void send_message(Message_struct* message, int pipe)
     char* time_arrival = (char* )malloc(sizeof (char) * 8);
     char* time_departure = (char* )malloc(sizeof (char) * 8);
     if(pid == 0) {
-        //@TODO usare P(mutex) per bloccare accesso a file
-        //getting time from computer
         int semaphore_array = semGet(2);
+        printf("dopo semget\n");
         printSem(7, semaphore_array);
-        printf("P mutex\n");
 
-        P(semaphore_array, 2);
 
         time_arrival = getTime(time_arrival);
         printf("Time arrival: %s\n", time_arrival);
@@ -90,18 +89,17 @@ void send_message(Message_struct* message, int pipe)
         } else if (strcmp(message->Type, "SH") == 0) {
             // TODO send with shared memory
         }
-        //printf("output: %s\n", output);
-        //@TODO V(mutex) per sbloccare l'accesso a un altro figlio
         time_departure = getTime(time_departure);
         printf("Time departure: %s\n", time_departure);
-        printf("V mutex\n");
 
-        /*char* outputBuffer;
-        outputBuffer = concatenate(message, time_arrival, time_departure);
-        printf("outputBuffer\n%s", outputBuffer);*/
-
-        V(semaphore_array, 2);
-
+        int fd = my_open("OutputFiles/F1.csv", O_WRONLY);
+        char* outputBuffer = concatenate(message, time_arrival, time_departure);
+        printf("outputBuffer\n%s", outputBuffer);
+        P(semaphore_array, 1);
+        my_write(fd, outputBuffer, strlen(outputBuffer))
+        V(semaphore_array, 1);
+        printf("uscito dalla sezione critica\n");
+        close(fd);
         free(time_arrival);
         free(time_departure);
         close_pipe(pipe);
@@ -111,13 +109,11 @@ void send_message(Message_struct* message, int pipe)
 
 
 int main(int argc, char * argv[]) {
-    /*char* starter = "ID;Message;IDSender;IDReceiver;TimeArrival;TimeDeparture\n";
-    write_file("OutputFiles/F1.csv", starter);*/
+    char* starter = "ID;Message;IDSender;IDReceiver;TimeArrival;TimeDeparture\n";
+    write_file("OutputFiles/F1.csv", starter);
     char *rPath = argv[0];
     int pipe1_write = atoi(argv[1]);
-    int fd = open(rPath, O_RDONLY);
-    if (fd == -1)
-        ErrExit("open");
+    int fd = my_open(rPath, O_RDONLY);
     // suppose each of the 8 fields has a maximum size of 50bytes
     char *buffer = (char *) malloc(8 * 50);
     if (buffer == NULL)
@@ -128,7 +124,6 @@ int main(int argc, char * argv[]) {
         Message_struct *message = parse_message(buffer);
         send_message(message, pipe1_write);
     }
-    //write_file("OutputFiles/F1.csv", "\0");
     free(buffer);
     close(fd);
     close_pipe(pipe1_write);

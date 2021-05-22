@@ -8,6 +8,7 @@
 #include "err_exit.h"
 #include "pipe.h"
 #include "defines.h"
+#include "files.h"
 
 void generate_pipe(int fd[]) {
     // checking if PIPE succeed
@@ -22,15 +23,12 @@ void close_pipe(int fd) {
 
 ssize_t read_pipe(int fd, Message_struct *content) {
     long size = sizeof(Message_struct);
-    ssize_t status = read(fd, content, size);
-    if (status == -1)
-        ErrExit("read");
+    ssize_t status = my_read(fd, content, size);
+
     return status;
 }
 
 void write_pipe(int fd, Message_struct *buffer) {
     size_t size = sizeof(Message_struct);
-    ssize_t numWrite = write(fd, buffer, size);
-    if (numWrite == -1)
-        ErrExit("write");
+    ssize_t numWrite = my_write(fd, buffer, size);
 }
