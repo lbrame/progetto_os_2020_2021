@@ -96,9 +96,11 @@ void send_message(Message_struct* message, int pipe)
         char* outputBuffer = concatenate(message, time_arrival, time_departure);
         printf("outputBuffer\n%s", outputBuffer);
         P(semaphore_array, 1);
-        my_write(fd, outputBuffer, strlen(outputBuffer))
+        my_write(fd, outputBuffer, strlen(outputBuffer));
+        printf("outputBuffer\n%s", outputBuffer);
         V(semaphore_array, 1);
         printf("uscito dalla sezione critica\n");
+        printSem(1, semaphore_array);
         close(fd);
         free(time_arrival);
         free(time_departure);
