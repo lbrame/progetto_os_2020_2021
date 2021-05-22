@@ -17,6 +17,16 @@ typedef struct {
     char Type[5];
 } Message_struct;
 
+/**
+ * Struct that defines a child process
+ * @param child_id ID that specifies in what order children are executed
+ * @param pid
+ */
+typedef struct {
+    char *sender_id;
+    pid_t pid;
+} child_struct;
+
 int count_messages(const char *input, int fileSize);
 int get_file_size(char *rPath);
 void read_file(char *inputBuffer, char *rPath, int fileSize);
@@ -26,3 +36,6 @@ char* join (char* str1, char* str2, char join_character);
 char* itoa(int val);
 int read_line(int fd, char* buffer);
 Message_struct *parse_message(char *inputBuffer);
+char* getTime(char* time_a);
+char *concatenate(Message_struct *message, char* time_arrival, char* time_departure);
+char *manager_concatenate(child_struct *info_children, int counter, char *starter);

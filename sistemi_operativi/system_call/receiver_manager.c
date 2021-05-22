@@ -12,17 +12,6 @@
 #include "pipe.h"
 #include "semaphore.h"
 
-
-/**
- * Struct that defines a child process
- * @param child_id ID that specifies in what order children are executed
- * @param pid
- */
-typedef struct {
-    char *sender_id;
-    pid_t pid;
-} child_struct;
-
 /**
  * append a struct to the given array
  * @param info_children a list where to put the data of the chi
@@ -88,49 +77,6 @@ void generate_child(child_struct *info_children, const int fd3[2], const int fd4
     }
 }
 
-/**
- * join all messages preparing the text to be outputted to file
- * @param info_children a list containing the data of the children
- * @param counter the number of children of the process
- * @param starter the header of the file
- * @return the string to be outputted to file
- */
-char *concatenate(child_struct *info_children, int counter, char *starter) {
-    char *outputBuffer;
-    char *old_outputBuffer;
-    for (int row = 0; row < counter; row++) {
-        for (int field_n = 0; field_n <= 2; field_n++) {
-            switch (field_n) {
-                case 0:
-                    if (row == 0) {
-                        outputBuffer = join(info_children[row].sender_id, "", NULL);
-                    } else {
-                        old_outputBuffer = outputBuffer;
-                        outputBuffer = join(outputBuffer, info_children[row].sender_id, NULL);
-                        free(old_outputBuffer);
-                    }
-                    break;
-                case 1:
-                    old_outputBuffer = outputBuffer;
-                    char *pid_s = itoa(info_children[row].pid);
-                    outputBuffer = join(outputBuffer, pid_s, ';');
-                    free(old_outputBuffer);
-                    break;
-                case 2:
-                    old_outputBuffer = outputBuffer;
-                    outputBuffer = join(outputBuffer, "\n", NULL);
-                    free(old_outputBuffer);
-                    break;
-                default:
-                    ErrExit("Concatenate");
-            }
-        }
-    }
-    //Added the static string to outputBuffer
-    outputBuffer = join(starter, outputBuffer, '\n');
-    outputBuffer = join(outputBuffer, "\0", NULL);
-    return outputBuffer;
-}
 
 
 int main(int argc, char * argv[]) {
@@ -143,7 +89,7 @@ int main(int argc, char * argv[]) {
      * 6 -> R1
      * */
     int semaphore_array = createSem(7);
-    if (semaphore_array == -1){
+    if (semaphore_array == -1) {
         semaphore_array = semGet(7);
     }
 
@@ -184,13 +130,14 @@ int main(int argc, char * argv[]) {
 
     int number_of_children = 3;
     char *starter = "ReceiverID;PID";
-    char *outputBuffer = concatenate(info_children, number_of_children, starter);
-    // outputBuffer written to F9.csv
+    char *outputBuffer = manager_concatenate(info_children, number_of_children, starter);
+    // outputBuffer written on F9.csv
     write_file("OutputFiles/F9.csv", outputBuffer);
 
     // Free up old buffers
     free(outputBuffer);
     free(info_children);
     unlink("OutputFiles/my_fifo.txt");
+    //delete_sem(7);
     return 0;
 }

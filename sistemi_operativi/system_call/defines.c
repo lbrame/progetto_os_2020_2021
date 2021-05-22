@@ -4,6 +4,7 @@
 
 #include "defines.h"
 #include <stdio.h>
+#include "files.h"
 #include <sys/stat.h>
 #include "err_exit.h"
 #include <unistd.h>
@@ -14,6 +15,7 @@
 #include "pipe.h"
 #include <sys/types.h>
 #include <sys/ipc.h>
+#include <time.h>
 
 /**
  * count the number of messages in the file
@@ -54,11 +56,9 @@ int get_file_size(char *rPath) {
  * @param fileSize the size of file
  */
 void read_file(char *inputBuffer, char *rPath, int fileSize) {
-    int fd = open(rPath, O_RDONLY);
-    if (fd == -1)
-        ErrExit("open read_file");
+    int fd = my_open(rPath, O_RDONLY);
     ssize_t numRead;
-    numRead = read(fd, inputBuffer, fileSize);
+    numRead = my_read(fd, inputBuffer, fileSize);
     if (numRead == -1) {
         ErrExit("read");
     }
@@ -110,17 +110,7 @@ char *get_out_file_rpath(char *in_file_path) {
  * writes data to the output file
  * @param out_file_path the relative path to the output file
  * @param outputBuffer the buffer where is stored the data to write
- *///        sleep(message->DelS1);
-//        if((strcmp(message->Type, "FIFO") == 0) || (strcmp(message->IdSender, "S1") != 0)) {
-//            write_pipe(pipe1_write, message);
-//        }
-//        else if(strcmp(message->Type, "Q") == 0) {
-//            // TODO send with queue
-//        }
-//        else if(strcmp(message->Type, "SH") == 0) {
-//            // TODO send with shared memory
-//        }
-//        free(message);
+ */
 void write_file(char out_file_path[], char *outputBuffer) {
     // check if file exists
     if (access(out_file_path, F_OK) == 0) {
@@ -131,19 +121,13 @@ void write_file(char out_file_path[], char *outputBuffer) {
         }
     }
     // create file and open it in write mode
-    int fd = open(out_file_path, O_WRONLY | O_CREAT | O_EXCL | O_TRUNC, S_IRWXU);
-    if (fd == -1)
-        ErrExit("open write_file");
+    int fd = my_open_wmode(out_file_path, O_WRONLY | O_CREAT | O_EXCL | O_TRUNC, S_IRWXU);
 
     // write buffer to destination file
-    ssize_t numWrite = write(fd, outputBuffer, strlen(outputBuffer));
-    if (numWrite == -1)
-        ErrExit("write");
-
-    // insert terminator character
-    outputBuffer[numWrite] = '\0';
+    ssize_t numWrite = my_write(fd, outputBuffer, strlen(outputBuffer));
     close(fd);
 }
+
 
 /**
  * converts integer value to string
@@ -165,6 +149,7 @@ char *itoa(int val) {
         buffer[i] = (char) (new + 48);
         val = val / 10;
     }
+    buffer[buffer_dim] = '\0';
     return buffer;
 }
 
@@ -182,13 +167,11 @@ int read_line(int fd, char* buffer) {
         ErrExit("lseek");
 
     while (buffer[index - 1] != '\n' && buffer[index - 1] != EOF) {
-        size_t numRead = read(fd, &buffer[index], 1);
+        size_t numRead = my_read(fd, &buffer[index], 1);
         if (numRead == 0){
             buffer[index] = '\0';
             return 0;
         }
-        else if(numRead == -1)
-            ErrExit("read");
         index++;
     }
     start += index;
@@ -240,4 +223,113 @@ Message_struct *parse_message(char *inputBuffer) {
         field_counter++;
     }
     return message;
+}
+
+char* getTime(char* time_a) {
+    time_t current_time;
+    struct tm* time_info;
+    char timeString[8];
+    time(&current_time);
+    time_info = localtime(&current_time);
+    strftime(timeString, 18, "%H:%M:%S", time_info);
+    for(int i = 0; i < 8; i++) {
+        time_a[i] = timeString[i];
+    }
+    return time_a;
+}
+
+/**
+ *
+ * @param message
+ * @param counter
+ * @param starter
+ * @return
+ */
+char *concatenate(Message_struct *message, char* time_arrival, char* time_departure) {
+    char *outputBuffer;
+    char *old_outputBuffer;
+    for (int field_n = 0; field_n <= 6; field_n++) {
+        switch (field_n) {
+            case 0:
+                outputBuffer = itoa(message->Id);
+                break;
+            case 1:
+                old_outputBuffer = outputBuffer;
+                outputBuffer = join(outputBuffer, message->Message, ';');
+                free(old_outputBuffer);
+                break;
+            case 2:
+                old_outputBuffer = outputBuffer;
+                outputBuffer = join(outputBuffer, message->IdSender, ';');
+                free(old_outputBuffer);
+                break;
+            case 3:
+                old_outputBuffer = outputBuffer;
+                outputBuffer = join(outputBuffer, message->IdReceiver, ';');
+                free(old_outputBuffer);
+                break;
+            case 4:
+                old_outputBuffer = outputBuffer;
+                outputBuffer = join(outputBuffer, time_arrival, ';');
+                free(old_outputBuffer);
+                break;
+            case 5:
+                old_outputBuffer = outputBuffer;
+                outputBuffer = join(outputBuffer, time_departure, ';');
+                free(old_outputBuffer);
+                break;
+            case 6:
+                old_outputBuffer = outputBuffer;
+                outputBuffer = join(outputBuffer, "\n", NULL);
+                free(old_outputBuffer);
+                break;
+            default:
+                ErrExit("Concatenate");
+        }
+    }
+    return outputBuffer;
+}
+
+/**
+ * join all messages preparing the text to be outputted to file
+ * @param info_children a list containing the data of the children
+ * @param counter the number of children of the process
+ * @param starter the header of the file
+ * @return the string to be outputted to file
+ */
+char *manager_concatenate(child_struct *info_children, int counter, char *starter) {
+    char *outputBuffer;
+    char *old_outputBuffer;
+    for (int row = 0; row < counter; row++) {
+        for (int field_n = 0; field_n <= 2; field_n++) {
+            switch (field_n) {
+                case 0:
+                    if (row == 0) {
+                        outputBuffer = join(info_children[row].sender_id, "", NULL);
+                    } else {
+                        old_outputBuffer = outputBuffer;
+                        outputBuffer = join(outputBuffer, info_children[row].sender_id, NULL);
+                        free(old_outputBuffer);
+                    }
+                    break;
+                case 1:
+                    old_outputBuffer = outputBuffer;
+                    char *pid_s = itoa(info_children[row].pid);
+                    outputBuffer = join(outputBuffer, pid_s, ';');
+                    free(old_outputBuffer);
+                    break;
+                case 2:
+                    old_outputBuffer = outputBuffer;
+                    outputBuffer = join(outputBuffer, "\n", NULL);
+                    free(old_outputBuffer);
+                    break;
+                default:
+                    ErrExit("Manager Concatenate");
+            }
+        }
+    }
+    //Added the static string to outputBuffer
+    outputBuffer = join(starter, outputBuffer, '\n');
+    outputBuffer = join(outputBuffer, "\0", NULL);
+    return outputBuffer;
 }

@@ -18,3 +18,5 @@ void P(int semid, unsigned short sem_num);
 void V(int semid, unsigned short sem_num);
 
 void delete_sem(int semid);
+
+void printSem(int sem_num, int semid);
