@@ -8,6 +8,7 @@
 #include "fifo.h"
 #include "semaphore.h"
 #include "files.h"
+#include "message_queue.h"
 
 void send_message(Message_struct* message, int pipe)
 {
@@ -50,8 +51,13 @@ int main(int argc, char * argv[]) {
 
     //Reading files from my_fifo.txt and saving them with the mechanism of S1
     int fd_fifo = open_fifo("OutputFiles/my_fifo.txt", O_RDONLY);
+
+    //Queue file's descriptor
+    int fd_queue = msgGet();
+
     Message_struct *message = (Message_struct *) malloc(sizeof(Message_struct));
     Message_struct *last_message = (Message_struct *) malloc(sizeof(Message_struct));
+
     if (message == NULL || last_message == NULL)
         ErrExit("malloc R3");
     ssize_t status;
@@ -64,6 +70,9 @@ int main(int argc, char * argv[]) {
             continue;
         send_message(message, pipe3_write);
     }while(status > 0);
+
+
+    memcpy(last_message, message, sizeof(Message_struct));
 
     close_pipe(pipe3_write);
     return 0;

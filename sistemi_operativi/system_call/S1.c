@@ -11,6 +11,7 @@
 #include "pipe.h"
 #include "semaphore.h"
 #include "files.h"
+#include "message_queue.h"
 
 
 void send_message(Message_struct* message, int pipe) {
@@ -23,17 +24,20 @@ void send_message(Message_struct* message, int pipe) {
 
         time_arrival = getTime(time_arrival);
         sleep(message->DelS1);
+
         if ((strcmp(message->Type, "FIFO") == 0) || (strcmp(message->IdSender, "S1") != 0)) {
             write_pipe(pipe, message);
         } else if (strcmp(message->Type, "Q") == 0) {
-            // TODO send with queue
+            int fd_queue = msgGet();
+            msgSnd(fd_queue, message);
+            printf("S1 sent message to queue\n");
         } else if (strcmp(message->Type, "SH") == 0) {
             // TODO send with shared memory
         }
-        time_departure = getTime(time_departure);
 
-        int fd = my_open("OutputFiles/F1.csv", O_WRONLY | O_APPEND);
+        time_departure = getTime(time_departure);
         char* outputBuffer = concatenate(message, time_arrival, time_departure);
+        int fd = my_open("OutputFiles/F1.csv", O_WRONLY | O_APPEND);
 
         P(semaphore_array, 1);
         my_write(fd, outputBuffer, strlen(outputBuffer));
@@ -67,5 +71,8 @@ int main(int argc, char * argv[]) {
     free(buffer);
     close(fd);
     close_pipe(pipe1_write);
+    //@TODO remove debug texts
+    printf("S1 ha finito\n");
+
     return 0;
 }

@@ -11,6 +11,7 @@
 #include "err_exit.h"
 #include "pipe.h"
 #include "semaphore.h"
+#include "message_queue.h"
 
 /**
  * append a struct to the given array
@@ -141,6 +142,9 @@ int main(int argc, char * argv[]) {
     free(outputBuffer);
     free(info_children);
     unlink("OutputFiles/my_fifo.txt");
+    //@TODO remove debug print
+    printf("Wanna delete msgqueue\n");
+    delete_msgqueue(msgGet());
     //delete_sem(7);
     return 0;
 }

@@ -510,6 +510,30 @@ hackler.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/hackler.dir/build.make CMakeFiles/hackler.dir/hackler.c.s
 .PHONY : hackler.c.s
 
+message_queue.o: message_queue.c.o
+.PHONY : message_queue.o
+
+# target to build an object file
+message_queue.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/os_core.dir/build.make CMakeFiles/os_core.dir/message_queue.c.o
+.PHONY : message_queue.c.o
+
+message_queue.i: message_queue.c.i
+.PHONY : message_queue.i
+
+# target to preprocess a source file
+message_queue.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/os_core.dir/build.make CMakeFiles/os_core.dir/message_queue.c.i
+.PHONY : message_queue.c.i
+
+message_queue.s: message_queue.c.s
+.PHONY : message_queue.s
+
+# target to generate assembly for a file
+message_queue.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/os_core.dir/build.make CMakeFiles/os_core.dir/message_queue.c.s
+.PHONY : message_queue.c.s
+
 pipe.o: pipe.c.o
 .PHONY : pipe.o
 
@@ -681,6 +705,9 @@ help:
 	@echo "... hackler.o"
 	@echo "... hackler.i"
 	@echo "... hackler.s"
+	@echo "... message_queue.o"
+	@echo "... message_queue.i"
+	@echo "... message_queue.s"
 	@echo "... pipe.o"
 	@echo "... pipe.i"
 	@echo "... pipe.s"
