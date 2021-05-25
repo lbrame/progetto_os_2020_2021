@@ -9,6 +9,7 @@
 #include "semaphore.h"
 #include "files.h"
 #include "message_queue.h"
+#include <sys/msg.h>
 
 void send_message(Message_struct* message, int pipe)
 {
@@ -60,6 +61,7 @@ int main(int argc, char * argv[]) {
 
     if (message == NULL || last_message == NULL)
         ErrExit("malloc R3");
+
     ssize_t status;
     do{//Read until it returns 0 (EOF)
         // ROBA FIFO
@@ -71,6 +73,13 @@ int main(int argc, char * argv[]) {
         send_message(message, pipe3_write);
     }while(status > 0);
 
+    struct msqid_ds buf;
+    if (msgctl(fd_queue, IPC_STAT, &buf) < 0)
+        ErrExit("msgctl");
+
+    while(buf.msg_qnum > 0){
+        msgRcv(fd_queue);
+    }
 
     memcpy(last_message, message, sizeof(Message_struct));
 

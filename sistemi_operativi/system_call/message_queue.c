@@ -57,8 +57,6 @@ void msgSnd(int msqid, Message_struct* message) {
     // Send message to queue
     if (msgsnd(msqid, &m, mSize, 0) == -1)
         ErrExit("msgsnd failed");
-    free(mSize);
-    free(structSize);
 }
 
 void msgRcv(int msqid) {
@@ -102,3 +100,4 @@ void msgqueue_set_upper_limit(int msqid, int upperlimit) {
     if (msgctl(msqid, IPC_SET, &ds) == -1)
         ErrExit("msgctl failed: update msqid_ds structure");
 }
+

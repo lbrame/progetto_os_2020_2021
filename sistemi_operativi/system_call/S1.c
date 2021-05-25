@@ -12,6 +12,7 @@
 #include "semaphore.h"
 #include "files.h"
 #include "message_queue.h"
+#include <sys/msg.h>
 
 
 void send_message(Message_struct* message, int pipe) {
@@ -30,6 +31,9 @@ void send_message(Message_struct* message, int pipe) {
         } else if (strcmp(message->Type, "Q") == 0) {
             int fd_queue = msgGet();
             msgSnd(fd_queue, message);
+            struct msqid_ds buf;
+            if(msgctl(fd_queue, IPC_STAT, &buf) < 0)
+                ErrExit("msgctl");
             printf("S1 sent message to queue\n");
         } else if (strcmp(message->Type, "SH") == 0) {
             // TODO send with shared memory
