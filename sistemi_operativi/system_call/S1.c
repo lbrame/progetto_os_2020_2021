@@ -32,7 +32,7 @@ void send_message(Message_struct* message, int pipe) {
         if ((strcmp(message->Type, "FIFO") == 0) || (strcmp(message->IdSender, "S1") != 0)) {
             write_pipe(pipe, message);
         } else if (strcmp(message->Type, "Q") == 0) {
-            // TODO send with message queue
+            //sent with message queue
             int fd_queue = msgGet();
             msgSnd(fd_queue, outputBuffer);
             struct msqid_ds buf;

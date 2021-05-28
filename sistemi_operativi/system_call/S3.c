@@ -12,6 +12,8 @@
 #include "unistd.h"
 #include "semaphore.h"
 #include "files.h"
+#include "message_queue.h"
+#include <sys/msg.h>
 
 void send_message(Message_struct* message)
 {
@@ -24,18 +26,26 @@ void send_message(Message_struct* message)
         time_arrival = getTime(time_arrival);
         int fd_fifo = open_fifo("OutputFiles/my_fifo.txt", O_RDWR);
         sleep(message->DelS3);
+
+        time_departure = getTime(time_departure);
+        int fd = my_open("OutputFiles/F3.csv", O_WRONLY | O_APPEND);
+        char* outputBuffer = concatenate(message, time_arrival, time_departure);
+
         if(strcmp(message->Type, "FIFO") == 0){
             write_pipe(fd_fifo, message);
         }
         else if(strcmp(message->Type, "Q") == 0) {
-            // TODO send with queue
+            //sent with message queue
+            int fd_queue = msgGet();
+            msgSnd(fd_queue, outputBuffer);
+            struct msqid_ds buf;
+            if(msgctl(fd_queue, IPC_STAT, &buf) < 0)
+                ErrExit("msgctl");
+            printf("S3 sent message to queue\n");
         }
         else if(strcmp(message->Type, "SH") == 0) {
             // TODO send with shared memory
         }
-
-        int fd = my_open("OutputFiles/F3.csv", O_WRONLY | O_APPEND);
-        char* outputBuffer = concatenate(message, time_arrival, time_departure);
 
         P(semaphore_array, 3);
         my_write(fd, outputBuffer, strlen(outputBuffer));
