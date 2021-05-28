@@ -23,7 +23,7 @@ void send_message(Message_struct* message, int pipe, char* queue_buffer)
         int fd = my_open("OutputFiles/F4.csv", O_WRONLY | O_APPEND);
         char *outputBuffer;
         if (message != NULL){
-                time_arrival = getTime(time_arrival);
+            time_arrival = getTime(time_arrival);
             sleep(message->DelS3);
             if (strcmp(message->IdReceiver, "R3") != 0) {
                 write_pipe(pipe, message);
@@ -90,10 +90,7 @@ int main(int argc, char * argv[]) {
            break;
     }
 
-   printf("AFTER WHILE\n");
-
     memcpy(last_message, message, sizeof(Message_struct));
-
     close_pipe(pipe3_write);
     return 0;
 }
