@@ -77,12 +77,16 @@ int main(int argc, char * argv[]) {
     if (msgctl(fd_queue, IPC_STAT, &buf) < 0)
         ErrExit("msgctl");
 
-   /* while(1) {
-        if (buf.msg_qnum == 0)
-            break;
-        msgRcv(fd_queue);
-    }*/
-    msgRcv(fd_queue);
+   while(1) {
+       printf("number of messages in queue before msgrcv %ld\n", buf.msg_qnum);
+       char* outputbuffer = msgRcv(fd_queue, outputbuffer);
+       printf("outputbuffer = %s\n", outputbuffer);
+       printf("number of messages in queue after msgrcv %ld\n", buf.msg_qnum);
+       if(outputbuffer == NULL || buf.msg_qnum == 0)
+           break;
+    }
+
+   printf("AFTER WHILE\n");
 
     memcpy(last_message, message, sizeof(Message_struct));
 

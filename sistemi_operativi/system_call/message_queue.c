@@ -61,15 +61,7 @@ void msgSnd(int msqid, char* outputbuffer) {
 
 }
 
-char array_copy(char* outputbuffer, char buffer[MAX+1]){
-    for(int i = 0; i < MAX; i++)
-    {
-        outputbuffer[i] = buffer[i];
-    }
-    return outputbuffer;
-}
-
-void msgRcv(int msqid) {
+char* msgRcv(int msqid, char* outputbuffer) {
     // Message structure
     struct mymsg {
         long mtype;
@@ -77,8 +69,6 @@ void msgRcv(int msqid) {
     } m;
 
     m.mtype = 1;
-
-    char* outputbuffer = (char*)malloc(sizeof(char)*MAX);
 
     struct msqid_ds buf;
     if (msgctl(msqid, IPC_STAT, &buf) < 0)
@@ -88,10 +78,12 @@ void msgRcv(int msqid) {
     if(buf.msg_qnum != 0) {
         if (msgrcv(msqid, &m, MAX, 1, 0) < 0)
             ErrExit("msgrcv");
-        //outputbuffer = array_copy(outputbuffer, m.buffer);
-        //return outputbuffer;
+        //TODO: control if i can use strcpy
+        outputbuffer = (char*) malloc(sizeof (char)*(MAX));
+        buf.msg_qnum = buf.msg_qnum - 1;
+        return strcpy(outputbuffer, m.buffer);
     }
-    //else return outputbuffer;
+    else return NULL;
     //Alloc size
     /*m.struct_message = (Message_struct*)malloc(sizeof (Message_struct));
     if(m.struct_message == NULL)
