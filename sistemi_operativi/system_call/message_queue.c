@@ -66,10 +66,11 @@ char* msgRcv(int msqid, char* outputbuffer) {
 
     printf("Elemets in queue before msgrcv %ld\n", buf.msg_qnum);
     if(buf.msg_qnum > 0) {
+        //received the message from the queue
         if (msgrcv(msqid, &m, MAX, 1, 0) < 0)
             ErrExit("msgrcv");
-        //TODO: control if i can use strcpy
         outputbuffer = (char*) malloc(sizeof (char)*(MAX));
+        //decreasing the number of messages in queue
         buf.msg_qnum = buf.msg_qnum - 1;
         return strcpy(outputbuffer, m.buffer);
     }

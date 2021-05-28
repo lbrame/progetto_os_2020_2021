@@ -11,7 +11,7 @@
 #include "message_queue.h"
 #include <sys/msg.h>
 
-void send_message(Message_struct* message, int pipe)
+void send_message(Message_struct* message, int pipe, char* queue_buffer)
 {
     pid_t pid = fork();
 
@@ -20,17 +20,18 @@ void send_message(Message_struct* message, int pipe)
 
     if(pid == 0) {
         int semaphore_array = semGet(7);
-
-        time_arrival = getTime(time_arrival);
-        sleep(message->DelS3);
-        if(strcmp(message->IdReceiver, "R3") != 0) {
-            write_pipe(pipe, message);
-        }
-        time_departure = getTime(time_departure);
-
         int fd = my_open("OutputFiles/F4.csv", O_WRONLY | O_APPEND);
-        char* outputBuffer = concatenate(message, time_arrival, time_departure);
-
+        char *outputBuffer;
+        if (message != NULL){
+                time_arrival = getTime(time_arrival);
+            sleep(message->DelS3);
+            if (strcmp(message->IdReceiver, "R3") != 0) {
+                write_pipe(pipe, message);
+            }
+            time_departure = getTime(time_departure);
+            outputBuffer = concatenate(message, time_arrival, time_departure);
+        }
+        else outputBuffer = queue_buffer;
         P(semaphore_array, 4);
         my_write(fd, outputBuffer, strlen(outputBuffer));
         V(semaphore_array, 4);
@@ -70,7 +71,7 @@ int main(int argc, char * argv[]) {
         status = read_pipe(fd_fifo, message);
         if(message->Id == last_message->Id)
             continue;
-        send_message(message, pipe3_write);
+        send_message(message, pipe3_write, NULL);
     }while(status > 0);
 
     struct msqid_ds buf;
@@ -78,11 +79,14 @@ int main(int argc, char * argv[]) {
         ErrExit("msgctl");
 
    while(1) {
-       printf("number of messages in queue before msgrcv %ld\n", buf.msg_qnum);
        char* outputbuffer = msgRcv(fd_queue, outputbuffer);
        printf("outputbuffer = %s\n", outputbuffer);
-       printf("number of messages in queue after msgrcv %ld\n", buf.msg_qnum);
-       if(outputbuffer == NULL || buf.msg_qnum == 0)
+       char* tmp;
+        if(tmp =  strstr(outputbuffer, "R3")) {
+            //send message to write in outputbuffer
+            send_message(NULL, 0, outputbuffer);
+        }
+        if(outputbuffer == NULL || buf.msg_qnum == 0)
            break;
     }
 
