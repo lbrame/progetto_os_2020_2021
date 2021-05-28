@@ -48,16 +48,6 @@ void msgSnd(int msqid, char* outputbuffer) {
     if(msgsnd(msqid, &m, buf_length, IPC_NOWAIT) < 0)
         ErrExit("msgsnd failed");
     printf("Sent %s to queue\n", m.buffer);
-    // Copy input text string into message structure
-    /*ssize_t structSize = sizeof(Message_struct);
-    m.struct_message = (Message_struct*)malloc(sizeof (Message_struct));
-    if(m.struct_message == NULL)
-        ErrExit("malloc message_queue");
-
-    memcpy(m.struct_message, message, structSize);
-
-    // Get size of the text field
-    size_t mSize = sizeof(Message_struct);*/
 
 }
 
@@ -75,7 +65,7 @@ char* msgRcv(int msqid, char* outputbuffer) {
         ErrExit("msgctl");
 
     printf("Elemets in queue before msgrcv %ld\n", buf.msg_qnum);
-    if(buf.msg_qnum != 0) {
+    if(buf.msg_qnum > 0) {
         if (msgrcv(msqid, &m, MAX, 1, 0) < 0)
             ErrExit("msgrcv");
         //TODO: control if i can use strcpy
@@ -84,25 +74,6 @@ char* msgRcv(int msqid, char* outputbuffer) {
         return strcpy(outputbuffer, m.buffer);
     }
     else return NULL;
-    //Alloc size
-    /*m.struct_message = (Message_struct*)malloc(sizeof (Message_struct));
-    if(m.struct_message == NULL)
-        ErrExit("malloc message_queue");
-    // Get size of the text field
-    size_t mSize = sizeof(Message_struct);
-
-    //control if there are elements in the queue
-    struct msqid_ds buf;
-    if (msgctl(msqid, IPC_STAT, &buf) < 0)
-        ErrExit("msgctl");
-    printf("Elemets in queue before msgrcv %ld\n", buf.msg_qnum);
-
-    // Wait for message of type 1
-    if (msgrcv(msqid, &m, mSize, 1, 0) == -1)
-        ErrExit("smgrcv");
-
-    printf("Elemets in queue after msgrcv %ld\n", buf.msg_qnum);
-    printf("Message received: %s\n", m.struct_message->Message);*/
 }
 
 /**
