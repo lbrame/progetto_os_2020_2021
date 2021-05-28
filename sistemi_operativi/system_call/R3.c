@@ -77,9 +77,12 @@ int main(int argc, char * argv[]) {
     if (msgctl(fd_queue, IPC_STAT, &buf) < 0)
         ErrExit("msgctl");
 
-    while(buf.msg_qnum > 0){
+   /* while(1) {
+        if (buf.msg_qnum == 0)
+            break;
         msgRcv(fd_queue);
-    }
+    }*/
+    msgRcv(fd_queue);
 
     memcpy(last_message, message, sizeof(Message_struct));
 

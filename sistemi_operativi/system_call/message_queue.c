@@ -12,6 +12,7 @@
 #include <stdio.h>
 #include "defines.h"
 #include <stdlib.h>
+#define MAX 50
 
 /**
  * Wrapper function to quickly create or get the message queue. The key is hard-coded
@@ -33,18 +34,22 @@ int msgGet() {
  * @param msqid ID of the message queue to send message to
  * @param text Text to send as part of the message
  */
-void msgSnd(int msqid, Message_struct* message) {
+void msgSnd(int msqid, char* outputbuffer) {
     // Message structure
     struct mymsg {
         long mtype;
-        Message_struct* struct_message;
+        char buffer[MAX];
     } m;
 
     // Define message type
     m.mtype = 1;
-
+    strcpy(m.buffer, outputbuffer);
+    int buf_length = strlen(m.buffer) + 1 ;
+    if(msgsnd(msqid, &m, buf_length, IPC_NOWAIT) < 0)
+        ErrExit("msgsnd failed");
+    printf("Sent %s to queue\n", m.buffer);
     // Copy input text string into message structure
-    ssize_t structSize = sizeof(Message_struct);
+    /*ssize_t structSize = sizeof(Message_struct);
     m.struct_message = (Message_struct*)malloc(sizeof (Message_struct));
     if(m.struct_message == NULL)
         ErrExit("malloc message_queue");
@@ -52,27 +57,60 @@ void msgSnd(int msqid, Message_struct* message) {
     memcpy(m.struct_message, message, structSize);
 
     // Get size of the text field
-    size_t mSize = sizeof(Message_struct);
+    size_t mSize = sizeof(Message_struct);*/
 
-    // Send message to queue
-    if (msgsnd(msqid, &m, mSize, 0) == -1)
-        ErrExit("msgsnd failed");
+}
+
+char array_copy(char* outputbuffer, char buffer[MAX+1]){
+    for(int i = 0; i < MAX; i++)
+    {
+        outputbuffer[i] = buffer[i];
+    }
+    return outputbuffer;
 }
 
 void msgRcv(int msqid) {
     // Message structure
     struct mymsg {
         long mtype;
-        char mtext[100];
+        char buffer[MAX+1];
     } m;
 
+    m.mtype = 1;
+
+    char* outputbuffer = (char*)malloc(sizeof(char)*MAX);
+
+    struct msqid_ds buf;
+    if (msgctl(msqid, IPC_STAT, &buf) < 0)
+        ErrExit("msgctl");
+
+    printf("Elemets in queue before msgrcv %ld\n", buf.msg_qnum);
+    if(buf.msg_qnum != 0) {
+        if (msgrcv(msqid, &m, MAX, 1, 0) < 0)
+            ErrExit("msgrcv");
+        //outputbuffer = array_copy(outputbuffer, m.buffer);
+        //return outputbuffer;
+    }
+    //else return outputbuffer;
+    //Alloc size
+    /*m.struct_message = (Message_struct*)malloc(sizeof (Message_struct));
+    if(m.struct_message == NULL)
+        ErrExit("malloc message_queue");
     // Get size of the text field
-    size_t mSize = sizeof(struct mymsg) - sizeof(long);
+    size_t mSize = sizeof(Message_struct);
+
+    //control if there are elements in the queue
+    struct msqid_ds buf;
+    if (msgctl(msqid, IPC_STAT, &buf) < 0)
+        ErrExit("msgctl");
+    printf("Elemets in queue before msgrcv %ld\n", buf.msg_qnum);
 
     // Wait for message of type 1
     if (msgrcv(msqid, &m, mSize, 1, 0) == -1)
         ErrExit("smgrcv");
-    printf("%s message queue\n", m.mtext);
+
+    printf("Elemets in queue after msgrcv %ld\n", buf.msg_qnum);
+    printf("Message received: %s\n", m.struct_message->Message);*/
 }
 
 /**

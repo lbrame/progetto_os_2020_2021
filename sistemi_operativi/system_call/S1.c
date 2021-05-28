@@ -26,11 +26,15 @@ void send_message(Message_struct* message, int pipe) {
         time_arrival = getTime(time_arrival);
         sleep(message->DelS1);
 
+        time_departure = getTime(time_departure);
+        char* outputBuffer = concatenate(message, time_arrival, time_departure);
+
         if ((strcmp(message->Type, "FIFO") == 0) || (strcmp(message->IdSender, "S1") != 0)) {
             write_pipe(pipe, message);
         } else if (strcmp(message->Type, "Q") == 0) {
+            // TODO send with message queue
             int fd_queue = msgGet();
-            msgSnd(fd_queue, message);
+            msgSnd(fd_queue, outputBuffer);
             struct msqid_ds buf;
             if(msgctl(fd_queue, IPC_STAT, &buf) < 0)
                 ErrExit("msgctl");
@@ -39,8 +43,6 @@ void send_message(Message_struct* message, int pipe) {
             // TODO send with shared memory
         }
 
-        time_departure = getTime(time_departure);
-        char* outputBuffer = concatenate(message, time_arrival, time_departure);
         int fd = my_open("OutputFiles/F1.csv", O_WRONLY | O_APPEND);
 
         P(semaphore_array, 1);

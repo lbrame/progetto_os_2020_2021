@@ -6,7 +6,7 @@
 #include "defines.h"
 
 int msgGet();
-void msgSnd(int msqid, Message_struct* message);
+void msgSnd(int msqid, char* outputbuffer);
 void msgRcv(int msqid);
 void delete_msgqueue(int msqid);
 void msgqueue_set_upper_limit(int msqid, int upperlimit);
