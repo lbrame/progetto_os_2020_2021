@@ -78,6 +78,7 @@ int main(int argc, char * argv[]) {
     if (msgctl(fd_queue, IPC_STAT, &buf) < 0)
         ErrExit("msgctl");
 
+    /*
    while(1) {
        char* outputbuffer = msgRcv(fd_queue, outputbuffer);
        printf("outputbuffer = %s\n", outputbuffer);
@@ -88,7 +89,7 @@ int main(int argc, char * argv[]) {
         }
         if(outputbuffer == NULL || buf.msg_qnum == 0)
            break;
-    }
+    }*/
 
     memcpy(last_message, message, sizeof(Message_struct));
     close_pipe(pipe3_write);
