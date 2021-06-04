@@ -5,7 +5,9 @@
 #include <string.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <signal.h>
 #include "defines.h"
+#include <stdio.h>
 
 typedef struct {
     int id;
@@ -105,7 +107,36 @@ pid_struct *parse_pid_struct(char *inputBuffer, int message_number) {
     return messages;
 }
 
+/**
+ * Function to handle outgoing signals from Hackler to other processes.
+ * @param sender_messages
+ * @param receiver_messages
+ * @param messages
+ */
+void handle_signals(pid_struct *sender_messages, pid_struct *receiver_messages, hackler_struct *messages, int message_number) {
+    printf("called handle_signals\n");
+    for (int i = 0; i < message_number; i++) {
+        printf("Number %d for cycle\n");
+        hackler_struct message = messages[i];
+        sleep(message.delay);
 
+        if (strcmp(message.action, "IncreaseDelay") == 0) {
+
+        } else if (strcmp(message.action, "RemoveMsg") == 0) {
+
+        } else if (strcmp(message.action, "SendMsg") == 0) {
+
+        } else if (strcmp(message.action, "ShutDown") == 0) {
+            for (int j=0; j<3; j++) {
+                pid_struct sender_message = sender_messages[j];
+                pid_struct receiver_message = receiver_messages[j];
+                kill(sender_message.pid, SIGTERM);
+                kill(receiver_message.pid, SIGTERM);
+                printf("SENT SIGTERM");
+            }
+        }
+    }
+}
 
 /**
  * join all messages preparing the text to be outputted to file
@@ -181,6 +212,8 @@ pid_struct *parse_pid_struct(char *inputBuffer, int message_number) {
 }*/
 
 int main(int argc, char *argv[]) {
+    printf("Hackler started\n");
+
     // READ F7.csv
     // argv[1] is the relative path to the input file and it is passes as a keyboard argument
     int fileSize = get_file_size(argv[1]);
@@ -194,6 +227,7 @@ int main(int argc, char *argv[]) {
     hackler_struct *messages = parse_hackler_struct(inputBuffer, message_number);
     free(inputBuffer);
 
+//    sleep(5);
 
     // READ f8.csv
     char path_sender[] = "OutputFiles/F8.csv";
@@ -207,6 +241,7 @@ int main(int argc, char *argv[]) {
     message_number = count_messages(inputBuffer, fileSize);
     pid_struct *sender_messages = parse_pid_struct(inputBuffer, message_number);
     free(inputBuffer);
+    printf("READ F8\n");
 
     // READ f9.csv
     char path_receiver[] = "OutputFiles/F9.csv";
@@ -220,7 +255,10 @@ int main(int argc, char *argv[]) {
     message_number = count_messages(inputBuffer, fileSize);
     pid_struct *receiver_messages = parse_pid_struct(inputBuffer, message_number);
     free(inputBuffer);
-//    handle_signals(sender_messages, receiver_messages, messages, message_number);
+    printf("READ F9\n");
+
+    handle_signals(sender_messages, receiver_messages, messages, message_number);
+
 
     free(messages);
     free(sender_messages);

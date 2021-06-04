@@ -16,6 +16,7 @@
 #include <sys/types.h>
 #include <sys/ipc.h>
 #include <time.h>
+#include <signal.h>
 
 /**
  * count the number of messages in the file

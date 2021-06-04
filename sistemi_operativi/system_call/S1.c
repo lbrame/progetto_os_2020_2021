@@ -7,11 +7,13 @@
 #include <string.h>
 #include <stdio.h>
 #include <fcntl.h>
+#include <signal.h>
 #include "err_exit.h"
 #include "pipe.h"
 #include "semaphore.h"
 #include "files.h"
 
+int pipe1_write;
 
 void send_message(Message_struct* message, int pipe) {
     pid_t pid = fork();
@@ -47,12 +49,45 @@ void send_message(Message_struct* message, int pipe) {
     }
 }
 
+/**
+ * Signal handler
+ * @param sig signal sent by the kernel
+ * SIGTERM: terminate the process gracefully, properly closing all open IPCs
+ * SIGUSR1: catch IncreaseDelay message (sent by hackler)
+ * SIGUSR2: catch RemoveMsg message (sent by hackler)
+ * SIGQUIT: catch SendMsg message (sent by hackler)
+ */
+void sigHandler (int sig) {
+    printf("S1: signal handler started\n");
+
+    switch (sig) {
+        case SIGUSR1:
+            printf("S1: Caught SIGUSR1\n");
+            break;
+        case SIGUSR2:
+            printf("S1: Caught SIGUSR2\n");
+            break;
+        case SIGQUIT:
+            printf("S1: Caught SIGQUIT\n");
+            break;
+        case SIGTERM:
+            printf("S1: Caught SIGTERM\n");
+            close_pipe(pipe1_write);
+            exit(0);
+        default:
+            printf("S1: Signal not valid\n");
+            break;
+    }
+}
 
 int main(int argc, char * argv[]) {
+    pipe1_write = atoi(argv[1]);
+    if(signal(SIGTERM, sigHandler) == SIG_ERR) {
+        ErrExit("S1, SIGTERM");
+    }
     char* starter = "ID;Message;IDSender;IDReceiver;TimeArrival;TimeDeparture\n";
     write_file("OutputFiles/F1.csv", starter);
     char *rPath = argv[0];
-    int pipe1_write = atoi(argv[1]);
     int fd = my_open(rPath, O_RDONLY);
     // suppose each of the 8 fields has a maximum size of 50bytes
     char *buffer = (char *) malloc(8 * 50);

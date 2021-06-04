@@ -5,12 +5,16 @@
 #include <stdio.h>
 #include <string.h>
 #include <fcntl.h>
+#include <signal.h>
 #include "defines.h"
 #include "unistd.h"
 #include "err_exit.h"
 #include "pipe.h"
 #include "semaphore.h"
 #include "files.h"
+
+int pipe1_read;
+int pipe2_write;
 
 void send_message(Message_struct* message, int pipe)
 {
@@ -48,9 +52,42 @@ void send_message(Message_struct* message, int pipe)
     }
 }
 
+/**
+ * Signal handler
+ * @param sig
+ */
+void sigHandler (int sig) {
+    printf("S1: signal handler started\n");
+
+    switch (sig) {
+        case SIGUSR1:
+            printf("Caught SIGUSR1\n");
+
+            break;
+        case SIGUSR2:
+            printf("Caught SIGUSR2\n");
+            break;
+        case SIGQUIT:
+            printf("Caught SIGQUIT, reusing it\n");
+            break;
+        case SIGTERM:
+            printf("Caught SIGTERM\n");
+            close_pipe(pipe1_read);
+            close_pipe(pipe2_write);
+            exit(0);
+        default:
+            printf("Signal not valid\n");
+            break;
+    }
+}
+
 int main(int argc, char * argv[]) {
-    int pipe1_read = atoi(argv[0]);
-    int pipe2_write = atoi(argv[1]);
+    pipe1_read = atoi(argv[0]);
+    pipe2_write = atoi(argv[1]);
+
+    if(signal(SIGTERM, sigHandler) == SIG_ERR) {
+        ErrExit("S1, SIGTERM");
+    }
 
     char* starter = "ID;Message;IDSender;IDReceiver;TimeArrival;TimeDeparture\n";
     write_file("OutputFiles/F2.csv", starter);
