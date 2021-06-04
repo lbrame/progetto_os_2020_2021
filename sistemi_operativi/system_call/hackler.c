@@ -115,18 +115,24 @@ pid_struct *parse_pid_struct(char *inputBuffer, int message_number) {
  */
 void handle_signals(pid_struct *sender_messages, pid_struct *receiver_messages, hackler_struct *messages, int message_number) {
     printf("called handle_signals\n");
+    printf("message number: %d\n", message_number);
     for (int i = 0; i < message_number; i++) {
-        printf("Number %d for cycle\n");
+        printf("Number %d for loop\n", i);
+        printf("message: %s\n", messages[i].action);
         hackler_struct message = messages[i];
         sleep(message.delay);
 
         if (strcmp(message.action, "IncreaseDelay") == 0) {
+            printf("IncreaseDelay\n");
 
-        } else if (strcmp(message.action, "RemoveMsg") == 0) {
+        } else if (strcmp(message.action, "RemoveMSG") == 0) {
+            printf("RemoveMsg\n");
 
-        } else if (strcmp(message.action, "SendMsg") == 0) {
+        } else if (strcmp(message.action, "SendMSG") == 0) {
+            printf("SendMsg\n");
 
         } else if (strcmp(message.action, "ShutDown") == 0) {
+            printf("Shutdown\n");
             for (int j=0; j<3; j++) {
                 pid_struct sender_message = sender_messages[j];
                 pid_struct receiver_message = receiver_messages[j];
