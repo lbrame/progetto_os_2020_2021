@@ -12,6 +12,9 @@
 #include "unistd.h"
 #include "semaphore.h"
 #include "files.h"
+#include <signal.h>
+
+int pipe2_read;
 
 void send_message(Message_struct* message)
 {
@@ -47,6 +50,34 @@ void send_message(Message_struct* message)
 
         close(fd_fifo);
         exit(0);
+    }
+}
+
+/**
+ * Signal handler
+ * @param sig
+ */
+void sigHandler (int sig) {
+    printf("S3: signal handler started\n");
+
+    switch (sig) {
+        case SIGUSR1:
+            printf("Caught SIGUSR1\n");
+
+            break;
+        case SIGUSR2:
+            printf("Caught SIGUSR2\n");
+            break;
+        case SIGQUIT:
+            printf("Caught SIGQUIT, reusing it\n");
+            break;
+        case SIGTERM:
+            printf("Caught SIGTERM\n");
+            close_pipe(pipe2_read);
+            exit(0);
+        default:
+            printf("Signal not valid\n");
+            break;
     }
 }
 

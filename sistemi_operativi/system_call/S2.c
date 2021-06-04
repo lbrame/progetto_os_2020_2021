@@ -89,6 +89,8 @@ int main(int argc, char * argv[]) {
         ErrExit("S1, SIGTERM");
     }
 
+    printf("S2: %d\n", getpid());
+
     char* starter = "ID;Message;IDSender;IDReceiver;TimeArrival;TimeDeparture\n";
     write_file("OutputFiles/F2.csv", starter);
 

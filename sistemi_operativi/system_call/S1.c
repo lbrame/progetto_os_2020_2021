@@ -85,6 +85,17 @@ int main(int argc, char * argv[]) {
     if(signal(SIGTERM, sigHandler) == SIG_ERR) {
         ErrExit("S1, SIGTERM");
     }
+    if(signal(SIGUSR1, sigHandler) == SIG_ERR) {
+        ErrExit("S1, SIGUSR1");
+    }
+    if(signal(SIGUSR2, sigHandler) == SIG_ERR) {
+        ErrExit("S1, SIGUSR2");
+    }
+    if(signal(SIGQUIT, sigHandler) == SIG_ERR) {
+        ErrExit("S1, SIGQUIT");
+    }
+    printf("S1: %d\n", getpid());
+
     char* starter = "ID;Message;IDSender;IDReceiver;TimeArrival;TimeDeparture\n";
     write_file("OutputFiles/F1.csv", starter);
     char *rPath = argv[0];
@@ -102,5 +113,6 @@ int main(int argc, char * argv[]) {
     free(buffer);
     close(fd);
     close_pipe(pipe1_write);
+
     return 0;
 }
