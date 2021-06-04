@@ -6,15 +6,14 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/stat.h>
+#include <stdlib.h>
 #include "defines.h"
 
 typedef struct {
-    char* id;
-    char* message;
-    char* id_sender;
-    char* id_receiver;
-    char* time_arrival;
-    char* time_departure;
+    int id;
+    int delay;
+    char target[2];
+    char action[13];
 } hackler_struct;
 
 
@@ -40,22 +39,16 @@ hackler_struct *parse_file(char *inputBuffer, int message_number) {
             for (char *field_token = strtok_r(row_token, ";", &field_context); field_token; field_token = strtok_r(NULL, ";", &field_context)) {
                 switch (field_counter) {
                     case 0:
-                        message->id = field_token;
+                        message->id = atoi(field_token);
                         break;
                     case 1:
-                        message->message = field_token;
+                        message->delay = atoi(field_token);
                         break;
                     case 2:
-                        message->id_sender = field_token;
+                        memcpy(message->target, field_token, sizeof(&field_token));
                         break;
                     case 3:
-                        message->id_receiver = field_token;
-                        break;
-                    case 4:
-                        message->time_arrival = field_token;
-                        break;
-                    case 5:
-                        message->time_departure = field_token;
+                        memcpy(message->action, field_token, sizeof(&field_token));
                         break;
                     default:
                         ErrExit("parse_file");
@@ -76,7 +69,7 @@ hackler_struct *parse_file(char *inputBuffer, int message_number) {
  * @param message_number the number of messages contained into the input file
  * @return the string to be outputted to file
  */
-char *concatenation(hackler_struct *messages, char *starter, int message_number) {
+/*char *concatenation(hackler_struct *messages, char *starter, int message_number) {
     // buffer used to save messages in order to return them to the main func
     char* outputBuffer;
     // buffer used too free memory
@@ -140,14 +133,9 @@ char *concatenation(hackler_struct *messages, char *starter, int message_number)
         outputBuffer = join(starter, outputBuffer, NULL);
         outputBuffer = join(outputBuffer, "\n", NULL);
         return outputBuffer;
-}
+}*/
 
 int main(int argc, char *argv[]) {
-    struct stat sb;
-    // If ./OutputFiles does not exist, create it
-    if (stat("OutputFiles", &sb) != 0)
-        mkdir("OutputFiles", S_IRWXU);
-
     // argv[1] is the relative path to the input file and it is passes as a keyboard argument
     int fileSize = get_file_size(argv[1]);
     // allocate buffer to read file of size fileSize + 1(space for /0)
@@ -160,15 +148,8 @@ int main(int argc, char *argv[]) {
     hackler_struct* messages = parse_file(inputBuffer, message_number);
     free(inputBuffer);
 
-    char firstRow[] = "Id;Message;Id_Sender;Id_Receiver;Time_arrival;Time_departure\n";
-    char* BUFFER = concatenation(messages, firstRow, message_number);
-    char* r_path = get_out_file_rpath(argv[1]);
-    write_file(r_path, BUFFER);
 
-    free(BUFFER);
+
     free(messages);
-
-    sleep(2);
-
     return 0;
 }
