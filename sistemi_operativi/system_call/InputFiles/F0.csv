@@ -3,5 +3,3 @@ ID;Message;IDSender;IDReceiver;DelS1;DelS2;DelS3;Type
 2;Come va?;S2;R2;1;1;-;SH
 3;MyMsg;S3;R3;3;2;4;FIFO
 4;MyMsg;S3;R1;3;2;4;FIFO
-5;StoBTantoene;S1;R1;2;5;7;Q
-6;StoBene;S3;R1;2;5;7;Q

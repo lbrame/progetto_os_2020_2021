@@ -68,18 +68,14 @@ int main(int argc, char * argv[]) {
 
     while(1) {
         char *outputbuffer = msgRcv(fd_queue, outputbuffer);
-        printf("outputbuffer = %s\n", outputbuffer);
-        char *tmp;
-        if (tmp = strstr(outputbuffer, "R1")) {
-            //send message to write in outputbuffer
-            send_message(NULL, outputbuffer);
-        }/*
-        else if(tmp == NULL)
-        {
-
-        }*/
         if (outputbuffer == NULL || buf.msg_qnum == 0)
             break;
+        printf("outputbuffer = %s\n", outputbuffer);
+        char *tmp;
+        if ((tmp =  strstr(outputbuffer, "R1")) != NULL) {
+            //send message to write in outputbuffer
+            send_message(NULL, outputbuffer);
+        }
     }
 
     close_pipe(pipe4_read);

@@ -14,6 +14,7 @@
 #include <stdlib.h>
 #define MAX 50
 
+
 /**
  * Wrapper function to quickly create or get the message queue. The key is hard-coded
  * as per project specification.
@@ -71,7 +72,6 @@ char* msgRcv(int msqid, char* outputbuffer) {
             ErrExit("msgrcv");
         outputbuffer = (char*) malloc(sizeof (char)*(MAX));
         //decreasing the number of messages in queue
-        buf.msg_qnum = buf.msg_qnum - 1;
         return strcpy(outputbuffer, m.buffer);
     }
     else return NULL;

@@ -78,18 +78,18 @@ int main(int argc, char * argv[]) {
     if (msgctl(fd_queue, IPC_STAT, &buf) < 0)
         ErrExit("msgctl");
 
-    /*
+
    while(1) {
        char* outputbuffer = msgRcv(fd_queue, outputbuffer);
+       if(outputbuffer == NULL || buf.msg_qnum == 0)
+           break;
        printf("outputbuffer = %s\n", outputbuffer);
        char* tmp;
-        if(tmp =  strstr(outputbuffer, "R3")) {
+        if((tmp =  strstr(outputbuffer, "R3")) != NULL) {
             //send message to write in outputbuffer
             send_message(NULL, 0, outputbuffer);
         }
-        if(outputbuffer == NULL || buf.msg_qnum == 0)
-           break;
-    }*/
+    }
 
     memcpy(last_message, message, sizeof(Message_struct));
     close_pipe(pipe3_write);
