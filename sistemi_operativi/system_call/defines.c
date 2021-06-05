@@ -145,12 +145,7 @@ char *itoa(int val) {
         buffer_dim++;
     }
     char *buffer = malloc(sizeof(char) * buffer_dim);
-    // itoa && assign values to buffer
-    for (int i = 0; val > 0; i++) {
-        new = val % 10;
-        buffer[i] = (char) (new + 48);
-        val = val / 10;
-    }
+    sprintf(buffer, "%d", val);
     buffer[buffer_dim] = '\0';
     return buffer;
 }

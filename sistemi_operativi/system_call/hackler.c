@@ -135,7 +135,7 @@ void handle_signals(pid_struct *sender_messages, pid_struct *receiver_messages, 
             printf("Shutdown\n");
             for (int j=0; j<3; j++) {
                 pid_struct sender_message = sender_messages[j];
-                pid_struct receiver_message = receiver_messages[j];
+                pid_struct receiver_message = receiver_messages[2-j];
                 kill(sender_message.pid, SIGTERM);
                 kill(receiver_message.pid, SIGTERM);
                 printf("SENT SIGTERM");
