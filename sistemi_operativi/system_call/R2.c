@@ -66,6 +66,11 @@ int main(int argc, char *argv[]) {
     do { // Read until it returns 0 (EOF)
         memcpy(last_content, content, sizeof(Message_struct));
         status = read_pipe(pipe3_read, content);
+        if(strcmp(content->IdReceiver, "R2") != 0 && strcmp(content->Type, "Q") != 0)
+        {
+            write_pipe(pipe4_write, content);
+            continue;
+        }
         if (content->Id == last_content->Id)
             continue;
         send_message(content, pipe4_write, NULL);
