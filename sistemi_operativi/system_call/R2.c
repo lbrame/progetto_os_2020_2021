@@ -75,7 +75,7 @@ int main(int argc, char *argv[]) {
     if (msgctl(fd_queue, IPC_STAT, &buf) < 0)
         ErrExit("msgctl");
 
-    while(1) {
+    /*while(1) {
         char* outputbuffer = msgRcv(fd_queue, outputbuffer);
         if(outputbuffer == NULL || buf.msg_qnum == 0)
             break;
@@ -85,7 +85,7 @@ int main(int argc, char *argv[]) {
             //send message to write in outputbuffer
             send_message(NULL, 0, outputbuffer);
         }
-    }
+    }*/
 
 
     close_pipe(pipe3_read);

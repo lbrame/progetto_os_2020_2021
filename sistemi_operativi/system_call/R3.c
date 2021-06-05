@@ -89,6 +89,12 @@ int main(int argc, char * argv[]) {
             //send message to write in outputbuffer
             send_message(NULL, 0, outputbuffer);
         }
+        else
+        {
+            Message_struct* queue_message = parse_message(outputbuffer);
+            //send without printing
+            write_pipe(pipe3_write, queue_message);
+        }
     }
 
     memcpy(last_message, message, sizeof(Message_struct));
