@@ -8,20 +8,72 @@
 #include <stdlib.h>
 #include <memory.h>
 #include <fcntl.h>
+#include <signal.h>
+
+int pipe4_read;
+
+/**
+ * Signal handler
+ * @param sig
+ */
+void sigHandler(int sig) {
+    printf("R1: signal handler started\n");
+
+    switch (sig) {
+        case SIGUSR1:
+            printf("Caught SIGUSR1\n");
+            break;
+        case SIGUSR2:
+            printf("Caught SIGUSR2\n");
+            break;
+        case SIGQUIT:
+            printf("Caught SIGQUIT, reusing it\n");
+            break;
+        case SIGTERM:
+            printf("Caught SIGTERM\n");
+            close_pipe(pipe4_read);
+            exit(0);
+        default:
+            printf("Signal not valid\n");
+            break;
+    }
+}
+
+int main(int argc, char *argv[]) {
+    printf("R1: %d\n", getpid());
+
+    pipe4_read = atoi(&argv[0][0]);
+    if(signal(SIGTERM, sigHandler) == SIG_ERR) {
+        ErrExit("R1, SIGTERM");
+    }
+    if(signal(SIGUSR1, sigHandler) == SIG_ERR) {
+        ErrExit("R1, SIGUSR1");
+    }
+    if(signal(SIGUSR2, sigHandler) == SIG_ERR) {
+        ErrExit("R1, SIGUSR2");
+    }
+    if(signal(SIGQUIT, sigHandler) == SIG_ERR) {
+        ErrExit("R1, SIGQUIT");
+    }
+
+    printf("R1: %d\n", getpid());
+
 
 int main(int argc, char * argv[]) {
-    int pipe4_read = atoi(&argv[0][0]);
+    pipe4_read = atoi(&argv[0][0]);
     int semaphore_array = semGet(8);
     int shmemId = get_shmem(sizeof(Message_struct));
     Message_struct *shmemPointer = (Message_struct *) attach_shmem(shmemId);
 
-    char* starter = "ID;Message;IDSender;IDReceiver;TimeArrival;TimeDeparture\n";
+
+    char *starter = "ID;Message;IDSender;IDReceiver;TimeArrival;TimeDeparture\n";
     write_file("OutputFiles/F6.csv", starter);
 
     Message_struct *message = (Message_struct *) malloc(sizeof(Message_struct));
     Message_struct *last_message = (Message_struct *) malloc(sizeof(Message_struct));
     if (message == NULL || last_message == NULL)
         ErrExit("malloc R1");
+
 
     ssize_t status = 1;
 
@@ -73,5 +125,7 @@ int main(int argc, char * argv[]) {
     close_pipe(pipe4_read);
     free(message);
     free(last_message);
+    pause();
+
     return 0;
 }

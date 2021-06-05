@@ -13,6 +13,8 @@
 #include "semaphore.h"
 #include "files.h"
 #include "shared_memory.h"
+#include <signal.h>
+int pipe2_read;
 
 void send_message(Message_struct* message)
 {
@@ -55,6 +57,34 @@ void send_message(Message_struct* message)
     }
 }
 
+/**
+ * Signal handler
+ * @param sig
+ */
+void sigHandler (int sig) {
+    printf("S3: signal handler started\n");
+
+    switch (sig) {
+        case SIGUSR1:
+            printf("S2: Caught SIGUSR1\n");
+
+            break;
+        case SIGUSR2:
+            printf("S2: Caught SIGUSR2\n");
+            break;
+        case SIGQUIT:
+            printf("S2: Caught SIGQUIT, reusing it\n");
+            break;
+        case SIGTERM:
+            printf("S2: Caught SIGTERM\n");
+            close_pipe(pipe2_read);
+            exit(0);
+        default:
+            printf("S2: Signal not valid\n");
+            break;
+    }
+}
+
 int main(int argc, char * argv[]) {
     int pipe2_read = atoi(&argv[0][0]);
 
@@ -85,6 +115,7 @@ int main(int argc, char * argv[]) {
     free(last_content);
     sleep(3);
 
+    scanf(NULL);
+    pause();
     return 0;
-
 }
