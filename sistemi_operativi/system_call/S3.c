@@ -31,7 +31,6 @@ void send_message(Message_struct* message, int fd_fifo, Message_struct* shmemPoi
     else if(strcmp(message->Type, "SH") == 0) {
         P(semaphore_array, 0);
         memcpy(shmemPointer, message, sizeof(Message_struct));
-        V(semaphore_array, 7);
     }
 
     int fd = my_open("OutputFiles/F3.csv", O_WRONLY | O_APPEND);

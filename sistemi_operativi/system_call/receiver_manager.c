@@ -1,11 +1,11 @@
 /// @file receiver_manager.c
 /// @brief Contiene l'implementazione del receiver_manager.
 
-#include "unistd.h"
+#include <unistd.h>
 #include <sys/wait.h>
 #include <errno.h>
-#include "stdio.h"
-#include "stdlib.h"
+#include <stdio.h>
+#include <stdlib.h>
 #include <sys/stat.h>
 #include "defines.h"
 #include "err_exit.h"
@@ -150,6 +150,5 @@ int main(int argc, char * argv[]) {
     free(outputBuffer);
     free(info_children);
     unlink("OutputFiles/my_fifo.txt");
-    //delete_sem(7);
     return 0;
 }

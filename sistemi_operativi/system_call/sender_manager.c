@@ -7,11 +7,11 @@
 #include "semaphore.h"
 #include "fifo.h"
 #include "pipe.h"
-#include "unistd.h"
+#include <unistd.h>
 #include <sys/wait.h>
 #include <errno.h>
-#include "stdio.h"
-#include "stdlib.h"
+#include <stdio.h>
+#include <stdlib.h>
 #include <sys/stat.h>
 
 // definition of the union semun

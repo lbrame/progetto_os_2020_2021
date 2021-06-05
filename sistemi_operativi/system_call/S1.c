@@ -29,7 +29,6 @@ void send_message(Message_struct* message, int pipe, Message_struct* shmemPointe
     } else if (strcmp(message->Type, "SH") == 0) {
         P(semaphore_array, 0);
         memcpy(shmemPointer, message, sizeof(Message_struct));
-        V(semaphore_array, 7);
     }
     time_departure = getTime(time_departure);
 
