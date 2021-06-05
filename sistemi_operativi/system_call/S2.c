@@ -108,7 +108,7 @@ int main(int argc, char * argv[]) {
         status = read_pipe(pipe1_read, message);
         if(message->Id == last_message->Id)
             continue;
-        send_message(message, pipe2_write);
+        send_message(message, pipe2_write, shmemPointer, semaphore_array);
     } while (status > 0);
 
     close_pipe(pipe1_read);

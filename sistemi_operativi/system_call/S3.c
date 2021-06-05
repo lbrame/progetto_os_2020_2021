@@ -107,7 +107,7 @@ int main(int argc, char * argv[]) {
     } while (status > 0);
 
     close_pipe(pipe2_read);
-    memcpy(content->Message, "END", 3);
+    st(content->Message, "END", 3);
     // max int
     content->Id = 2147483647;
 
