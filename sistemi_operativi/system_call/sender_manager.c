@@ -28,6 +28,7 @@ void add_child(child_struct *info_children, char sender_id[], pid_t pid, int i) 
     }
     child->sender_id = sender_id;
     child->pid = (int) pid;
+    printf("S%d pid from SM: %d\n", i, pid);
     info_children[i - 1] = *child;
 }
 

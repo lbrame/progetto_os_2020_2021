@@ -48,19 +48,19 @@ cmake_force:
 SHELL = /bin/sh
 
 # The CMake executable.
-CMAKE_COMMAND = /usr/local/bin/cmake
+CMAKE_COMMAND = /usr/bin/cmake
 
 # The command to remove a file.
-RM = /usr/local/bin/cmake -E rm -f
+RM = /usr/bin/cmake -E rm -f
 
 # Escaping for special characters.
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/laura/Scrivania/progetto_os_2020_2021/sistemi_operativi/system_call
+CMAKE_SOURCE_DIR = /home/luca/CLionProjects/progetto_os_2020_2021/sistemi_operativi/system_call
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/laura/Scrivania/progetto_os_2020_2021/sistemi_operativi/system_call
+CMAKE_BINARY_DIR = /home/luca/CLionProjects/progetto_os_2020_2021/sistemi_operativi/system_call
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -68,7 +68,7 @@ CMAKE_BINARY_DIR = /home/laura/Scrivania/progetto_os_2020_2021/sistemi_operativi
 # Special rule for the target rebuild_cache
 rebuild_cache:
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake to regenerate build system..."
-	/usr/local/bin/cmake --regenerate-during-build -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
+	/usr/bin/cmake --regenerate-during-build -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
 .PHONY : rebuild_cache
 
 # Special rule for the target rebuild_cache
@@ -77,8 +77,8 @@ rebuild_cache/fast: rebuild_cache
 
 # Special rule for the target edit_cache
 edit_cache:
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "No interactive CMake dialog available..."
-	/usr/local/bin/cmake -E echo No\ interactive\ CMake\ dialog\ available.
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake cache editor..."
+	/usr/bin/ccmake -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
 .PHONY : edit_cache
 
 # Special rule for the target edit_cache
@@ -87,9 +87,9 @@ edit_cache/fast: edit_cache
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/laura/Scrivania/progetto_os_2020_2021/sistemi_operativi/system_call/CMakeFiles /home/laura/Scrivania/progetto_os_2020_2021/sistemi_operativi/system_call//CMakeFiles/progress.marks
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/luca/CLionProjects/progetto_os_2020_2021/sistemi_operativi/system_call/CMakeFiles /home/luca/CLionProjects/progetto_os_2020_2021/sistemi_operativi/system_call//CMakeFiles/progress.marks
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/laura/Scrivania/progetto_os_2020_2021/sistemi_operativi/system_call/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/luca/CLionProjects/progetto_os_2020_2021/sistemi_operativi/system_call/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
@@ -130,6 +130,19 @@ R3/fast:
 .PHONY : R3/fast
 
 #=============================================================================
+# Target rules for targets named R2
+
+# Build rule for target.
+R2: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 R2
+.PHONY : R2
+
+# fast build rule for target.
+R2/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/R2.dir/build.make CMakeFiles/R2.dir/build
+.PHONY : R2/fast
+
+#=============================================================================
 # Target rules for targets named R1
 
 # Build rule for target.
@@ -141,6 +154,45 @@ R1: cmake_check_build_system
 R1/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/R1.dir/build.make CMakeFiles/R1.dir/build
 .PHONY : R1/fast
+
+#=============================================================================
+# Target rules for targets named S2
+
+# Build rule for target.
+S2: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 S2
+.PHONY : S2
+
+# fast build rule for target.
+S2/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/S2.dir/build.make CMakeFiles/S2.dir/build
+.PHONY : S2/fast
+
+#=============================================================================
+# Target rules for targets named hackler
+
+# Build rule for target.
+hackler: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 hackler
+.PHONY : hackler
+
+# fast build rule for target.
+hackler/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/hackler.dir/build.make CMakeFiles/hackler.dir/build
+.PHONY : hackler/fast
+
+#=============================================================================
+# Target rules for targets named receiver_manager
+
+# Build rule for target.
+receiver_manager: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 receiver_manager
+.PHONY : receiver_manager
+
+# fast build rule for target.
+receiver_manager/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/receiver_manager.dir/build.make CMakeFiles/receiver_manager.dir/build
+.PHONY : receiver_manager/fast
 
 #=============================================================================
 # Target rules for targets named S3
@@ -169,58 +221,6 @@ sender_manager/fast:
 .PHONY : sender_manager/fast
 
 #=============================================================================
-# Target rules for targets named os_core
-
-# Build rule for target.
-os_core: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 os_core
-.PHONY : os_core
-
-# fast build rule for target.
-os_core/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/os_core.dir/build.make CMakeFiles/os_core.dir/build
-.PHONY : os_core/fast
-
-#=============================================================================
-# Target rules for targets named receiver_manager
-
-# Build rule for target.
-receiver_manager: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 receiver_manager
-.PHONY : receiver_manager
-
-# fast build rule for target.
-receiver_manager/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/receiver_manager.dir/build.make CMakeFiles/receiver_manager.dir/build
-.PHONY : receiver_manager/fast
-
-#=============================================================================
-# Target rules for targets named hackler
-
-# Build rule for target.
-hackler: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 hackler
-.PHONY : hackler
-
-# fast build rule for target.
-hackler/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/hackler.dir/build.make CMakeFiles/hackler.dir/build
-.PHONY : hackler/fast
-
-#=============================================================================
-# Target rules for targets named R2
-
-# Build rule for target.
-R2: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 R2
-.PHONY : R2
-
-# fast build rule for target.
-R2/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/R2.dir/build.make CMakeFiles/R2.dir/build
-.PHONY : R2/fast
-
-#=============================================================================
 # Target rules for targets named S1
 
 # Build rule for target.
@@ -234,17 +234,17 @@ S1/fast:
 .PHONY : S1/fast
 
 #=============================================================================
-# Target rules for targets named S2
+# Target rules for targets named os_core
 
 # Build rule for target.
-S2: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 S2
-.PHONY : S2
+os_core: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 os_core
+.PHONY : os_core
 
 # fast build rule for target.
-S2/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/S2.dir/build.make CMakeFiles/S2.dir/build
-.PHONY : S2/fast
+os_core/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/os_core.dir/build.make CMakeFiles/os_core.dir/build
+.PHONY : os_core/fast
 
 R1.o: R1.c.o
 .PHONY : R1.o
@@ -510,6 +510,30 @@ hackler.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/hackler.dir/build.make CMakeFiles/hackler.dir/hackler.c.s
 .PHONY : hackler.c.s
 
+message_queue.o: message_queue.c.o
+.PHONY : message_queue.o
+
+# target to build an object file
+message_queue.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/os_core.dir/build.make CMakeFiles/os_core.dir/message_queue.c.o
+.PHONY : message_queue.c.o
+
+message_queue.i: message_queue.c.i
+.PHONY : message_queue.i
+
+# target to preprocess a source file
+message_queue.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/os_core.dir/build.make CMakeFiles/os_core.dir/message_queue.c.i
+.PHONY : message_queue.c.i
+
+message_queue.s: message_queue.c.s
+.PHONY : message_queue.s
+
+# target to generate assembly for a file
+message_queue.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/os_core.dir/build.make CMakeFiles/os_core.dir/message_queue.c.s
+.PHONY : message_queue.c.s
+
 pipe.o: pipe.c.o
 .PHONY : pipe.o
 
@@ -681,6 +705,9 @@ help:
 	@echo "... hackler.o"
 	@echo "... hackler.i"
 	@echo "... hackler.s"
+	@echo "... message_queue.o"
+	@echo "... message_queue.i"
+	@echo "... message_queue.s"
 	@echo "... pipe.o"
 	@echo "... pipe.i"
 	@echo "... pipe.s"
