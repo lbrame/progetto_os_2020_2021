@@ -45,7 +45,7 @@ int get_file_size(char *rPath) {
     struct stat st;
     int statStatus = stat(rPath, &st);
     if (statStatus == -1) {
-        ErrExit("stat");
+        return -1;
     }
     return st.st_size;
 }

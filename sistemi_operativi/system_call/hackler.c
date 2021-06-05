@@ -148,7 +148,6 @@ void handle_signals(pid_struct *sender_messages, pid_struct *receiver_messages, 
         }
 
 
-
         if (strcmp(message.action, "IncreaseDelay") == 0) {
             printf("IncreaseDelay\n");
             kill(reciver_info.pid, SIGUSR1);
@@ -185,7 +184,12 @@ int main(int argc, char *argv[]) {
 
     // READ F7.csv
     // argv[1] is the relative path to the input file and it is passes as a keyboard argument
-    int fileSize = get_file_size(argv[1]);
+    int fileSize;
+    do {
+        fileSize = get_file_size(argv[1]);
+    } while (fileSize == -1 || fileSize == 0);
+    printf("F7 Filesize = %d\n", fileSize);
+
     // allocate buffer to read file of size fileSize + 1(space for /0)
     char *inputBuffer = malloc(sizeof(char) * fileSize + 1);
     if (inputBuffer == NULL) {
@@ -197,15 +201,19 @@ int main(int argc, char *argv[]) {
     hackler_struct message_shtdwn = messages[3];
     free(inputBuffer);
 
-//    sleep(5);
-
     // READ f8.csv
     char path_sender[] = "OutputFiles/F8.csv";
-    fileSize = get_file_size(path_sender);
+    do {
+        fileSize = get_file_size(path_sender);
+    } while (fileSize == -1 || fileSize == 0);
+    printf("F8 Filesize = %d\n", fileSize);
+
+
     // allocate buffer to read file of size fileSize + 1(space for /0)
     inputBuffer = malloc(sizeof(char) * fileSize + 1);
     if (inputBuffer == NULL)
         ErrExit("malloc");
+
 
     read_file(inputBuffer, path_sender, fileSize);
     message_number = count_messages(inputBuffer, fileSize);
@@ -215,7 +223,10 @@ int main(int argc, char *argv[]) {
 
     // READ f9.csv
     char path_receiver[] = "OutputFiles/F9.csv";
-    fileSize = get_file_size(path_receiver);
+    do {
+        fileSize = get_file_size(path_receiver);
+    } while (fileSize == -1 || fileSize == 0);
+    printf("F9 Filesize = %d\n", fileSize);
     // allocate buffer to read file of size fileSize + 1(space for /0)
     inputBuffer = malloc(sizeof(char) * fileSize + 1);
     if (inputBuffer == NULL)

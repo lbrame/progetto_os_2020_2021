@@ -90,7 +90,7 @@ int main(int argc, char * argv[]) {
         ErrExit("S2, SIGQUIT");
     }
 
-    int semaphore_array = semGet(8);
+    int semaphore_array = semGet(1);
     int shmemId = get_shmem(sizeof(Message_struct));
     Message_struct* shmemPointer = (Message_struct*) attach_shmem(shmemId);
 
