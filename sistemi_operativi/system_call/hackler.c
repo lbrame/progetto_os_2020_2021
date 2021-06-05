@@ -117,6 +117,10 @@ pid_struct *parse_pid_struct(char *inputBuffer, int message_number) {
  * @param sender_messages
  * @param receiver_messages
  * @param messages
+ * SIGTERM: terminate the process gracefully, properly closing all open IPCs
+ * SIGUSR1: catch IncreaseDelay message (sent by hackler)
+ * SIGUSR2 RemoveMsg message (sent by hackler)
+ * SIGQUIT: catch SendMsg message (sent by hackler)
  */
 void handle_signals(pid_struct *sender_messages, pid_struct *receiver_messages, hackler_struct *messages,
                     int message_number) {
@@ -127,15 +131,35 @@ void handle_signals(pid_struct *sender_messages, pid_struct *receiver_messages, 
         printf("message: %s\n", messages[i].action);
         hackler_struct message = messages[i];
         sleep(message.delay);
+        pid_struct reciver_info;
+
+        if(strcmp("S1", message.target) == 0) {
+            reciver_info = sender_messages[0];
+        } else if(strcmp("S2", message.target) == 0) {
+            reciver_info = sender_messages[1];
+        }else if(strcmp("S3", message.target) == 0) {
+            reciver_info = sender_messages[2];
+        } else if(strcmp("R1", message.target) == 0) {
+            reciver_info = receiver_messages[0];
+        } else if(strcmp("R2", message.target) == 0) {
+            reciver_info = receiver_messages[1];
+        }else if(strcmp("R3", message.target) == 0) {
+            reciver_info = receiver_messages[2];
+        }
+
+
 
         if (strcmp(message.action, "IncreaseDelay") == 0) {
             printf("IncreaseDelay\n");
+            kill(reciver_info.pid, SIGUSR1);
 
         } else if (strcmp(message.action, "RemoveMSG") == 0) {
             printf("RemoveMsg\n");
+            kill(reciver_info.pid, SIGUSR2);
 
         } else if (strcmp(message.action, "SendMSG") == 0) {
             printf("SendMsg\n");
+            kill(reciver_info.pid, SIGQUIT);
 
         } else if (strcmp(message.action, "ShutDown") == 0) {
             printf("Shutdown\n");

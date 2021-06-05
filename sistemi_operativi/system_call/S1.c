@@ -47,7 +47,7 @@ void send_message(Message_struct* message, int pipe, Message_struct* shmemPointe
  * @param sig signal sent by the kernel
  * SIGTERM: terminate the process gracefully, properly closing all open IPCs
  * SIGUSR1: catch IncreaseDelay message (sent by hackler)
-ch RemoveMsg message (sent by hackler)
+ * SIGUSR2 RemoveMsg message (sent by hackler)
  * SIGQUIT: catch SendMsg message (sent by hackler)
  */
 void sigHandler (int sig) {

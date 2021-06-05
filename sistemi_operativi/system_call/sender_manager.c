@@ -91,15 +91,7 @@ void generate_child(child_struct *info_children, char *inputFile, const int fd1[
 
 int main(int argc, char *argv[]) {
     // Create semaphore set
-    /* 0 -> shmem
-     * 1 -> S1
-     * 2 -> S2
-     * 3 -> S3
-     * 4 -> R3
-     * 5 -> R2
-     * 6 -> R1
-     * 7 -> mutex read shmem
-     * */
+    /* 0 -> shmem*/
     int semaphore_array = createSem(8);
     arg2.val = 0;
     if (semctl(semaphore_array, 7, SETVAL, arg2) == -1)
