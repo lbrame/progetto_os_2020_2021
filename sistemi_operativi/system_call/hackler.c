@@ -216,8 +216,8 @@ int main(int argc, char *argv[]) {
 
 
     read_file(inputBuffer, path_sender, fileSize);
-    message_number = count_messages(inputBuffer, fileSize);
-    pid_struct *sender_messages = parse_pid_struct(inputBuffer, message_number);
+    int n = count_messages(inputBuffer, fileSize);
+    pid_struct *sender_messages = parse_pid_struct(inputBuffer, n);
     free(inputBuffer);
     printf("READ F8\n");
 
@@ -233,8 +233,8 @@ int main(int argc, char *argv[]) {
         ErrExit("malloc");
 
     read_file(inputBuffer, path_receiver, fileSize);
-    message_number = count_messages(inputBuffer, fileSize);
-    pid_struct *receiver_messages = parse_pid_struct(inputBuffer, message_number);
+    n = count_messages(inputBuffer, fileSize);
+    pid_struct *receiver_messages = parse_pid_struct(inputBuffer, n);
     free(inputBuffer);
     printf("READ F9\n");
 
