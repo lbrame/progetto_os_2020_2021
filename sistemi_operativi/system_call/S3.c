@@ -16,45 +16,30 @@
 #include <signal.h>
 int pipe2_read;
 
-void send_message(Message_struct* message)
-{
-    pid_t pid = fork();
+void send_message(Message_struct* message, int fd_fifo, Message_struct* shmemPointer, int semaphore_array) {
     char* time_arrival = (char* )malloc(sizeof (char) * 8);
     char* time_departure = (char* )malloc(sizeof (char) * 8);
-    if(pid == 0) {
-        int semaphore_array = semGet(8);
-        int shmemId = get_shmem(sizeof(Message_struct));
-        Message_struct* shmemPointer = (Message_struct*) attach_shmem(shmemId);
 
-        time_arrival = getTime(time_arrival);
-        int fd_fifo = open_fifo("OutputFiles/my_fifo.txt", O_RDWR);
-        sleep(message->DelS3);
-        if(strcmp(message->Type, "FIFO") == 0){
-            write_pipe(fd_fifo, message);
-        }
-        else if(strcmp(message->Type, "Q") == 0) {
-            // TODO send with queue
-        }
-        else if(strcmp(message->Type, "SH") == 0) {
-            P(semaphore_array, 0);
-            memcpy(shmemPointer, message, sizeof(Message_struct));
-            V(semaphore_array, 7);
-        }
-
-        int fd = my_open("OutputFiles/F3.csv", O_WRONLY | O_APPEND);
-        char* outputBuffer = concatenate(message, time_arrival, time_departure);
-
-        P(semaphore_array, 3);
-        my_write(fd, outputBuffer, strlen(outputBuffer));
-        V(semaphore_array, 3);
-
-        close(fd);
-        free(time_arrival);
-        free(time_departure);
-
-        close(fd_fifo);
-        exit(0);
+    time_arrival = getTime(time_arrival);
+    sleep(message->DelS3);
+    if(strcmp(message->Type, "FIFO") == 0){
+        write_pipe(fd_fifo, message);
     }
+    else if(strcmp(message->Type, "Q") == 0) {
+        // TODO send with queue
+    }
+    else if(strcmp(message->Type, "SH") == 0) {
+        P(semaphore_array, 0);
+        memcpy(shmemPointer, message, sizeof(Message_struct));
+        V(semaphore_array, 7);
+    }
+
+    int fd = my_open("OutputFiles/F3.csv", O_WRONLY | O_APPEND);
+    char* outputBuffer = concatenate(message, time_arrival, time_departure);
+    my_write(fd, outputBuffer, strlen(outputBuffer));
+    close(fd);
+    free(time_arrival);
+    free(time_departure);
 }
 
 /**
@@ -86,36 +71,57 @@ void sigHandler (int sig) {
 }
 
 int main(int argc, char * argv[]) {
-    int pipe2_read = atoi(&argv[0][0]);
+    pipe2_read = atoi(&argv[0][0]);
+
+    if(signal(SIGTERM, sigHandler) == SIG_ERR) {
+        ErrExit("S2, SIGTERM");
+    }
+    if(signal(SIGUSR1, sigHandler) == SIG_ERR) {
+        ErrExit("S2, SIGUSR1");
+    }
+    if(signal(SIGUSR2, sigHandler) == SIG_ERR) {
+        ErrExit("S2, SIGUSR2");
+    }
+    if(signal(SIGQUIT, sigHandler) == SIG_ERR) {
+        ErrExit("S2, SIGQUIT");
+    }
+
+    int semaphore_array = semGet(8);
+    int shmemId = get_shmem(sizeof(Message_struct));
+    Message_struct* shmemPointer = (Message_struct*) attach_shmem(shmemId);
+    int fd_fifo = open_fifo("OutputFiles/my_fifo.txt", O_RDWR);
 
     char* starter = "ID;Message;IDSender;IDReceiver;TimeArrival;TimeDeparture\n";
     write_file("OutputFiles/F3.csv", starter);
 
-    Message_struct *content = (Message_struct *) malloc(sizeof(Message_struct));
-    Message_struct *last_content = (Message_struct *) malloc(sizeof(Message_struct));
-    if (content == NULL || last_content == NULL)
+    Message_struct *message = (Message_struct *) malloc(sizeof(Message_struct));
+    Message_struct *last_message = (Message_struct *) malloc(sizeof(Message_struct));
+    if (message == NULL || last_message == NULL)
         ErrExit("malloc S3");
+
     ssize_t status;
     do { // Read until it returns 0 (EOF)
-        memcpy(last_content, content, sizeof(Message_struct));
-        status = read_pipe(pipe2_read, content);
-        if(content->Id == last_content->Id) {
+        memcpy(last_message, message, sizeof(Message_struct));
+        status = read_pipe(pipe2_read, message);
+        if(message->Id == last_message->Id) {
             continue;
         }
-        send_message(content);
+        send_message(message, fd_fifo, shmemPointer, semaphore_array);
 
     } while (status > 0);
 
     close_pipe(pipe2_read);
-    st(content->Message, "END", 3);
+    close_pipe(fd_fifo);
+
+    // write end message to SHMEM
+    strcpy(message->Message, "END");
     // max int
-    content->Id = 2147483647;
+    message->Id = 2147483647;
 
-    free(content);
-    free(last_content);
-    sleep(3);
+    free(message);
+    free(last_message);
+    detach_shmem((int *) shmemPointer);
 
-    scanf(NULL);
     pause();
     return 0;
 }

@@ -117,7 +117,6 @@ int main(int argc, char * argv[]) {
     free(last_message);
     detach_shmem((int *) shmemPointer);
 
-    scanf(NULL);
     pause();
     return 0;
 }
