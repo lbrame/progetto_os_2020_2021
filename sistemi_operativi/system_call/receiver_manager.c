@@ -11,6 +11,7 @@
 #include "err_exit.h"
 #include "pipe.h"
 #include "semaphore.h"
+#include "shared_memory.h"
 
 /**
  * append a struct to the given array
@@ -90,10 +91,17 @@ int main(int argc, char * argv[]) {
      * 4 -> R3
      * 5 -> R2
      * 6 -> R1
+     * 7 -> mutex read shmem
      * */
-    int semaphore_array = createSem(7);
+    int semaphore_array = createSem(8);
     if (semaphore_array == -1) {
-        semaphore_array = semGet(7);
+        semaphore_array = semGet(8);
+    }
+
+    // Shared memory
+    int shmemId = create_shmem(sizeof(Message_struct));
+    if(shmemId == -1) {
+        shmemId = get_shmem(sizeof(Message_struct));
     }
 
 
@@ -136,6 +144,7 @@ int main(int argc, char * argv[]) {
     while (wait(&info_children[2].pid) != -1);
 
     delete_sem(semaphore_array);
+    destroy_shmem(shmemId);
 
     // Free up old buffers
     free(outputBuffer);

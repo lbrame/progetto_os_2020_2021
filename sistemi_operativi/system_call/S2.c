@@ -12,6 +12,7 @@
 #include "pipe.h"
 #include "semaphore.h"
 #include "files.h"
+#include "shared_memory.h"
 
 int pipe1_read;
 int pipe2_write;
@@ -22,7 +23,9 @@ void send_message(Message_struct* message, int pipe)
     char* time_arrival = (char* )malloc(sizeof (char) * 8);
     char* time_departure = (char* )malloc(sizeof (char) * 8);
     if(pid == 0) {
-        int semaphore_array = semGet(7);
+        int semaphore_array = semGet(8);
+        int shmemId = get_shmem(sizeof(Message_struct));
+        Message_struct* shmemPointer = (Message_struct*) attach_shmem(shmemId);
 
         time_arrival = getTime(time_arrival);
         sleep(message->DelS2);
@@ -33,7 +36,9 @@ void send_message(Message_struct* message, int pipe)
             // TODO send with queue
         }
         else if(strcmp(message->Type, "SH") == 0) {
-            // TODO send with shared memory
+            P(semaphore_array, 0);
+            memcpy(shmemPointer, message, sizeof(Message_struct));
+            V(semaphore_array, 7);
         }
         time_departure = getTime(time_departure);
 

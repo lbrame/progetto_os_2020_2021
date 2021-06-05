@@ -15,10 +15,15 @@
  * @param size size of the shared memory area to initialize
  * @return id of the shared memory
  */
-int generate_shmem(size_t size) {
-    int shmid;
+int create_shmem(size_t size) {
     key_t key = 01101101;
-    shmid = shmget(key, size, IPC_CREAT | IPC_EXCL | S_IRUSR | S_IWUSR);
+    int shmid = shmget(key, size, IPC_CREAT | IPC_EXCL | S_IRUSR | S_IWUSR);
+    return shmid;
+}
+
+int get_shmem(size_t size) {
+    key_t key = 01101101;
+    int shmid = shmget(key, size, S_IRUSR | S_IWUSR);
     if (shmid == -1)
         ErrExit("shmget");
     return shmid;
@@ -33,7 +38,7 @@ void destroy_shmem(int shmid) {
         ErrExit("shmctl: failed to remove shared memory");
 }
 
-int* attach_smem(int shmid) {
+int* attach_shmem(int shmid) {
     int *ptr = (int *) shmat(shmid, NULL, 0);
     if (*ptr == -1)
         ErrExit("shmat: failed to attach to shared memory");

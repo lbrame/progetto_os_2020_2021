@@ -6,7 +6,6 @@
 #include "semaphore.h"
 #include <sys/ipc.h>
 #include <sys/sem.h>
-#include <sys/types.h>
 #include <sys/stat.h>
 #include "unistd.h"
 #include <stdio.h>
@@ -90,6 +89,13 @@ void P(int semid, unsigned short sem_num) {
  */
 void V(int semid, unsigned short sem_num) {
     struct sembuf sop = {.sem_num = sem_num, .sem_op = 1, .sem_flg = 0};
+
+    // Make semaphore binary
+    int value = semctl(semid, sem_num, GETVAL, 0/*ignored*/);
+    if (value == 1)
+        return;
+    else if (value == -1)
+        ErrExit("semctl GETVAL (V)");
 
     if (semop(semid, &sop, 1) == -1)
         ErrExit("semop failed in V wrapper");

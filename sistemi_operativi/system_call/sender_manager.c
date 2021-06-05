@@ -14,6 +14,13 @@
 #include "stdlib.h"
 #include <sys/stat.h>
 
+// definition of the union semun
+union semun {
+    int val;
+    struct semid_ds * buf;
+    unsigned short * array;
+} arg2;
+
 /**
  * append a struct to the given array
  * @param info_children a list where to put the data of the chi
@@ -91,8 +98,15 @@ int main(int argc, char *argv[]) {
      * 4 -> R3
      * 5 -> R2
      * 6 -> R1
+     * 7 -> mutex read shmem
      * */
-    int semaphore_array = createSem(7);
+    int semaphore_array = createSem(8);
+    arg2.val = 0;
+    if (semctl(semaphore_array, 7, SETVAL, arg2) == -1)
+        ErrExit("semctl: initialize semaphore 8 to 0");
+
+    // Shared memory
+    int shmemId = create_shmem(sizeof(Message_struct));
 
     // Dynamic memory allocation
     child_struct *info_children = (child_struct *) malloc(sizeof(child_struct) * 3);
@@ -141,7 +155,6 @@ int main(int argc, char *argv[]) {
     while (wait(&info_children[0].pid) != -1);
     while (wait(&info_children[1].pid) != -1);
     while (wait(&info_children[2].pid) != -1);
-
 
     free(outputBuffer);
     free(info_children);

@@ -15,7 +15,14 @@
  * @param size size of the shared memory area to initialize
  * @return id of the shared memory
  */
-int generate_shmem(size_t size);
+int create_shmem(size_t size);
+
+/**
+ * Get shared memory area.
+ * @param size of the shared memory
+ * @return id of the shared memory
+ */
+int get_shmem(size_t size);
 
 /**
  * Remove shared memory area.
@@ -28,7 +35,7 @@ void destroy_shmem(int shmid);
  * @param shmid id of existing shared memory area to attach to
  * @return pointer where shared memory is attached
  */
-int* attach_smem(int shmid);
+int* attach_shmem(int shmid);
 
 /**
  * Detach current process from shared memory area.
