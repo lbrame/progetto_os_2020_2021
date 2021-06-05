@@ -28,7 +28,7 @@ int count_messages(const char *input, int fileSize) {
     int counter = 0;
     for (int i = 1; i < fileSize + 1; i++) {
         //if after a letter or a number there's a \n, it's the beginning of a new message and the counter is incremented
-        if (input[i] == '\n' && input[i - 1] >= '0' && input[i - 1] <= 'z')
+        if (input[i] == '\n' || input[i] == '\0')
             counter++;
     }
 

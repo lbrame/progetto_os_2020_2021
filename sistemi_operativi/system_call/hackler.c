@@ -12,8 +12,8 @@
 typedef struct {
     int id;
     int delay;
-    char target[2];
-    char action[13];
+    char target[3];
+    char action[14];
 } hackler_struct;
 
 typedef struct {
@@ -53,10 +53,15 @@ hackler_struct *parse_hackler_struct(char *inputBuffer, int message_number) {
                         message->delay = atoi(field_token);
                         break;
                     case 2:
-                        memcpy(message->target, field_token, sizeof(&field_token));
-                        break;
+                        if(strcmp(field_token, "ShutDown") == 0) {
+                            strcpy(message->action, field_token);
+                            break;
+                        } else {
+                            strcpy(message->target, field_token);
+                            break;
+                        }
                     case 3:
-                        memcpy(message->action, field_token, sizeof(&field_token));
+                        strcpy(message->action, field_token);
                         break;
                     default:
                         ErrExit("parse_file");
@@ -113,7 +118,8 @@ pid_struct *parse_pid_struct(char *inputBuffer, int message_number) {
  * @param receiver_messages
  * @param messages
  */
-void handle_signals(pid_struct *sender_messages, pid_struct *receiver_messages, hackler_struct *messages, int message_number) {
+void handle_signals(pid_struct *sender_messages, pid_struct *receiver_messages, hackler_struct *messages,
+                    int message_number) {
     printf("called handle_signals\n");
     printf("message number: %d\n", message_number);
     for (int i = 0; i < message_number; i++) {
@@ -133,12 +139,18 @@ void handle_signals(pid_struct *sender_messages, pid_struct *receiver_messages, 
 
         } else if (strcmp(message.action, "ShutDown") == 0) {
             printf("Shutdown\n");
-            for (int j=0; j<3; j++) {
+            for (int j = 0; j < 3; j++) {
                 pid_struct sender_message = sender_messages[j];
-                pid_struct receiver_message = receiver_messages[2-j];
+                pid_struct receiver_message = receiver_messages[2 - j];
                 kill(sender_message.pid, SIGTERM);
                 kill(receiver_message.pid, SIGTERM);
-                printf("SENT SIGTERM");
+                printf("Hackler sent SIGTERM to:\n"
+                       "Sender messages:"
+                       "\t%s %d\n"
+                       "Receiver messages:"
+                       "\t%s %d \n",
+                       sender_message.senderID, sender_message.pid,
+                       receiver_message.senderID, receiver_message.pid);
             }
         }
     }
@@ -158,6 +170,7 @@ int main(int argc, char *argv[]) {
     read_file(inputBuffer, argv[1], fileSize);
     int message_number = count_messages(inputBuffer, fileSize);
     hackler_struct *messages = parse_hackler_struct(inputBuffer, message_number);
+    hackler_struct message_shtdwn = messages[3];
     free(inputBuffer);
 
 //    sleep(5);
