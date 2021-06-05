@@ -97,5 +97,9 @@ int main(int argc, char * argv[]) {
     }while(status > 0);
 
     close_pipe(pipe3_write);
+
+    // pause();
+    scanf(NULL);
+    pause();
     return 0;
 }

@@ -269,5 +269,8 @@ int main(int argc, char *argv[]) {
     free(messages);
     free(sender_messages);
     free(receiver_messages);
+
+    printf("Hackler quitting: %d\n", getpid());
+
     return 0;
 }

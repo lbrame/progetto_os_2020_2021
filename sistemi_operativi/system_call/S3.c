@@ -62,21 +62,21 @@ void sigHandler (int sig) {
 
     switch (sig) {
         case SIGUSR1:
-            printf("Caught SIGUSR1\n");
+            printf("S2: Caught SIGUSR1\n");
 
             break;
         case SIGUSR2:
-            printf("Caught SIGUSR2\n");
+            printf("S2: Caught SIGUSR2\n");
             break;
         case SIGQUIT:
-            printf("Caught SIGQUIT, reusing it\n");
+            printf("S2: Caught SIGQUIT, reusing it\n");
             break;
         case SIGTERM:
-            printf("Caught SIGTERM\n");
+            printf("S2: Caught SIGTERM\n");
             close_pipe(pipe2_read);
             exit(0);
         default:
-            printf("Signal not valid\n");
+            printf("S2: Signal not valid\n");
             break;
     }
 }
@@ -108,6 +108,7 @@ int main(int argc, char * argv[]) {
     free(last_content);
     sleep(3);
 
+    scanf(NULL);
+    pause();
     return 0;
-
 }

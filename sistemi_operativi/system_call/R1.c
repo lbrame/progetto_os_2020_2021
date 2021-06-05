@@ -39,6 +39,8 @@ void sigHandler(int sig) {
 }
 
 int main(int argc, char *argv[]) {
+    printf("R1: %d\n", getpid());
+
     pipe4_read = atoi(&argv[0][0]);
     if(signal(SIGTERM, sigHandler) == SIG_ERR) {
         ErrExit("R1, SIGTERM");
@@ -92,5 +94,9 @@ int main(int argc, char *argv[]) {
     close_pipe(pipe4_read);
     free(content);
     free(last_content);
+
+    // pause()
+    scanf(NULL);
+    pause();
     return 0;
 }

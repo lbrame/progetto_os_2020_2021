@@ -94,7 +94,6 @@ int main(int argc, char * argv[]) {
     if(signal(SIGQUIT, sigHandler) == SIG_ERR) {
         ErrExit("S1, SIGQUIT");
     }
-    printf("S1: %d\n", getpid());
 
     char* starter = "ID;Message;IDSender;IDReceiver;TimeArrival;TimeDeparture\n";
     write_file("OutputFiles/F1.csv", starter);
@@ -114,5 +113,6 @@ int main(int argc, char * argv[]) {
     close(fd);
     close_pipe(pipe1_write);
 
+    pause();
     return 0;
 }

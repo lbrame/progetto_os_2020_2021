@@ -77,15 +77,16 @@ void read_file(char *inputBuffer, char *rPath, int fileSize) {
  */
 char *join(char *str1, char *str2, char join_character) {
     //allocated the space needed for both the strings, the odd character and the \0
-    int malloc_size = (int) (strlen(str1) + sizeof(join_character) + strlen(str2) + 1);
-    char *buffer = malloc(malloc_size);
+    int calloc_size = (int) (strlen(str1) + sizeof(join_character) + strlen(str2) + 1);
+    // char *buffer = malloc(calloc_size);
+    char *buffer = calloc(calloc_size, sizeof(join_character));
     // clean buffer
-    for (int i = 0; i < malloc_size; i++) buffer[i] = 0;
+    // for (int i = 0; i < calloc_size; i++) buffer[i] = 0;
     //copied the content of str1 in buffer
     strcpy(buffer, str1);
     //if the strings are non zero -> calculate the position of join_character
     if (strcmp(str1, "") != 0 && strcmp(str2, "") != 0 && join_character) {
-        buffer[malloc_size - strlen(str2) - 2] = join_character;
+        buffer[calloc_size - strlen(str2) - 2] = join_character;
     }
     //append str2 to buffer
     strcat(buffer, str2);

@@ -76,6 +76,7 @@ void sigHandler(int sig) {
 
 
 int main(int argc, char *argv[]) {
+    printf("R2: %d\n", getpid());
     pipe3_read = atoi(argv[0]);
     pipe4_write = atoi(argv[1]);
 
@@ -115,5 +116,9 @@ int main(int argc, char *argv[]) {
     close_pipe(pipe4_write);
     free(content);
     free(last_content);
+
+    // pause();
+    scanf(NULL);
+    pause();
     return 0;
 }
