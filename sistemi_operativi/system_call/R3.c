@@ -83,7 +83,6 @@ int main(int argc, char * argv[]) {
        char* outputbuffer = msgRcv(fd_queue, outputbuffer);
        if(outputbuffer == NULL || buf.msg_qnum == 0)
            break;
-       printf("outputbuffer = %s\n", outputbuffer);
        char* tmp;
         if((tmp =  strstr(outputbuffer, "R3")) != NULL) {
             //send message to write in outputbuffer

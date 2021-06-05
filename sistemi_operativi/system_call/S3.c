@@ -41,7 +41,6 @@ void send_message(Message_struct* message)
             struct msqid_ds buf;
             if(msgctl(fd_queue, IPC_STAT, &buf) < 0)
                 ErrExit("msgctl");
-            printf("S3 sent message to queue\n");
         }
         else if(strcmp(message->Type, "SH") == 0) {
             // TODO send with shared memory

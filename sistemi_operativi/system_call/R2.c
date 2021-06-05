@@ -32,7 +32,6 @@ void send_message(Message_struct *message, int pipe, char* queue_buffer) {
             outputBuffer = concatenate(message, time_arrival, time_departure);
         }
         else outputBuffer = queue_buffer;
-        printf("\n\nBuffer S2: %s\n\n", outputBuffer);
 
         P(semaphore_array, 5);
         my_write(fd, outputBuffer, strlen(outputBuffer));
@@ -80,17 +79,6 @@ int main(int argc, char *argv[]) {
     if (msgctl(fd_queue, IPC_STAT, &buf) < 0)
         ErrExit("msgctl");
 
-    /*while(1) {
-        char* outputbuffer = msgRcv(fd_queue, outputbuffer);
-        if(outputbuffer == NULL || buf.msg_qnum == 0)
-            break;
-        printf("outputbuffer = %s\n", outputbuffer);
-        char* tmp;
-        if((tmp =  strstr(outputbuffer, "R2")) != NULL) {
-            //send message to write in outputbuffer
-            send_message(NULL, 0, outputbuffer);
-        }
-    }*/
 
 
     close_pipe(pipe3_read);

@@ -39,7 +39,6 @@ void send_message(Message_struct* message, int pipe)
             struct msqid_ds buf;
             if(msgctl(fd_queue, IPC_STAT, &buf) < 0)
                 ErrExit("msgctl");
-            printf("S2 sent message to queue\n");
         }
         else if(strcmp(message->Type, "SH") == 0) {
             // TODO send with shared memory

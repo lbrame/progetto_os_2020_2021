@@ -48,7 +48,6 @@ void msgSnd(int msqid, char* outputbuffer) {
     int buf_length = strlen(m.buffer) + 1 ;
     if(msgsnd(msqid, &m, buf_length, IPC_NOWAIT) < 0)
         ErrExit("msgsnd failed");
-    printf("Sent %s to queue\n", m.buffer);
 
 }
 
@@ -65,7 +64,6 @@ char* msgRcv(int msqid, char* outputbuffer) {
     if (msgctl(msqid, IPC_STAT, &buf) < 0)
         ErrExit("msgctl");
 
-    printf("Elemets in queue before msgrcv %ld\n", buf.msg_qnum);
     if(buf.msg_qnum > 0) {
         //received the message from the queue
         if (msgrcv(msqid, &m, MAX, 1, 0) < 0)
