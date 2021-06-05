@@ -17,44 +17,32 @@
 int pipe1_read;
 int pipe2_write;
 
-void send_message(Message_struct* message, int pipe)
-{
-    pid_t pid = fork();
+void send_message(Message_struct* message, int pipe, Message_struct* shmemPointer, int semaphore_array) {
+    // come parametro verrà passato l'id del semaforo
     char* time_arrival = (char* )malloc(sizeof (char) * 8);
     char* time_departure = (char* )malloc(sizeof (char) * 8);
-    if(pid == 0) {
-        int semaphore_array = semGet(8);
-        int shmemId = get_shmem(sizeof(Message_struct));
-        Message_struct* shmemPointer = (Message_struct*) attach_shmem(shmemId);
 
-        time_arrival = getTime(time_arrival);
-        sleep(message->DelS2);
-        if((strcmp(message->Type, "FIFO") == 0) || (strcmp(message->IdSender, "S2") != 0)) {
-            write_pipe(pipe, message);
-        }
-        else if(strcmp(message->Type, "Q") == 0) {
-            // TODO send with queue
-        }
-        else if(strcmp(message->Type, "SH") == 0) {
-            P(semaphore_array, 0);
-            memcpy(shmemPointer, message, sizeof(Message_struct));
-            V(semaphore_array, 7);
-        }
-        time_departure = getTime(time_departure);
-
-        int fd = my_open("OutputFiles/F2.csv", O_WRONLY | O_APPEND);
-        char* outputBuffer = concatenate(message, time_arrival, time_departure);
-
-        P(semaphore_array, 2);
-        my_write(fd, outputBuffer, strlen(outputBuffer));
-        V(semaphore_array, 2);
-
-        close(fd);
-        free(time_arrival);
-        free(time_departure);
-        close_pipe(pipe);
-        exit(0);
+    time_arrival = getTime(time_arrival);
+    sleep(message->DelS1);
+    if ((strcmp(message->Type, "FIFO") == 0) || (strcmp(message->IdSender, "S2") != 0)) {
+        write_pipe(pipe, message);
+    } else if (strcmp(message->Type, "Q") == 0) {
+        // TODO send with queue
+    } else if (strcmp(message->Type, "SH") == 0) {
+        P(semaphore_array, 0);
+        memcpy(shmemPointer, message, sizeof(Message_struct));
+        V(semaphore_array, 7);
     }
+    time_departure = getTime(time_departure);
+
+    int fd = my_open("OutputFiles/F2.csv", O_WRONLY | O_APPEND);
+    char* outputBuffer = concatenate(message, time_arrival, time_departure);
+
+    my_write(fd, outputBuffer, strlen(outputBuffer));
+
+    close(fd);
+    free(time_arrival);
+    free(time_departure);
 }
 
 /**
@@ -91,31 +79,43 @@ int main(int argc, char * argv[]) {
     pipe2_write = atoi(argv[1]);
 
     if(signal(SIGTERM, sigHandler) == SIG_ERR) {
-        ErrExit("S1, SIGTERM");
+        ErrExit("S2, SIGTERM");
+    }
+    if(signal(SIGUSR1, sigHandler) == SIG_ERR) {
+        ErrExit("S2, SIGUSR1");
+    }
+    if(signal(SIGUSR2, sigHandler) == SIG_ERR) {
+        ErrExit("S2, SIGUSR2");
+    }
+    if(signal(SIGQUIT, sigHandler) == SIG_ERR) {
+        ErrExit("S2, SIGQUIT");
     }
 
-    printf("S2: %d\n", getpid());
+    int semaphore_array = semGet(8);
+    int shmemId = get_shmem(sizeof(Message_struct));
+    Message_struct* shmemPointer = (Message_struct*) attach_shmem(shmemId);
 
     char* starter = "ID;Message;IDSender;IDReceiver;TimeArrival;TimeDeparture\n";
     write_file("OutputFiles/F2.csv", starter);
 
-    Message_struct *content = (Message_struct *) malloc(sizeof(Message_struct));
-    Message_struct *last_content = (Message_struct *) malloc(sizeof(Message_struct));
-    if (content == NULL || last_content == NULL)
+    Message_struct *message = (Message_struct *) malloc(sizeof(Message_struct));
+    Message_struct *last_message = (Message_struct *) malloc(sizeof(Message_struct));
+    if (message == NULL || last_message == NULL)
         ErrExit("malloc S2");
     ssize_t status;
     do { // Read until it returns 0 (EOF)
-        memcpy(last_content, content, sizeof(Message_struct));
-        status = read_pipe(pipe1_read, content);
-        if(content->Id == last_content->Id)
+        memcpy(last_message, message, sizeof(Message_struct));
+        status = read_pipe(pipe1_read, message);
+        if(message->Id == last_message->Id)
             continue;
-        send_message(content, pipe2_write);
+        send_message(message, pipe2_write);
     } while (status > 0);
 
     close_pipe(pipe1_read);
     close_pipe(pipe2_write);
-    free(content);
-    free(last_content);
+    free(message);
+    free(last_message);
+    detach_shmem((int *) shmemPointer);
 
     scanf(NULL);
     pause();
