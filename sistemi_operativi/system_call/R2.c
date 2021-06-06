@@ -91,7 +91,7 @@ int main(int argc, char *argv[]) {
 
     pipe3_read = atoi(argv[0]);
     pipe4_write = atoi(argv[1]);
-    int semaphore_array = semGet(1);
+    int semaphore_array = semGet(2);
     int shmemId = get_shmem(sizeof(Message_struct));
     //Queue file's descriptor
     int fd_queue = msgGet();

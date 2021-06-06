@@ -85,7 +85,7 @@ int main(int argc, char *argv[]) {
 
     printf("R1: %d\n", getpid());
 
-    int semaphore_array = semGet(1);
+    int semaphore_array = semGet(2);
     int shmemId = get_shmem(sizeof(Message_struct));
     int fd_queue = msgGet();
 

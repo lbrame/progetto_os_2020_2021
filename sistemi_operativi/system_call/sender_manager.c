@@ -93,8 +93,9 @@ int main(int argc, char *argv[]) {
 
     struct stat sb;
     // Create semaphore set
-    /* 0 -> shmem*/
-    int semaphore_array = createSem(1);
+    // 0 -> shmem
+    // 1 -> write to F10.csv
+    int semaphore_array = createSem(2);
     arg2.val = 0;
 
     // Shared memory

@@ -88,10 +88,12 @@ void generate_child(child_struct *info_children, const int fd3[2], const int fd4
 
 int main(int argc, char * argv[]) {
 
-    // Semaphore to protect shared memory writes
-    int semaphore_array = createSem(1);
+    // Semaphore set
+    // 0: protect shmem writes
+    // 1: protect F10 writes
+    int semaphore_array = createSem(2);
     if (semaphore_array == -1) {
-        semaphore_array = semGet(1);
+        semaphore_array = semGet(2);
     }
 
     // Shared memory
