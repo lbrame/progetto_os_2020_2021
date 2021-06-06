@@ -8,6 +8,8 @@
 #include "files.h"
 #include "shared_memory.h"
 #include <fcntl.h>
+#include "message_queue.h"
+#include <sys/msg.h>
 #include <signal.h>
 
 int pipe3_read;
@@ -68,6 +70,8 @@ int main(int argc, char *argv[]) {
     pipe4_write = atoi(argv[1]);
     int semaphore_array = semGet(1);
     int shmemId = get_shmem(sizeof(Message_struct));
+    //Queue file's descriptor
+    int fd_queue = msgGet();
     Message_struct *shmemPointer = (Message_struct *) attach_shmem(shmemId);
 
     if(signal(SIGTERM, sigHandler) == SIG_ERR) {
@@ -102,10 +106,14 @@ int main(int argc, char *argv[]) {
     do { //Read until it returns 0 (EOF)
         if (status > 0) {
             memcpy(last_message, message, sizeof(Message_struct));
-            // using read_pipe as a reader also for fifo (they works the same way)
+            
             status = read_pipe(pipe3_read, message);
             if (message->Id == last_message->Id)
                 continue;
+            if(strcmp(message->IdReceiver, "R2") != 0  && strcmp(content->Type, "Q") == 0) {
+              write_pipe(pipe4_write, content);
+              continue;
+            }
             send_message(message, pipe4_write);
         } else
             endFlag--;
@@ -123,6 +131,12 @@ int main(int argc, char *argv[]) {
             endFlag--;
 
     } while (endFlag > 0);
+
+
+    struct msqid_ds buf;
+    if (msgctl(fd_queue, IPC_STAT, &buf) < 0)
+        ErrExit("msgctl");
+
 
 
     close_pipe(pipe3_read);

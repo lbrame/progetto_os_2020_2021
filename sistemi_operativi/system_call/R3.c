@@ -9,23 +9,29 @@
 #include "fifo.h"
 #include "semaphore.h"
 #include "files.h"
+#include "message_queue.h"
+#include <sys/msg.h>
 #include "shared_memory.h"
 #include <signal.h>
+
 int pipe3_write;
 
-void send_message(Message_struct *message, int pipe) {
+void send_message(Message_struct *message, int pipe, char* queue_buffer) {
     char *time_arrival = (char *) malloc(sizeof(char) * 8);
     char *time_departure = (char *) malloc(sizeof(char) * 8);
     time_arrival = getTime(time_arrival);
-
-    sleep(message->DelS3);
-    if (strcmp(message->IdReceiver, "R3") != 0) {
-        write_pipe(pipe, message);
+    if (message != NULL){
+      sleep(message->DelS3);
+      if (strcmp(message->IdReceiver, "R3") != 0) {
+          write_pipe(pipe, message);
+      }
+      time_departure = getTime(time_departure);
+      char *outputBuffer = concatenate(message, time_arrival, time_departure);
+    } else {
+      outputBuffer = queue_buffer
     }
-    time_departure = getTime(time_departure);
-
+  
     int fd = my_open("OutputFiles/F4.csv", O_WRONLY | O_APPEND);
-    char *outputBuffer = concatenate(message, time_arrival, time_departure);
     my_write(fd, outputBuffer, strlen(outputBuffer));
     close(fd);
 
@@ -85,10 +91,16 @@ int main(int argc, char * argv[]) {
 
     // Reading files from my_fifo.txt and saving them with the mechanism of S1
     int fd_fifo = open_fifo("OutputFiles/my_fifo.txt", O_RDONLY);
+
+    //Queue file's descriptor
+    int fd_queue = msgGet();
+
     Message_struct *message = (Message_struct *) malloc(sizeof(Message_struct));
     Message_struct *last_message = (Message_struct *) malloc(sizeof(Message_struct));
+
     if (message == NULL || last_message == NULL)
         ErrExit("malloc R3");
+
     ssize_t status = 1;
 
     // 2 --> 1. fifo
@@ -102,7 +114,7 @@ int main(int argc, char * argv[]) {
             status = read_pipe(fd_fifo, message);
             if (message->Id == last_message->Id)
                 continue;
-            send_message(message, pipe3_write);
+            send_message(message, pipe3_write, NULL);
         } else
             endFlag--;
 
@@ -118,9 +130,29 @@ int main(int argc, char * argv[]) {
                 V(semaphore_array,0);
         } else
             endFlag--;
+      
+      // MSG QUEUE
+      char* outputbuffer = msgRcv(fd_queue, outputbuffer);
+      if(outputbuffer == NULL || buf.msg_qnum == 0)
+           break;
+      char* tmp;
+      if((tmp =  strstr(outputbuffer, "R3")) != NULL) {
+        //send message to write in outputbuffer
+        send_message(NULL, 0, outputbuffer);
+      }
+      else {
+            Message_struct* queue_message = parse_message(outputbuffer);
+            //send without printing
+            write_pipe(pipe3_write, queue_message);
+        }
 
     } while (endFlag > 0);
+  
+    struct msqid_ds buf;
+    if (msgctl(fd_queue, IPC_STAT, &buf) < 0)
+        ErrExit("msgctl");
 
+    memcpy(last_message, message, sizeof(Message_struct));
     close_pipe(pipe3_write);
     free(message);
     free(last_message);

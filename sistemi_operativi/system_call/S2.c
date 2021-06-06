@@ -12,6 +12,8 @@
 #include "pipe.h"
 #include "semaphore.h"
 #include "files.h"
+#include "message_queue.h"
+#include <sys/msg.h>
 #include "shared_memory.h"
 
 int pipe1_read;
@@ -27,7 +29,12 @@ void send_message(Message_struct* message, int pipe, Message_struct* shmemPointe
     if ((strcmp(message->Type, "FIFO") == 0) || (strcmp(message->IdSender, "S2") != 0)) {
         write_pipe(pipe, message);
     } else if (strcmp(message->Type, "Q") == 0) {
-        // TODO send with queue
+       //sent with message queue
+        int fd_queue = msgGet();
+        msgSnd(fd_queue, outputBuffer);
+        struct msqid_ds buf;
+        if(msgctl(fd_queue, IPC_STAT, &buf) < 0)
+            ErrExit("msgctl");
     } else if (strcmp(message->Type, "SH") == 0) {
         P(semaphore_array, 0);
         memcpy(shmemPointer, message, sizeof(Message_struct));

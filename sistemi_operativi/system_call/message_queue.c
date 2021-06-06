@@ -9,6 +9,11 @@
 #include <sys/msg.h>
 #include <string.h>
 #include "err_exit.h"
+#include <stdio.h>
+#include "defines.h"
+#include <stdlib.h>
+#define MAX 50
+
 
 /**
  * Wrapper function to quickly create or get the message queue. The key is hard-coded
@@ -30,40 +35,44 @@ int msgGet() {
  * @param msqid ID of the message queue to send message to
  * @param text Text to send as part of the message
  */
-void msgSnd(int msqid, char* text) {
+void msgSnd(int msqid, char* outputbuffer) {
     // Message structure
     struct mymsg {
         long mtype;
-        char mtext[100];
+        char buffer[MAX];
     } m;
 
     // Define message type
     m.mtype = 1;
-
-    // Copy input text string into message structure
-    memcpy(m.mtext, text, strlen(text) + 1);
-
-    // Get size of the text field
-    size_t mSize = sizeof(struct mymsg) - sizeof(long);
-
-    // Send message to queue
-    if (msgsnd(msqid, &m, mSize, 0) == -1)
+    strcpy(m.buffer, outputbuffer);
+    int buf_length = strlen(m.buffer) + 1 ;
+    if(msgsnd(msqid, &m, buf_length, IPC_NOWAIT) < 0)
         ErrExit("msgsnd failed");
+
 }
 
-void msgRcv(int msqid) {
+char* msgRcv(int msqid, char* outputbuffer) {
     // Message structure
     struct mymsg {
         long mtype;
-        char mtext[100];
+        char buffer[MAX+1];
     } m;
 
-    // Get size of the text field
-    size_t mSize = sizeof(struct mymsg) - sizeof(long);
+    m.mtype = 1;
 
-    // Wait for message of type 1
-    if (msgrcv(msqid, &m, mSize, 1, 0) == -1)
-        ErrExit("smgrcv");
+    struct msqid_ds buf;
+    if (msgctl(msqid, IPC_STAT, &buf) < 0)
+        ErrExit("msgctl");
+
+    if(buf.msg_qnum > 0) {
+        //received the message from the queue
+        if (msgrcv(msqid, &m, MAX, 1, 0) < 0)
+            ErrExit("msgrcv");
+        outputbuffer = (char*) malloc(sizeof (char)*(MAX));
+        //decreasing the number of messages in queue
+        return strcpy(outputbuffer, m.buffer);
+    }
+    else return NULL;
 }
 
 /**
@@ -91,3 +100,4 @@ void msgqueue_set_upper_limit(int msqid, int upperlimit) {
     if (msgctl(msqid, IPC_SET, &ds) == -1)
         ErrExit("msgctl failed: update msqid_ds structure");
 }
+

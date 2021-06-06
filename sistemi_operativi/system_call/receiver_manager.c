@@ -11,6 +11,7 @@
 #include "err_exit.h"
 #include "pipe.h"
 #include "semaphore.h"
+#include "message_queue.h"
 #include "shared_memory.h"
 
 /**
@@ -142,5 +143,6 @@ int main(int argc, char * argv[]) {
     free(outputBuffer);
     free(info_children);
     unlink("OutputFiles/my_fifo.txt");
+    delete_msgqueue(msgGet());
     return 0;
 }

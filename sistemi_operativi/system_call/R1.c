@@ -8,7 +8,8 @@
 #include <stdlib.h>
 #include <memory.h>
 #include <fcntl.h>
-#include <signal.h>
+#include "message_queue.h"
+#include <sys/msg.h>
 
 int pipe4_read;
 
@@ -38,6 +39,7 @@ void sigHandler(int sig) {
             break;
     }
 }
+
 int main(int argc, char *argv[]) {
     pipe4_read = atoi(&argv[0][0]);
 
@@ -58,11 +60,17 @@ int main(int argc, char *argv[]) {
 
     int semaphore_array = semGet(1);
     int shmemId = get_shmem(sizeof(Message_struct));
+    int fd_queue = msgGet();
+
     Message_struct *shmemPointer = (Message_struct *) attach_shmem(shmemId);
 
 
     char *starter = "ID;Message;IDSender;IDReceiver;TimeArrival;TimeDeparture\n";
     write_file("OutputFiles/F6.csv", starter);
+
+    struct msqid_ds buf;
+    if (msgctl(fd_queue, IPC_STAT, &buf) < 0)
+        ErrExit("msgctl");
 
     Message_struct *message = (Message_struct *) malloc(sizeof(Message_struct));
     Message_struct *last_message = (Message_struct *) malloc(sizeof(Message_struct));
@@ -118,6 +126,5 @@ int main(int argc, char *argv[]) {
     free(message);
     free(last_message);
     pause();
-
     return 0;
 }
