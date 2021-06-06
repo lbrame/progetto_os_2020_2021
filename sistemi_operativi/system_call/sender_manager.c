@@ -7,12 +7,19 @@
 #include "semaphore.h"
 #include "fifo.h"
 #include "pipe.h"
-#include "unistd.h"
+#include <unistd.h>
 #include <sys/wait.h>
 #include <errno.h>
-#include "stdio.h"
-#include "stdlib.h"
+#include <stdio.h>
+#include <stdlib.h>
 #include <sys/stat.h>
+
+// definition of the union semun
+union semun {
+    int val;
+    struct semid_ds * buf;
+    unsigned short * array;
+} arg2;
 
 /**
  * append a struct to the given array
@@ -28,6 +35,7 @@ void add_child(child_struct *info_children, char sender_id[], pid_t pid, int i) 
     }
     child->sender_id = sender_id;
     child->pid = (int) pid;
+    printf("S%d pid from SM: %d\n", i, pid);
     info_children[i - 1] = *child;
 }
 
@@ -82,16 +90,15 @@ void generate_child(child_struct *info_children, char *inputFile, const int fd1[
 }
 
 int main(int argc, char *argv[]) {
+
+    struct stat sb;
     // Create semaphore set
-    /* 0 -> shmem
-     * 1 -> S1
-     * 2 -> S2
-     * 3 -> S3
-     * 4 -> R3
-     * 5 -> R2
-     * 6 -> R1
-     * */
-    int semaphore_array = createSem(7);
+    /* 0 -> shmem*/
+    int semaphore_array = createSem(1);
+    arg2.val = 0;
+
+    // Shared memory
+    int shmemId = create_shmem(sizeof(Message_struct));
 
     // Dynamic memory allocation
     child_struct *info_children = (child_struct *) malloc(sizeof(child_struct) * 3);
@@ -99,7 +106,6 @@ int main(int argc, char *argv[]) {
         ErrExit("malloc senderManager");
     }
 
-    struct stat sb;
     // If ./OutputFiles does not exist, create it
     if (stat("OutputFiles", &sb) != 0)
         mkdir("OutputFiles", S_IRWXU);
@@ -140,7 +146,6 @@ int main(int argc, char *argv[]) {
     while (wait(&info_children[0].pid) != -1);
     while (wait(&info_children[1].pid) != -1);
     while (wait(&info_children[2].pid) != -1);
-
 
     free(outputBuffer);
     free(info_children);

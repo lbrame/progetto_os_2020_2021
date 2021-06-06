@@ -16,6 +16,7 @@
 #include <sys/types.h>
 #include <sys/ipc.h>
 #include <time.h>
+#include <signal.h>
 
 /**
  * count the number of messages in the file
@@ -27,7 +28,7 @@ int count_messages(const char *input, int fileSize) {
     int counter = 0;
     for (int i = 1; i < fileSize + 1; i++) {
         //if after a letter or a number there's a \n, it's the beginning of a new message and the counter is incremented
-        if (input[i] == '\n' && input[i - 1] >= '0' && input[i - 1] <= 'z')
+        if (input[i] == '\n' || input[i] == '\0')
             counter++;
     }
 
@@ -44,7 +45,7 @@ int get_file_size(char *rPath) {
     struct stat st;
     int statStatus = stat(rPath, &st);
     if (statStatus == -1) {
-        ErrExit("stat");
+        return -1;
     }
     return st.st_size;
 }
@@ -76,15 +77,16 @@ void read_file(char *inputBuffer, char *rPath, int fileSize) {
  */
 char *join(char *str1, char *str2, char join_character) {
     //allocated the space needed for both the strings, the odd character and the \0
-    int malloc_size = (int) (strlen(str1) + sizeof(join_character) + strlen(str2) + 1);
-    char *buffer = malloc(malloc_size);
+    int calloc_size = (int) (strlen(str1) + sizeof(join_character) + strlen(str2) + 1);
+    // char *buffer = malloc(calloc_size);
+    char *buffer = calloc(calloc_size, sizeof(join_character));
     // clean buffer
-    for (int i = 0; i < malloc_size; i++) buffer[i] = 0;
+    // for (int i = 0; i < calloc_size; i++) buffer[i] = 0;
     //copied the content of str1 in buffer
     strcpy(buffer, str1);
     //if the strings are non zero -> calculate the position of join_character
     if (strcmp(str1, "") != 0 && strcmp(str2, "") != 0 && join_character) {
-        buffer[malloc_size - strlen(str2) - 2] = join_character;
+        buffer[calloc_size - strlen(str2) - 2] = join_character;
     }
     //append str2 to buffer
     strcat(buffer, str2);
@@ -143,12 +145,7 @@ char *itoa(int val) {
         buffer_dim++;
     }
     char *buffer = malloc(sizeof(char) * buffer_dim);
-    // itoa && assign values to buffer
-    for (int i = 0; val > 0; i++) {
-        new = val % 10;
-        buffer[i] = (char) (new + 48);
-        val = val / 10;
-    }
+    sprintf(buffer, "%d", val);
     buffer[buffer_dim] = '\0';
     return buffer;
 }

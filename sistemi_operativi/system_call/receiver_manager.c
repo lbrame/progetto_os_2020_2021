@@ -1,17 +1,18 @@
 /// @file receiver_manager.c
 /// @brief Contiene l'implementazione del receiver_manager.
 
-#include "unistd.h"
+#include <unistd.h>
 #include <sys/wait.h>
 #include <errno.h>
-#include "stdio.h"
-#include "stdlib.h"
+#include <stdio.h>
+#include <stdlib.h>
 #include <sys/stat.h>
 #include "defines.h"
 #include "err_exit.h"
 #include "pipe.h"
 #include "semaphore.h"
 #include "message_queue.h"
+#include "shared_memory.h"
 
 /**
  * append a struct to the given array
@@ -84,17 +85,16 @@ void generate_child(child_struct *info_children, const int fd3[2], const int fd4
 
 
 int main(int argc, char * argv[]) {
-    /* 0 -> shmem
-     * 1 -> S1
-     * 2 -> S2
-     * 3 -> S3
-     * 4 -> R3
-     * 5 -> R2
-     * 6 -> R1
-     * */
-    int semaphore_array = createSem(7);
+    // Semaphore to protect shared memory writes
+    int semaphore_array = createSem(1);
     if (semaphore_array == -1) {
-        semaphore_array = semGet(7);
+        semaphore_array = semGet(1);
+    }
+
+    // Shared memory
+    int shmemId = create_shmem(sizeof(Message_struct));
+    if(shmemId == -1) {
+        shmemId = get_shmem(sizeof(Message_struct));
     }
 
 
@@ -137,12 +137,12 @@ int main(int argc, char * argv[]) {
     while (wait(&info_children[2].pid) != -1);
 
     delete_sem(semaphore_array);
+    destroy_shmem(shmemId);
 
     // Free up old buffers
     free(outputBuffer);
     free(info_children);
     unlink("OutputFiles/my_fifo.txt");
     delete_msgqueue(msgGet());
-    //delete_sem(7);
     return 0;
 }
