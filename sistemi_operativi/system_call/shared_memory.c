@@ -32,7 +32,6 @@ int create_shmem(size_t size, char * buffer, char * creator) {
         strcpy(buffer, localbuffer);
     }
 
-
     return shmid;
 }
 

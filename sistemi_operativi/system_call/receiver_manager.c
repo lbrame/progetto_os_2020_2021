@@ -93,7 +93,9 @@ int main(int argc, char * argv[]) {
     // Semaphore set
     // 0: protect shmem writes
     // 1: protect F10 writes
-    int semaphore_array = createSem(3);
+    // char * buffer_sem = malloc(31);
+    char * buffer_sem = malloc(50);
+    int semaphore_array = createSem(3, buffer_sem, "RM");
     if (semaphore_array == -1) {
         semaphore_array = semGet(3);
     }
@@ -162,6 +164,18 @@ int main(int argc, char * argv[]) {
     V(semaphore_array, 1);
     close(fd_f10_rm);
 
+    // Log SEM to F10
+    printf("Buffer SEM: %s\n", buffer_sem);
+
+    char *destruction_time_sem = (char *) calloc(9, sizeof(char));
+    destruction_time_sem = getTime(destruction_time_sem);
+    buffer_sem = join(buffer_sem, destruction_time_sem, ';');
+    buffer_sem = join(buffer_sem, "\n", NULL);
+    int fd_f10_sem = my_open("OutputFiles/F10.csv", O_WRONLY | O_APPEND);
+    P(semaphore_array, 1);
+    my_write(fd_f10_sem, buffer_sem, strlen(buffer_sem));
+    V(semaphore_array, 1);
+    close(fd_f10_sem);
 
     P(semaphore_array, 2);
     delete_sem(semaphore_array);

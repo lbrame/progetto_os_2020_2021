@@ -8,6 +8,9 @@
 #include <sys/sem.h>
 #include <sys/stat.h>
 #include <stdio.h>
+#include <string.h>
+#include "defines.h"
+#include <stdlib.h>
 
 // definition of the union semun
 union semun {
@@ -40,10 +43,23 @@ int semGet(int sem_num) {
 * @param sem_num
 * @return id of created semaphore
 */
-int createSem(int sem_num) {
+int createSem(int sem_num, char * buffer, char * creator) {
     key_t key = 01110011;
 
     int semid = semget(key, sem_num, IPC_CREAT | IPC_EXCL | S_IRUSR | S_IWUSR);
+
+    if (strcmp(creator, "RM") == 0) {
+        printf("RM!\n");
+        char *creation_time_sem = (char *) calloc(9, sizeof(char));
+        creation_time_sem = getTime(creation_time_sem);
+
+        char * localbuffer;
+        localbuffer = join("SEM", itoa(key), ';');
+        localbuffer = join(localbuffer, "-", ';');
+        localbuffer = join(localbuffer, creation_time_sem, ';');
+        strcpy(buffer, localbuffer);
+    }
+
     if (semid != -1) {
         // Initialize semaphore set to 1
         for (int i = 0; i < sem_num; i++) {
@@ -52,6 +68,7 @@ int createSem(int sem_num) {
                 ErrExit("semctl SETVAL in semGet wrapper");
         }
     }
+
     return semid;
 }
 

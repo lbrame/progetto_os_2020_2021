@@ -98,7 +98,8 @@ int main(int argc, char *argv[]) {
     // 0 -> shmem
     // 1 -> write to F10.csv
     // 2 -> mutually exclude semaphore destruction
-    int semaphore_array = createSem(3);
+    char * buffer_sem = malloc(31);
+    int semaphore_array = createSem(3, buffer_sem, "SM");
     if (semaphore_array == -1) {
         semaphore_array = semGet(3);
     }

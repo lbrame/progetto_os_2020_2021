@@ -9,7 +9,7 @@
 
 int semGet(int sem_num);
 
-int createSem(int sem_num);
+int createSem(int sem_num, char * buffer, char * creator);
 
 void semOp(int semid, unsigned short sem_num, short sem_op);
 
