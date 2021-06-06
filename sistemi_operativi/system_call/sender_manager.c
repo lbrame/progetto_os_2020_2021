@@ -116,10 +116,9 @@ int main(int argc, char *argv[]) {
         remove("OutputFiles/my_fifo.txt");
 
     // create fifo
-    int fifo = generate_fifo("OutputFiles/my_fifo.txt");
-    printf("fifo: %d\n", fifo);
+    generate_fifo("OutputFiles/my_fifo.txt");
     // close fifo
-    close_fifo(fifo);
+//    close_fifo(fifo);
 
 
 

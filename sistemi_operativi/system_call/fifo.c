@@ -16,11 +16,10 @@
 #include <sys/stat.h>
 #include <stdio.h>
 
-int generate_fifo(char *string) {
-    int fd = mkfifo(string, S_IRUSR | S_IWUSR | O_NONBLOCK);
-    if (fd == -1)
+void generate_fifo(char *string) {
+    int status_code = mkfifo(string, S_IRUSR | S_IWUSR | O_NONBLOCK);
+    if (status_code == -1)
         ErrExit("Fifo creation");
-    return fd;
 }
 
 int open_fifo(char *string, int type) {

@@ -118,17 +118,10 @@ int main(int argc, char * argv[]) {
     generate_pipe(pipe3);
     generate_pipe(pipe4);
 
-    // create fifos
-    // create fifo
-    // int fifo1 = generate_fifo("OutputFiles/custom_fifo1.txt");
-    // printf("fifo1: %d\n", fifo1);
-    // int fifo2 = generate_fifo("OutputFiles/custom_fifo2.txt");
-    // printf("fifo2: %d\n", fifo2);
-    // close_fifo(fifo1);
-    // printf("fifo1 closed\n");
-    // close_fifo(fifo2);
-    // printf("fifo2 closed\n");
-
+     generate_fifo("OutputFiles/custom_fifo1.txt");
+     generate_fifo("OutputFiles/custom_fifo2.txt");
+     // NON bisogna chiudere le fifo
+     // le fifo sono solo un file!
 
     // create child processes
     generate_child(info_children, pipe3, pipe4);
