@@ -7,12 +7,14 @@
 #include "semaphore.h"
 #include "fifo.h"
 #include "pipe.h"
+#include "files.h"
 #include <unistd.h>
 #include <sys/wait.h>
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/stat.h>
+#include <string.h>
 
 // definition of the union semun
 union semun {
@@ -95,8 +97,14 @@ int main(int argc, char *argv[]) {
     // Create semaphore set
     // 0 -> shmem
     // 1 -> write to F10.csv
-    int semaphore_array = createSem(2);
+    // 2 -> mutually exclude semaphore destruction
+    int semaphore_array = createSem(3);
+    if (semaphore_array == -1) {
+        semaphore_array = semGet(3);
+    }
     arg2.val = 0;
+    if (semctl(semaphore_array, 2, SETVAL, arg2) == -1)
+        ErrExit("Failed to initialize sem 2");
 
     // Shared memory
     int shmemId = create_shmem(sizeof(Message_struct));
@@ -127,7 +135,12 @@ int main(int argc, char *argv[]) {
     int pipe1[2];
     int pipe2[2];
     generate_pipe(pipe1);
+    char *creation_time_pipe1 = (char *) malloc(sizeof(char) * 8);
+    creation_time_pipe1 = getTime(creation_time_pipe1);
+
     generate_pipe(pipe2);
+    char *creation_time_pipe2 = (char *) malloc(sizeof(char) * 8);
+    creation_time_pipe2 = getTime(creation_time_pipe2);
 
     // create child processes
     generate_child(info_children, argv[1], pipe1, pipe2);
@@ -150,8 +163,42 @@ int main(int argc, char *argv[]) {
     while (wait(&info_children[1].pid) != -1);
     while (wait(&info_children[2].pid) != -1);
 
+    // Log PIPE1
+    char *destruction_time_pipe1 = (char *) malloc(sizeof(char) * 8);
+    destruction_time_pipe1 = getTime(destruction_time_pipe1);
+    int fd_pipe1 = my_open("OutputFiles/F10.csv", O_WRONLY | O_APPEND);
+    char *buf_p01 = join("PIPE1;-;SM;", creation_time_pipe1, NULL);
+    buf_p01 = join(buf_p01, ";", NULL);
+    buf_p01 = join(buf_p01, destruction_time_pipe1, NULL);
+    buf_p01 = join(buf_p01, "\n", NULL);
+    printf("\n\nsm array: %d\n\n", semaphore_array);
+    P(semaphore_array, 1);
+    my_write(fd_pipe1, buf_p01, strlen(buf_p01));
+    V(semaphore_array, 1);
+    close(fd_pipe1);
+
+    // log PIPE2
+    char *destruction_time_pipe2 = (char *) malloc(sizeof(char) * 8);
+    destruction_time_pipe2 = getTime(destruction_time_pipe2);
+    int fd_pipe2 = my_open("OutputFiles/F10.csv", O_WRONLY | O_APPEND);
+    char *buf_p02 = join("PIPE2;-;SM;", creation_time_pipe2, NULL);
+    buf_p02 = join(buf_p02, ";", NULL);
+    buf_p02 = join(buf_p02, destruction_time_pipe2, NULL);
+    buf_p02 = join(buf_p02, "\n", NULL);
+    printf("\n\nsm array: %d\n\n", semaphore_array);
+    P(semaphore_array, 1);
+    my_write(fd_pipe2, buf_p02, strlen(buf_p02));
+    V(semaphore_array, 1);
+    close(fd_pipe2);
+
+    V(semaphore_array, 2);
+
     free(outputBuffer);
     free(info_children);
+    free(creation_time_pipe1);
+    free(creation_time_pipe2);
+    free(destruction_time_pipe1);
+    free(destruction_time_pipe2);
 
     return 0;
 }

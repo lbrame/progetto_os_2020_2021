@@ -92,7 +92,7 @@ void sigHandler(int sig) {
 int main(int argc, char *argv[]) {
     pipe3_write = atoi(argv[0]);
     int fifoR2_R3 = open_fifo("OutputFiles/custom_fifo1.txt", O_RDONLY);
-    int semaphore_array = semGet(2);
+    int semaphore_array = semGet(3);
     int shmemId = get_shmem(sizeof(Message_struct));
     Message_struct *shmemPointer = (Message_struct *) attach_shmem(shmemId);
 

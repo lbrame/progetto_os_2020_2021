@@ -113,7 +113,7 @@ int main(int argc, char *argv[]) {
         ErrExit("S2, SIGQUIT");
     }
 
-    int semaphore_array = semGet(2);
+    int semaphore_array = semGet(3);
     int shmemId = get_shmem(sizeof(Message_struct));
     Message_struct *shmemPointer = (Message_struct *) attach_shmem(shmemId);
     int fd_fifo = open_fifo("OutputFiles/my_fifo.txt", O_RDWR);

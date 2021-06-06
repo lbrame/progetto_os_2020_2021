@@ -117,7 +117,7 @@ int main(int argc, char *argv[]) {
     if (signal(SIGQUIT, sigHandler) == SIG_ERR) {
         ErrExit("S1, SIGQUIT");
     }
-    int semaphore_array = semGet(2);
+    int semaphore_array = semGet(3);
     int shmemId = get_shmem(sizeof(Message_struct));
     Message_struct *shmemPointer = (Message_struct *) attach_shmem(shmemId);
 

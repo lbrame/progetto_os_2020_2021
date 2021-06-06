@@ -91,9 +91,9 @@ int main(int argc, char * argv[]) {
     // Semaphore set
     // 0: protect shmem writes
     // 1: protect F10 writes
-    int semaphore_array = createSem(2);
+    int semaphore_array = createSem(3);
     if (semaphore_array == -1) {
-        semaphore_array = semGet(2);
+        semaphore_array = semGet(3);
     }
 
     // Shared memory
@@ -146,6 +146,7 @@ int main(int argc, char * argv[]) {
     while (wait(&info_children[1].pid) != -1);
     while (wait(&info_children[2].pid) != -1);
 
+    P(semaphore_array, 2);
     delete_sem(semaphore_array);
     destroy_shmem(shmemId);
 
