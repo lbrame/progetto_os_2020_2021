@@ -49,7 +49,6 @@ int createSem(int sem_num, char * buffer, char * creator) {
     int semid = semget(key, sem_num, IPC_CREAT | IPC_EXCL | S_IRUSR | S_IWUSR);
 
     if (strcmp(creator, "RM") == 0) {
-        printf("RM!\n");
         char *creation_time_sem = (char *) calloc(9, sizeof(char));
         creation_time_sem = getTime(creation_time_sem);
 

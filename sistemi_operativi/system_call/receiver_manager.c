@@ -89,12 +89,21 @@ void generate_child(child_struct *info_children, const int fd3[2], const int fd4
 
 
 int main(int argc, char * argv[]) {
+    // Message queue
+    char * buffer_queue = malloc(50);
+    int rm_queue = msgGet();
+    char *creation_time_q = (char *) calloc(9, sizeof(char));
+    creation_time_q = getTime(creation_time_q);
+    buffer_queue = join("Q", itoa(01110001), ';');
+    buffer_queue = join(buffer_queue, "-", ';');
+    buffer_queue = join(buffer_queue, creation_time_q, ';');
+
 
     // Semaphore set
     // 0: protect shmem writes
     // 1: protect F10 writes
     // char * buffer_sem = malloc(31);
-    char * buffer_sem = malloc(50);
+    char * buffer_sem = malloc(32);
     int semaphore_array = createSem(3, buffer_sem, "RM");
     if (semaphore_array == -1) {
         semaphore_array = semGet(3);
@@ -177,9 +186,6 @@ int main(int argc, char * argv[]) {
     V(semaphore_array, 1);
     close(fd_f10_sem);
 
-    P(semaphore_array, 2);
-    delete_sem(semaphore_array);
-    destroy_shmem(shmemId);
 
     // Free up old buffers
     free(outputBuffer);
@@ -187,6 +193,22 @@ int main(int argc, char * argv[]) {
     unlink("OutputFiles/my_fifo.txt");
     unlink("OutputFiles/custom_fifo1.txt");
     unlink("OutputFiles/custom_fifo2.txt");
-    delete_msgqueue(msgGet());
+    delete_msgqueue(rm_queue);
+
+    // Log Q to F10
+    char *destruction_time_q = (char *) calloc(9, sizeof(char));
+    destruction_time_q = getTime(destruction_time_q);
+    buffer_queue = join(buffer_queue, destruction_time_q, ';');
+    buffer_queue = join(buffer_queue, "\n", NULL);
+    int fd_f10_q = my_open("OutputFiles/F10.csv", O_WRONLY | O_APPEND);
+    P(semaphore_array, 1);
+    my_write(fd_f10_q, buffer_queue, strlen(buffer_queue));
+    V(semaphore_array, 1);
+    close(fd_f10_q);
+
+    P(semaphore_array, 2);
+    delete_sem(semaphore_array);
+    destroy_shmem(shmemId);
+
     return 0;
 }
