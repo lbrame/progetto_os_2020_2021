@@ -128,6 +128,10 @@ int main(int argc, char *argv[]) {
 
     // create fifo
     generate_fifo("OutputFiles/my_fifo.txt");
+    char *creation_time_myfifo = (char *) calloc(9, sizeof(char));
+    creation_time_myfifo = getTime(creation_time_myfifo);
+    write_file("OutputFiles/tmp.txt", creation_time_myfifo);
+
 
     // create F10.csv: IPC history
     char *f10_starter = "IPC;IDKey;Creator;CreationTime;DestructionTime\n";

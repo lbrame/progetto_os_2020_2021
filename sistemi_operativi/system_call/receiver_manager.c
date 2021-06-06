@@ -117,6 +117,7 @@ int main(int argc, char * argv[]) {
     }
 
 
+
     // Dynamic memory allocation
     child_struct *info_children = (child_struct *) malloc(sizeof(child_struct) * 3);
     if (info_children == NULL) {
@@ -195,6 +196,15 @@ int main(int argc, char * argv[]) {
     unlink("OutputFiles/custom_fifo2.txt");
     delete_msgqueue(rm_queue);
 
+    char *destruction_time_myfifo = (char *) malloc(sizeof(char) * 8);
+    destruction_time_myfifo = getTime(destruction_time_myfifo);
+
+    char *destruction_time_custom_fifo1 = (char *) malloc(sizeof(char) * 8);
+    destruction_time_custom_fifo1 = getTime(destruction_time_custom_fifo1);
+
+    char *destruction_time_custom_fifo2 = (char *) malloc(sizeof(char) * 8);
+    destruction_time_custom_fifo2 = getTime(destruction_time_custom_fifo2);
+
     // Log Q to F10
     char *destruction_time_q = (char *) calloc(9, sizeof(char));
     destruction_time_q = getTime(destruction_time_q);
@@ -206,9 +216,24 @@ int main(int argc, char * argv[]) {
     V(semaphore_array, 1);
     close(fd_f10_q);
 
+    // FIFO
+    int tmp_size = get_file_size("OutputFiles/tmp.txt");
+    char *tmp_read_buf = malloc(tmp_size);
+    read_file(tmp_read_buf, "OutputFiles/tmp.txt", tmp_size);
+    printf("tmp_read_buf: %s\n", tmp_read_buf);
+
+
+    // Close semaphore array
     P(semaphore_array, 2);
     delete_sem(semaphore_array);
     destroy_shmem(shmemId);
+
+    free(destruction_time_q);
+    free(destruction_time_sem);
+    free(destruction_time_shmem);
+    free(destruction_time_myfifo);
+    free(destruction_time_custom_fifo1);
+    free(destruction_time_custom_fifo2);
 
     return 0;
 }
