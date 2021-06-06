@@ -135,11 +135,11 @@ int main(int argc, char *argv[]) {
     int pipe1[2];
     int pipe2[2];
     generate_pipe(pipe1);
-    char *creation_time_pipe1 = (char *) malloc(sizeof(char) * 8);
+    char *creation_time_pipe1 = (char *) calloc(9, sizeof(char));
     creation_time_pipe1 = getTime(creation_time_pipe1);
 
     generate_pipe(pipe2);
-    char *creation_time_pipe2 = (char *) malloc(sizeof(char) * 8);
+    char *creation_time_pipe2 = (char *) calloc(9, sizeof(char));
     creation_time_pipe2 = getTime(creation_time_pipe2);
 
     // create child processes
@@ -167,11 +167,13 @@ int main(int argc, char *argv[]) {
     char *destruction_time_pipe1 = (char *) malloc(sizeof(char) * 8);
     destruction_time_pipe1 = getTime(destruction_time_pipe1);
     int fd_pipe1 = my_open("OutputFiles/F10.csv", O_WRONLY | O_APPEND);
-    char *buf_p01 = join("PIPE1;-;SM;", creation_time_pipe1, NULL);
+    char *buf_p01 = join("PIPE1", itoa(pipe1[0]), ';');
+    buf_p01 = join(buf_p01, ";", NULL);
+    buf_p01 = join(buf_p01, "SM;", NULL);
+    buf_p01 = join(buf_p01, creation_time_pipe1, NULL);
     buf_p01 = join(buf_p01, ";", NULL);
     buf_p01 = join(buf_p01, destruction_time_pipe1, NULL);
     buf_p01 = join(buf_p01, "\n", NULL);
-    printf("\n\nsm array: %d\n\n", semaphore_array);
     P(semaphore_array, 1);
     my_write(fd_pipe1, buf_p01, strlen(buf_p01));
     V(semaphore_array, 1);
@@ -181,11 +183,13 @@ int main(int argc, char *argv[]) {
     char *destruction_time_pipe2 = (char *) malloc(sizeof(char) * 8);
     destruction_time_pipe2 = getTime(destruction_time_pipe2);
     int fd_pipe2 = my_open("OutputFiles/F10.csv", O_WRONLY | O_APPEND);
-    char *buf_p02 = join("PIPE2;-;SM;", creation_time_pipe2, NULL);
+    char *buf_p02 = join("PIPE2", itoa(pipe2[0]), ';');
+    buf_p02 = join(buf_p02, ";", NULL);
+    buf_p02 = join(buf_p02, "SM;", NULL);
+    buf_p02 = join(buf_p02, creation_time_pipe2, NULL);
     buf_p02 = join(buf_p02, ";", NULL);
     buf_p02 = join(buf_p02, destruction_time_pipe2, NULL);
     buf_p02 = join(buf_p02, "\n", NULL);
-    printf("\n\nsm array: %d\n\n", semaphore_array);
     P(semaphore_array, 1);
     my_write(fd_pipe2, buf_p02, strlen(buf_p02));
     V(semaphore_array, 1);

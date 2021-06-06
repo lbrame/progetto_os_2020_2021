@@ -229,9 +229,13 @@ char* getTime(char* time_a) {
     time(&current_time);
     time_info = localtime(&current_time);
     strftime(timeString, 18, "%H:%M:%S", time_info);
+    strcpy(time_a, timeString);
+    /*
     for(int i = 0; i < 8; i++) {
         time_a[i] = timeString[i];
     }
+     */
+
     return time_a;
 }
 
