@@ -117,6 +117,10 @@ pid_struct *parse_pid_struct(char *inputBuffer, int message_number) {
  * @param sender_messages
  * @param receiver_messages
  * @param messages
+ * SIGTERM: terminate the process gracefully, properly closing all open IPCs
+ * SIGUSR1: catch IncreaseDelay message (sent by hackler)
+ * SIGUSR2 RemoveMsg message (sent by hackler)
+ * SIGQUIT: catch SendMsg message (sent by hackler)
  */
 void handle_signals(pid_struct *sender_messages, pid_struct *receiver_messages, hackler_struct *messages,
                     int message_number) {
@@ -127,15 +131,34 @@ void handle_signals(pid_struct *sender_messages, pid_struct *receiver_messages, 
         printf("message: %s\n", messages[i].action);
         hackler_struct message = messages[i];
         sleep(message.delay);
+        pid_struct reciver_info;
+
+        if(strcmp("S1", message.target) == 0) {
+            reciver_info = sender_messages[0];
+        } else if(strcmp("S2", message.target) == 0) {
+            reciver_info = sender_messages[1];
+        }else if(strcmp("S3", message.target) == 0) {
+            reciver_info = sender_messages[2];
+        } else if(strcmp("R1", message.target) == 0) {
+            reciver_info = receiver_messages[0];
+        } else if(strcmp("R2", message.target) == 0) {
+            reciver_info = receiver_messages[1];
+        }else if(strcmp("R3", message.target) == 0) {
+            reciver_info = receiver_messages[2];
+        }
+
 
         if (strcmp(message.action, "IncreaseDelay") == 0) {
             printf("IncreaseDelay\n");
+            kill(reciver_info.pid, SIGUSR1);
 
         } else if (strcmp(message.action, "RemoveMSG") == 0) {
             printf("RemoveMsg\n");
+            kill(reciver_info.pid, SIGUSR2);
 
         } else if (strcmp(message.action, "SendMSG") == 0) {
             printf("SendMsg\n");
+            kill(reciver_info.pid, SIGQUIT);
 
         } else if (strcmp(message.action, "ShutDown") == 0) {
             printf("Shutdown\n");
@@ -161,7 +184,12 @@ int main(int argc, char *argv[]) {
 
     // READ F7.csv
     // argv[1] is the relative path to the input file and it is passes as a keyboard argument
-    int fileSize = get_file_size(argv[1]);
+    int fileSize;
+    do {
+        fileSize = get_file_size(argv[1]);
+    } while (fileSize == -1 || fileSize == 0);
+    printf("F7 Filesize = %d\n", fileSize);
+
     // allocate buffer to read file of size fileSize + 1(space for /0)
     char *inputBuffer = malloc(sizeof(char) * fileSize + 1);
     if (inputBuffer == NULL) {
@@ -173,33 +201,40 @@ int main(int argc, char *argv[]) {
     hackler_struct message_shtdwn = messages[3];
     free(inputBuffer);
 
-//    sleep(5);
-
     // READ f8.csv
     char path_sender[] = "OutputFiles/F8.csv";
-    fileSize = get_file_size(path_sender);
+    do {
+        fileSize = get_file_size(path_sender);
+    } while (fileSize == -1 || fileSize == 0);
+    printf("F8 Filesize = %d\n", fileSize);
+
+
     // allocate buffer to read file of size fileSize + 1(space for /0)
     inputBuffer = malloc(sizeof(char) * fileSize + 1);
     if (inputBuffer == NULL)
         ErrExit("malloc");
 
+
     read_file(inputBuffer, path_sender, fileSize);
-    message_number = count_messages(inputBuffer, fileSize);
-    pid_struct *sender_messages = parse_pid_struct(inputBuffer, message_number);
+    int n = count_messages(inputBuffer, fileSize);
+    pid_struct *sender_messages = parse_pid_struct(inputBuffer, n);
     free(inputBuffer);
     printf("READ F8\n");
 
     // READ f9.csv
     char path_receiver[] = "OutputFiles/F9.csv";
-    fileSize = get_file_size(path_receiver);
+    do {
+        fileSize = get_file_size(path_receiver);
+    } while (fileSize == -1 || fileSize == 0);
+    printf("F9 Filesize = %d\n", fileSize);
     // allocate buffer to read file of size fileSize + 1(space for /0)
     inputBuffer = malloc(sizeof(char) * fileSize + 1);
     if (inputBuffer == NULL)
         ErrExit("malloc");
 
     read_file(inputBuffer, path_receiver, fileSize);
-    message_number = count_messages(inputBuffer, fileSize);
-    pid_struct *receiver_messages = parse_pid_struct(inputBuffer, message_number);
+    n = count_messages(inputBuffer, fileSize);
+    pid_struct *receiver_messages = parse_pid_struct(inputBuffer, n);
     free(inputBuffer);
     printf("READ F9\n");
 

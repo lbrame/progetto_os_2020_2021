@@ -63,7 +63,7 @@ void sigHandler(int sig) {
 
 int main(int argc, char * argv[]) {
     pipe3_write = atoi(argv[0]);
-    int semaphore_array = semGet(8);
+    int semaphore_array = semGet(1);
     int shmemId = get_shmem(sizeof(Message_struct));
     Message_struct *shmemPointer = (Message_struct *) attach_shmem(shmemId);
 

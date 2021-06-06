@@ -84,18 +84,10 @@ void generate_child(child_struct *info_children, const int fd3[2], const int fd4
 
 
 int main(int argc, char * argv[]) {
-    /* 0 -> shmem
-     * 1 -> S1
-     * 2 -> S2
-     * 3 -> S3
-     * 4 -> R3
-     * 5 -> R2
-     * 6 -> R1
-     * 7 -> mutex read shmem
-     * */
-    int semaphore_array = createSem(8);
+    // Semaphore to protect shared memory writes
+    int semaphore_array = createSem(1);
     if (semaphore_array == -1) {
-        semaphore_array = semGet(8);
+        semaphore_array = semGet(1);
     }
 
     // Shared memory

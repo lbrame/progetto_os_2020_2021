@@ -43,7 +43,6 @@ void sigHandler(int sig) {
     switch (sig) {
         case SIGUSR1:
             printf("Caught SIGUSR1\n");
-
             break;
         case SIGUSR2:
             printf("Caught SIGUSR2\n");
@@ -67,7 +66,7 @@ int main(int argc, char *argv[]) {
 
     pipe3_read = atoi(argv[0]);
     pipe4_write = atoi(argv[1]);
-    int semaphore_array = semGet(8);
+    int semaphore_array = semGet(1);
     int shmemId = get_shmem(sizeof(Message_struct));
     Message_struct *shmemPointer = (Message_struct *) attach_shmem(shmemId);
 

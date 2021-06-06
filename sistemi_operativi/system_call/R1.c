@@ -56,7 +56,7 @@ int main(int argc, char *argv[]) {
 
     printf("R1: %d\n", getpid());
 
-    int semaphore_array = semGet(8);
+    int semaphore_array = semGet(1);
     int shmemId = get_shmem(sizeof(Message_struct));
     Message_struct *shmemPointer = (Message_struct *) attach_shmem(shmemId);
 

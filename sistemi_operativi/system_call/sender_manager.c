@@ -90,20 +90,12 @@ void generate_child(child_struct *info_children, char *inputFile, const int fd1[
 }
 
 int main(int argc, char *argv[]) {
+
+    struct stat sb;
     // Create semaphore set
-    /* 0 -> shmem
-     * 1 -> S1
-     * 2 -> S2
-     * 3 -> S3
-     * 4 -> R3
-     * 5 -> R2
-     * 6 -> R1
-     * 7 -> mutex read shmem
-     * */
-    int semaphore_array = createSem(8);
+    /* 0 -> shmem*/
+    int semaphore_array = createSem(1);
     arg2.val = 0;
-    if (semctl(semaphore_array, 7, SETVAL, arg2) == -1)
-        ErrExit("semctl: initialize semaphore 8 to 0");
 
     // Shared memory
     int shmemId = create_shmem(sizeof(Message_struct));
@@ -114,7 +106,6 @@ int main(int argc, char *argv[]) {
         ErrExit("malloc senderManager");
     }
 
-    struct stat sb;
     // If ./OutputFiles does not exist, create it
     if (stat("OutputFiles", &sb) != 0)
         mkdir("OutputFiles", S_IRWXU);

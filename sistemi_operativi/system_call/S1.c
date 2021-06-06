@@ -12,8 +12,12 @@
 #include "semaphore.h"
 #include "files.h"
 #include "shared_memory.h"
+#include <stdbool.h>
 
 int pipe1_write;
+bool added_delay = false;
+bool remove_msg = false;
+bool send_msg = false;
 
 void send_message(Message_struct* message, int pipe, Message_struct* shmemPointer, int semaphore_array) {
     // come parametro verrà passato l'id del semaforo
@@ -21,7 +25,21 @@ void send_message(Message_struct* message, int pipe, Message_struct* shmemPointe
     char* time_departure = (char* )malloc(sizeof (char) * 8);
 
     time_arrival = getTime(time_arrival);
-    sleep(message->DelS1);
+
+    if(added_delay) {
+        sleep(message->DelS1 + 5);
+        added_delay = true;
+    } else if (remove_msg) {
+        free(time_arrival);
+        free(time_departure);
+        remove_msg =true;
+        return;
+    } else if (send_msg) {
+        send_msg = false;
+    } else {
+        sleep(message->DelS1);
+    }
+
     if ((strcmp(message->Type, "FIFO") == 0) || (strcmp(message->IdSender, "S1") != 0)) {
         write_pipe(pipe, message);
     } else if (strcmp(message->Type, "Q") == 0) {
@@ -47,7 +65,7 @@ void send_message(Message_struct* message, int pipe, Message_struct* shmemPointe
  * @param sig signal sent by the kernel
  * SIGTERM: terminate the process gracefully, properly closing all open IPCs
  * SIGUSR1: catch IncreaseDelay message (sent by hackler)
-ch RemoveMsg message (sent by hackler)
+ * SIGUSR2 RemoveMsg message (sent by hackler)
  * SIGQUIT: catch SendMsg message (sent by hackler)
  */
 void sigHandler (int sig) {
@@ -56,11 +74,14 @@ void sigHandler (int sig) {
     switch (sig) {
         case SIGUSR1:
             printf("S1: Caught SIGUSR1\n");
+            added_delay = true;
             break;
         case SIGUSR2:
             printf("S1: Caught SIGUSR2\n");
+            remove_msg = true;
             break;
         case SIGQUIT:
+            send_msg=true;
             printf("S1: Caught SIGQUIT\n");
             break;
         case SIGTERM:
@@ -87,7 +108,7 @@ int main(int argc, char * argv[]) {
     if(signal(SIGQUIT, sigHandler) == SIG_ERR) {
         ErrExit("S1, SIGQUIT");
     }
-    int semaphore_array = semGet(8);
+    int semaphore_array = semGet(1);
     int shmemId = get_shmem(sizeof(Message_struct));
     Message_struct* shmemPointer = (Message_struct*) attach_shmem(shmemId);
 
