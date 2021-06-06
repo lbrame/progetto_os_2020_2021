@@ -14,6 +14,8 @@
 #include "message_queue.h"
 #include "shared_memory.h"
 #include <fifo.h>
+#include "files.h"
+#include <string.h>
 
 
 /**
@@ -97,7 +99,8 @@ int main(int argc, char * argv[]) {
     }
 
     // Shared memory
-    int shmemId = create_shmem(sizeof(Message_struct));
+    char * buffer = malloc(30);
+    int shmemId = create_shmem(sizeof(Message_struct), buffer, "RM");
     if(shmemId == -1) {
         shmemId = get_shmem(sizeof(Message_struct));
     }
@@ -145,6 +148,20 @@ int main(int argc, char * argv[]) {
     while (wait(&info_children[0].pid) != -1);
     while (wait(&info_children[1].pid) != -1);
     while (wait(&info_children[2].pid) != -1);
+
+    // Log SHMEM to F10
+    printf("Buffer: %s\n", buffer);
+
+    char *destruction_time_shmem = (char *) calloc(9, sizeof(char));
+    destruction_time_shmem = getTime(destruction_time_shmem);
+    buffer = join(buffer, destruction_time_shmem, ';');
+    buffer = join(buffer, "\n", NULL);
+    int fd_f10_rm = my_open("OutputFiles/F10.csv", O_WRONLY | O_APPEND);
+    P(semaphore_array, 1);
+    my_write(fd_f10_rm, buffer, strlen(buffer));
+    V(semaphore_array, 1);
+    close(fd_f10_rm);
+
 
     P(semaphore_array, 2);
     delete_sem(semaphore_array);

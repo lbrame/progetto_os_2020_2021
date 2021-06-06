@@ -107,7 +107,8 @@ int main(int argc, char *argv[]) {
         ErrExit("Failed to initialize sem 2");
 
     // Shared memory
-    int shmemId = create_shmem(sizeof(Message_struct));
+    char * buffer = malloc(1);
+    int shmemId = create_shmem(sizeof(Message_struct), buffer, "SM");
 
     // Dynamic memory allocation
     child_struct *info_children = (child_struct *) malloc(sizeof(child_struct) * 3);

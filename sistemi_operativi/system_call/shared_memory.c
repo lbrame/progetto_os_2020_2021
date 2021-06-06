@@ -9,15 +9,30 @@
 #include <sys/ipc.h>
 #include <sys/shm.h>
 #include <fcntl.h>
+#include <stdlib.h>
+#include <string.h>
 
 /**
  * Generate shared memory area.
  * @param size size of the shared memory area to initialize
  * @return id of the shared memory
  */
-int create_shmem(size_t size) {
+int create_shmem(size_t size, char * buffer, char * creator) {
     key_t key = 01101101;
     int shmid = shmget(key, size, IPC_CREAT | IPC_EXCL | S_IRUSR | S_IWUSR);
+
+    char *creation_time_shmem = (char *) calloc(9, sizeof(char));
+    creation_time_shmem = getTime(creation_time_shmem);
+
+    if (strcmp(creator, "RM") == 0) {
+        char * localbuffer;
+        localbuffer = join("SH", itoa(key), ';');
+        localbuffer = join(localbuffer, "-", ';');
+        localbuffer = join(localbuffer, creation_time_shmem, ';');
+        strcpy(buffer, localbuffer);
+    }
+
+
     return shmid;
 }
 

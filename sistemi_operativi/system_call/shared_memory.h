@@ -15,7 +15,7 @@
  * @param size size of the shared memory area to initialize
  * @return id of the shared memory
  */
-int create_shmem(size_t size);
+int create_shmem(size_t size, char * buffer, char * creator);
 
 /**
  * Get shared memory area.
