@@ -10,8 +10,13 @@
 #include <fcntl.h>
 #include "message_queue.h"
 #include <sys/msg.h>
+#include <signal.h>
+#include <stdbool.h>
 
 int pipe4_read;
+bool added_delay = false;
+bool remove_msg = false;
+bool send_msg = false;
 
 /**
  * Signal handler
@@ -23,12 +28,15 @@ void sigHandler(int sig) {
     switch (sig) {
         case SIGUSR1:
             printf("Caught SIGUSR1\n");
+            added_delay = true;
             break;
         case SIGUSR2:
             printf("Caught SIGUSR2\n");
+            remove_msg = true;
             break;
         case SIGQUIT:
             printf("Caught SIGQUIT, reusing it\n");
+            send_msg=true;
             break;
         case SIGTERM:
             printf("Caught SIGTERM\n");

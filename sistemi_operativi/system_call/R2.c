@@ -11,16 +11,33 @@
 #include "message_queue.h"
 #include <sys/msg.h>
 #include <signal.h>
+#include <stdbool.h>
 
 int pipe3_read;
 int pipe4_write;
+bool added_delay = false;
+bool remove_msg = false;
+bool send_msg = false;
 
 void send_message(Message_struct *message, int pipe) {
     char *time_arrival = (char *) malloc(sizeof(char) * 8);
     char *time_departure = (char *) malloc(sizeof(char) * 8);
     time_arrival = getTime(time_arrival);
 
-    sleep(message->DelS2);
+    if (added_delay) {
+        sleep(message->DelS2 + 5);
+        added_delay = false;
+    } else if (remove_msg) {
+        free(time_arrival);
+        free(time_departure);
+        remove_msg = false;
+        return;
+    } else if (send_msg) {
+        send_msg = false;
+    } else {
+        sleep(message->DelS2);
+    }
+
     if (strcmp(message->IdReceiver, "R2") != 0) {
         write_pipe(pipe, message);
     }
@@ -45,12 +62,15 @@ void sigHandler(int sig) {
     switch (sig) {
         case SIGUSR1:
             printf("Caught SIGUSR1\n");
+            added_delay = true;
             break;
         case SIGUSR2:
             printf("Caught SIGUSR2\n");
+            remove_msg = true;
             break;
         case SIGQUIT:
             printf("Caught SIGQUIT, reusing it\n");
+            send_msg=true;
             break;
         case SIGTERM:
             printf("Caught SIGTERM\n");
@@ -110,8 +130,8 @@ int main(int argc, char *argv[]) {
             status = read_pipe(pipe3_read, message);
             if (message->Id == last_message->Id)
                 continue;
-            if(strcmp(message->IdReceiver, "R2") != 0  && strcmp(content->Type, "Q") == 0) {
-              write_pipe(pipe4_write, content);
+            if(strcmp(message->IdReceiver, "R2") != 0  && strcmp(message->Type, "Q") == 0) {
+              write_pipe(pipe4_write, message);
               continue;
             }
             send_message(message, pipe4_write);

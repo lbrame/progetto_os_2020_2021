@@ -21,25 +21,28 @@ bool added_delay = false;
 bool remove_msg = false;
 bool send_msg = false;
 
-void send_message(Message_struct* message, int pipe, Message_struct* shmemPointer, int semaphore_array) {
+void send_message(Message_struct *message, int pipe, Message_struct *shmemPointer, int semaphore_array) {
     // come parametro verrà passato l'id del semaforo
-    char* time_arrival = (char* )malloc(sizeof (char) * 8);
-    char* time_departure = (char* )malloc(sizeof (char) * 8);
+    char *time_arrival = (char *) malloc(sizeof(char) * 8);
+    char *time_departure = (char *) malloc(sizeof(char) * 8);
     time_arrival = getTime(time_arrival);
 
-    if(added_delay) {
+    if (added_delay) {
         sleep(message->DelS1 + 5);
-        added_delay = true;
+        added_delay = false;
     } else if (remove_msg) {
         free(time_arrival);
         free(time_departure);
-        remove_msg =true;
+        remove_msg = false;
         return;
     } else if (send_msg) {
         send_msg = false;
     } else {
         sleep(message->DelS1);
     }
+
+    time_departure = getTime(time_departure);
+    char *outputBuffer = concatenate(message, time_arrival, time_departure);
 
     if ((strcmp(message->Type, "FIFO") == 0) || (strcmp(message->IdSender, "S1") != 0)) {
         write_pipe(pipe, message);
@@ -48,17 +51,16 @@ void send_message(Message_struct* message, int pipe, Message_struct* shmemPointe
         int fd_queue = msgGet();
         msgSnd(fd_queue, outputBuffer);
         struct msqid_ds buf;
-        if(msgctl(fd_queue, IPC_STAT, &buf) < 0)
+        if (msgctl(fd_queue, IPC_STAT, &buf) < 0)
             ErrExit("msgctl");
-      
+
     } else if (strcmp(message->Type, "SH") == 0) {
         P(semaphore_array, 0);
         memcpy(shmemPointer, message, sizeof(Message_struct));
     }
-    time_departure = getTime(time_departure);
+
 
     int fd = my_open("OutputFiles/F1.csv", O_WRONLY | O_APPEND);
-    char* outputBuffer = concatenate(message, time_arrival, time_departure);
 
     my_write(fd, outputBuffer, strlen(outputBuffer));
 
@@ -75,7 +77,7 @@ void send_message(Message_struct* message, int pipe, Message_struct* shmemPointe
  * SIGUSR2 RemoveMsg message (sent by hackler)
  * SIGQUIT: catch SendMsg message (sent by hackler)
  */
-void sigHandler (int sig) {
+void sigHandler(int sig) {
     printf("S1: signal handler started\n");
 
     switch (sig) {
@@ -88,8 +90,8 @@ void sigHandler (int sig) {
             remove_msg = true;
             break;
         case SIGQUIT:
-            send_msg=true;
             printf("S1: Caught SIGQUIT\n");
+            send_msg = true;
             break;
         case SIGTERM:
             printf("S1: Caught SIGTERM\n");
@@ -101,25 +103,25 @@ void sigHandler (int sig) {
     }
 }
 
-int main(int argc, char * argv[]) {
+int main(int argc, char *argv[]) {
     pipe1_write = atoi(argv[1]);
-    if(signal(SIGTERM, sigHandler) == SIG_ERR) {
+    if (signal(SIGTERM, sigHandler) == SIG_ERR) {
         ErrExit("S1, SIGTERM");
     }
-    if(signal(SIGUSR1, sigHandler) == SIG_ERR) {
+    if (signal(SIGUSR1, sigHandler) == SIG_ERR) {
         ErrExit("S1, SIGUSR1");
     }
-    if(signal(SIGUSR2, sigHandler) == SIG_ERR) {
+    if (signal(SIGUSR2, sigHandler) == SIG_ERR) {
         ErrExit("S1, SIGUSR2");
     }
-    if(signal(SIGQUIT, sigHandler) == SIG_ERR) {
+    if (signal(SIGQUIT, sigHandler) == SIG_ERR) {
         ErrExit("S1, SIGQUIT");
     }
     int semaphore_array = semGet(1);
     int shmemId = get_shmem(sizeof(Message_struct));
-    Message_struct* shmemPointer = (Message_struct*) attach_shmem(shmemId);
+    Message_struct *shmemPointer = (Message_struct *) attach_shmem(shmemId);
 
-    char* starter = "ID;Message;IDSender;IDReceiver;TimeArrival;TimeDeparture\n";
+    char *starter = "ID;Message;IDSender;IDReceiver;TimeArrival;TimeDeparture\n";
     write_file("OutputFiles/F1.csv", starter);
     char *rPath = argv[0];
     int fd_input = my_open(rPath, O_RDONLY);

@@ -15,22 +15,41 @@
 #include <signal.h>
 
 int pipe3_write;
+bool added_delay = false;
+bool remove_msg = false;
+bool send_msg = false;
 
-void send_message(Message_struct *message, int pipe, char* queue_buffer) {
+void send_message(Message_struct *message, int pipe, char *queue_buffer) {
     char *time_arrival = (char *) malloc(sizeof(char) * 8);
     char *time_departure = (char *) malloc(sizeof(char) * 8);
     time_arrival = getTime(time_arrival);
-    if (message != NULL){
-      sleep(message->DelS3);
-      if (strcmp(message->IdReceiver, "R3") != 0) {
-          write_pipe(pipe, message);
-      }
-      time_departure = getTime(time_departure);
-      char *outputBuffer = concatenate(message, time_arrival, time_departure);
+
+    char *outputBuffer;
+    if (message != NULL) {
+
+        if (added_delay) {
+            sleep(message->DelS3 + 5);
+            added_delay = false;
+        } else if (remove_msg) {
+            free(time_arrival);
+            free(time_departure);
+            remove_msg = false;
+            return;
+        } else if (send_msg) {
+            send_msg = false;
+        } else {
+            sleep(message->DelS3);
+        }
+
+        if (strcmp(message->IdReceiver, "R3") != 0) {
+            write_pipe(pipe, message);
+        }
+        time_departure = getTime(time_departure);
+        outputBuffer = concatenate(message, time_arrival, time_departure);
     } else {
-      outputBuffer = queue_buffer
+        outputBuffer = queue_buffer;
     }
-  
+
     int fd = my_open("OutputFiles/F4.csv", O_WRONLY | O_APPEND);
     my_write(fd, outputBuffer, strlen(outputBuffer));
     close(fd);
@@ -49,13 +68,15 @@ void sigHandler(int sig) {
     switch (sig) {
         case SIGUSR1:
             printf("Caught SIGUSR1\n");
-
+            added_delay = true;
             break;
         case SIGUSR2:
             printf("Caught SIGUSR2\n");
+            remove_msg = true;
             break;
         case SIGQUIT:
             printf("Caught SIGQUIT, reusing it\n");
+            send_msg = true;
             break;
         case SIGTERM:
             printf("Caught SIGTERM\n");
@@ -67,22 +88,22 @@ void sigHandler(int sig) {
     }
 }
 
-int main(int argc, char * argv[]) {
+int main(int argc, char *argv[]) {
     pipe3_write = atoi(argv[0]);
     int semaphore_array = semGet(1);
     int shmemId = get_shmem(sizeof(Message_struct));
     Message_struct *shmemPointer = (Message_struct *) attach_shmem(shmemId);
 
-    if(signal(SIGTERM, sigHandler) == SIG_ERR) {
+    if (signal(SIGTERM, sigHandler) == SIG_ERR) {
         ErrExit("R2, SIGTERM");
     }
-    if(signal(SIGUSR1, sigHandler) == SIG_ERR) {
+    if (signal(SIGUSR1, sigHandler) == SIG_ERR) {
         ErrExit("R1, SIGUSR1");
     }
-    if(signal(SIGUSR2, sigHandler) == SIG_ERR) {
+    if (signal(SIGUSR2, sigHandler) == SIG_ERR) {
         ErrExit("R1, SIGUSR2");
     }
-    if(signal(SIGQUIT, sigHandler) == SIG_ERR) {
+    if (signal(SIGQUIT, sigHandler) == SIG_ERR) {
         ErrExit("R1, SIGQUIT");
     }
 
@@ -124,30 +145,30 @@ int main(int argc, char * argv[]) {
             memcpy(last_message, message, sizeof(Message_struct));
             memcpy(message, shmemPointer, sizeof(Message_struct));
             printf("R3 shmem: %s\n", message->Message);
-            if (message->Id == last_message->Id )
+            if (message->Id == last_message->Id)
                 continue;
             else if (strcmp(message->IdReceiver, "R3") == 0)
-                V(semaphore_array,0);
+                V(semaphore_array, 0);
         } else
             endFlag--;
-      
-      // MSG QUEUE
-      char* outputbuffer = msgRcv(fd_queue, outputbuffer);
-      if(outputbuffer == NULL || buf.msg_qnum == 0)
-           break;
-      char* tmp;
-      if((tmp =  strstr(outputbuffer, "R3")) != NULL) {
-        //send message to write in outputbuffer
-        send_message(NULL, 0, outputbuffer);
-      }
-      else {
-            Message_struct* queue_message = parse_message(outputbuffer);
+
+        // MSG QUEUE
+        char *outputbuffer = msgRcv(fd_queue, outputbuffer);
+        struct msqid_ds buf;
+        if (outputbuffer == NULL || buf.msg_qnum == 0)
+            break;
+        char *tmp;
+        if ((tmp = strstr(outputbuffer, "R3")) != NULL) {
+            //send message to write in outputbuffer
+            send_message(NULL, 0, outputbuffer);
+        } else {
+            Message_struct *queue_message = parse_message(outputbuffer);
             //send without printing
             write_pipe(pipe3_write, queue_message);
         }
 
     } while (endFlag > 0);
-  
+
     struct msqid_ds buf;
     if (msgctl(fd_queue, IPC_STAT, &buf) < 0)
         ErrExit("msgctl");
