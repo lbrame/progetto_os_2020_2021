@@ -86,8 +86,8 @@ void sigHandler(int sig) {
 
 
 int main(int argc, char *argv[]) {
-//    int fifoR2_R3 = open_fifo("OutputFiles/custom_fifo1.txt", O_RDWR);
-//    int fifoR1_R2 = open_fifo("OutputFiles/custom_fifo2.txt", O_RDONLY);
+    int fifoR2_R3 = open_fifo("OutputFiles/custom_fifo1.txt", O_RDWR);
+    int fifoR1_R2 = open_fifo("OutputFiles/custom_fifo2.txt", O_RDONLY);
 
     pipe3_read = atoi(argv[0]);
     pipe4_write = atoi(argv[1]);
@@ -146,7 +146,6 @@ int main(int argc, char *argv[]) {
 
 
         // custom fifo
-        /*
         if (status_custom_fifo > 0) {
             memcpy(last_message, message, sizeof(Message_struct));
             // using read_pipe as a reader also for fifo (they works the same way)
@@ -155,7 +154,6 @@ int main(int argc, char *argv[]) {
                 write_pipe(fifoR2_R3, message);
         } else
             endFlag--;
-            */
 
         // shmem
         if (strcmp(message->Message, "END") != 0) {
@@ -179,7 +177,7 @@ int main(int argc, char *argv[]) {
                 if(strcmp(queue_message->IdReceiver, "R1")) {
                     write_pipe(pipe4_write, queue_message);
                 } else {
-//                    write_pipe(fifoR2_R3, queue_message);
+                    write_pipe(fifoR2_R3, queue_message);
                 }
             } else {
                 //send to R1

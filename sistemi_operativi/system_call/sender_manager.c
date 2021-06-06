@@ -117,11 +117,10 @@ int main(int argc, char *argv[]) {
 
     // create fifo
     generate_fifo("OutputFiles/my_fifo.txt");
-    // close fifo
-//    close_fifo(fifo);
 
-
-
+    // create F10.csv: IPC history
+    char *f10_starter = "IPC;IDKey;Creator;CreationTime;DestructionTime\n";
+    write_file("OutputFiles/F10.csv", f10_starter);
 
     // create pipes
     int pipe1[2];

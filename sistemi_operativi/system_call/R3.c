@@ -91,7 +91,7 @@ void sigHandler(int sig) {
 
 int main(int argc, char *argv[]) {
     pipe3_write = atoi(argv[0]);
-//    int fifoR2_R3 = open_fifo("OutputFiles/custom_fifo1.txt", O_RDONLY);
+    int fifoR2_R3 = open_fifo("OutputFiles/custom_fifo1.txt", O_RDONLY);
     int semaphore_array = semGet(1);
     int shmemId = get_shmem(sizeof(Message_struct));
     Message_struct *shmemPointer = (Message_struct *) attach_shmem(shmemId);
@@ -146,7 +146,7 @@ int main(int argc, char *argv[]) {
         if (status_custom_fifo > 0) {
             memcpy(last_message, message, sizeof(Message_struct));
             // using read_pipe as a reader also for fifo (they works the same way)
-//            status_custom_fifo = read_pipe(fifoR2_R3, message);
+            status_custom_fifo = read_pipe(fifoR2_R3, message);
             if (message->Id != last_message->Id)
                 send_message(message, pipe3_write, NULL);
         } else

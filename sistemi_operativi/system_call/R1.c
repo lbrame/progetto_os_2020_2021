@@ -148,7 +148,7 @@ int main(int argc, char *argv[]) {
             if (strcmp(queue_message->IdReceiver, "R1") == 0) {
                 send_message(queue_message);
             } else {
-//                write_pipe(fifoR1_R2, queue_message);
+                write_pipe(fifoR1_R2, queue_message);
             }
         }
     } while (endFlag > 0);
