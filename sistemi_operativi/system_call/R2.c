@@ -12,6 +12,7 @@
 #include <sys/msg.h>
 #include <signal.h>
 #include <stdbool.h>
+#include "fifo.h"
 
 int pipe3_read;
 int pipe4_write;
@@ -74,8 +75,8 @@ void sigHandler(int sig) {
             break;
         case SIGTERM:
             printf("Caught SIGTERM\n");
-            close_pipe(pipe3_read);
-            close_pipe(pipe4_write);
+//            close_pipe(pipe3_read);
+//            close_pipe(pipe4_write);
             exit(0);
         default:
             printf("Signal not valid\n");
@@ -85,6 +86,8 @@ void sigHandler(int sig) {
 
 
 int main(int argc, char *argv[]) {
+//    int fifoR2_R3 = open_fifo("OutputFiles/custom_fifo1.txt", O_RDWR);
+//    int fifoR1_R2 = open_fifo("OutputFiles/custom_fifo2.txt", O_RDONLY);
 
     pipe3_read = atoi(argv[0]);
     pipe4_write = atoi(argv[1]);
@@ -118,10 +121,13 @@ int main(int argc, char *argv[]) {
         ErrExit("malloc R2");
 
     ssize_t status = 1;
+    ssize_t status_custom_fifo = 1;
 
-    // 2 --> 1. fifo
+    // 4 --> 1. pipe
     //   --> 2. shmem
-    int endFlag = 2;
+    //   --> 3. queue
+    //   --> 4. fifo custom
+    int endFlag = 4;
 
     do { //Read until it returns 0 (EOF)
         if (status > 0) {
@@ -132,23 +138,56 @@ int main(int argc, char *argv[]) {
                 continue;
             if(strcmp(message->IdReceiver, "R2") != 0  && strcmp(message->Type, "Q") == 0) {
               write_pipe(pipe4_write, message);
-              continue;
+            } else {
+                send_message(message, pipe4_write);
             }
-            send_message(message, pipe4_write);
         } else
             endFlag--;
+
+
+        // custom fifo
+        /*
+        if (status_custom_fifo > 0) {
+            memcpy(last_message, message, sizeof(Message_struct));
+            // using read_pipe as a reader also for fifo (they works the same way)
+            status_custom_fifo = read_pipe(fifoR1_R2, message);
+            if (message->Id != last_message->Id && strcmp(message->IdReceiver, "R2") != 0)
+                write_pipe(fifoR2_R3, message);
+        } else
+            endFlag--;
+            */
 
         // shmem
         if (strcmp(message->Message, "END") != 0) {
             // read from shmem
             memcpy(last_message, message, sizeof(Message_struct));
             memcpy(message, shmemPointer, sizeof(Message_struct));
-            if (message->Id == last_message->Id )
-                continue;
-            else if (strcmp(message->IdReceiver, "R2") == 0)
+            if (strcmp(message->IdReceiver, "R2") == 0 && message->Id != last_message->Id) {
                 V(semaphore_array,0);
+                send_message(message, pipe4_write);
+            }
         } else
             endFlag--;
+
+        // MSG QUEUE
+        char *outputbuffer = msgRcv(fd_queue, outputbuffer);
+        struct msqid_ds buf;
+        if (outputbuffer == NULL || buf.msg_qnum == 0) {
+            Message_struct *queue_message = parse_message(outputbuffer);
+            if (strcmp(queue_message->Message, "R2") != 0) {
+                //send without printing
+                if(strcmp(queue_message->IdReceiver, "R1")) {
+                    write_pipe(pipe4_write, queue_message);
+                } else {
+//                    write_pipe(fifoR2_R3, queue_message);
+                }
+            } else {
+                //send to R1
+                send_message(queue_message, pipe4_write);
+            }
+        } else {
+            endFlag--;
+        }
 
     } while (endFlag > 0);
 
@@ -156,7 +195,6 @@ int main(int argc, char *argv[]) {
     struct msqid_ds buf;
     if (msgctl(fd_queue, IPC_STAT, &buf) < 0)
         ErrExit("msgctl");
-
 
 
     close_pipe(pipe3_read);

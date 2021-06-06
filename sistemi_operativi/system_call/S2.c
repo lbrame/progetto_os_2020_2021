@@ -7,7 +7,7 @@
 #include <fcntl.h>
 #include <signal.h>
 #include "defines.h"
-#include "unistd.h"
+#include <unistd.h>
 #include "err_exit.h"
 #include "pipe.h"
 #include "semaphore.h"
@@ -93,8 +93,8 @@ void sigHandler(int sig) {
             break;
         case SIGTERM:
             printf("S2: Caught SIGTERM\n");
-            close_pipe(pipe1_read);
-            close_pipe(pipe2_write);
+//            close_pipe(pipe1_read);
+//            close_pipe(pipe2_write);
             exit(0);
         default:
             printf("S2: Signal not valid\n");

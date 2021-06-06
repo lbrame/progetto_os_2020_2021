@@ -7,9 +7,7 @@
 #include <sys/ipc.h>
 #include <sys/sem.h>
 #include <sys/stat.h>
-#include "unistd.h"
 #include <stdio.h>
-#include <stdlib.h>
 
 // definition of the union semun
 union semun {

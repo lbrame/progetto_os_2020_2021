@@ -27,6 +27,7 @@ void send_message(Message_struct *message, int pipe, char *queue_buffer) {
     char *outputBuffer;
     if (message != NULL) {
 
+
         if (added_delay) {
             sleep(message->DelS3 + 5);
             added_delay = false;
@@ -80,7 +81,7 @@ void sigHandler(int sig) {
             break;
         case SIGTERM:
             printf("Caught SIGTERM\n");
-            close_pipe(pipe3_write);
+//            close_pipe(pipe3_write);
             exit(0);
         default:
             printf("Signal not valid\n");
@@ -90,6 +91,7 @@ void sigHandler(int sig) {
 
 int main(int argc, char *argv[]) {
     pipe3_write = atoi(argv[0]);
+//    int fifoR2_R3 = open_fifo("OutputFiles/custom_fifo1.txt", O_RDONLY);
     int semaphore_array = semGet(1);
     int shmemId = get_shmem(sizeof(Message_struct));
     Message_struct *shmemPointer = (Message_struct *) attach_shmem(shmemId);
@@ -123,49 +125,61 @@ int main(int argc, char *argv[]) {
         ErrExit("malloc R3");
 
     ssize_t status = 1;
+    ssize_t status_custom_fifo = 1;
 
-    // 2 --> 1. fifo
+    // 4 --> 1. fifo
     //   --> 2. shmem
-    int endFlag = 2;
+    //   --> 3. queue
+    //   --> 4. fifo custom
+    int endFlag = 4;
 
     do { // Read until it returns 0 (EOF)
         if (status > 0) {
             memcpy(last_message, message, sizeof(Message_struct));
             // using read_pipe as a reader also for fifo (they works the same way)
             status = read_pipe(fd_fifo, message);
-            if (message->Id == last_message->Id)
-                continue;
-            send_message(message, pipe3_write, NULL);
+            if (message->Id != last_message->Id)
+                send_message(message, pipe3_write, NULL);
         } else
             endFlag--;
 
+        if (status_custom_fifo > 0) {
+            memcpy(last_message, message, sizeof(Message_struct));
+            // using read_pipe as a reader also for fifo (they works the same way)
+//            status_custom_fifo = read_pipe(fifoR2_R3, message);
+            if (message->Id != last_message->Id)
+                send_message(message, pipe3_write, NULL);
+        } else
+            endFlag--;
+
+        memcpy(last_message, message, sizeof(Message_struct));
+        memcpy(message, shmemPointer, sizeof(Message_struct));
         // shmem
         if (strcmp(message->Message, "END") != 0) {
-            // write to shmem
-            memcpy(last_message, message, sizeof(Message_struct));
-            memcpy(message, shmemPointer, sizeof(Message_struct));
             printf("R3 shmem: %s\n", message->Message);
-            if (message->Id == last_message->Id)
-                continue;
-            else if (strcmp(message->IdReceiver, "R3") == 0)
+            if (strcmp(message->IdReceiver, "R3") == 0 && message->Id != last_message->Id ) {
                 V(semaphore_array, 0);
+                send_message(message, pipe3_write, NULL);
+            }
         } else
             endFlag--;
 
         // MSG QUEUE
         char *outputbuffer = msgRcv(fd_queue, outputbuffer);
         struct msqid_ds buf;
-        if (outputbuffer == NULL || buf.msg_qnum == 0)
-            break;
-        char *tmp;
-        if ((tmp = strstr(outputbuffer, "R3")) != NULL) {
-            //send message to write in outputbuffer
-            send_message(NULL, 0, outputbuffer);
-        } else {
+        if (outputbuffer == NULL || buf.msg_qnum == 0) {
             Message_struct *queue_message = parse_message(outputbuffer);
-            //send without printing
-            write_pipe(pipe3_write, queue_message);
+            if (strcmp(queue_message->Message, "R3") != 0) {
+                //send without printing
+                write_pipe(pipe3_write, queue_message);
+            } else {
+                // send message to the right receiver
+                send_message(queue_message, pipe3_write, NULL);
+            }
+        } else {
+            endFlag--;
         }
+
 
     } while (endFlag > 0);
 
@@ -173,7 +187,7 @@ int main(int argc, char *argv[]) {
     if (msgctl(fd_queue, IPC_STAT, &buf) < 0)
         ErrExit("msgctl");
 
-    memcpy(last_message, message, sizeof(Message_struct));
+
     close_pipe(pipe3_write);
     free(message);
     free(last_message);

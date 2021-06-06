@@ -1,7 +1,7 @@
 /// @file S1.c
 /// @brief Contiene l'implementazione del processo S1 chiamato da SenderManager.
 
-#include "unistd.h"
+#include <unistd.h>
 #include "defines.h"
 #include <stdlib.h>
 #include <string.h>
@@ -95,7 +95,7 @@ void sigHandler(int sig) {
             break;
         case SIGTERM:
             printf("S1: Caught SIGTERM\n");
-            close_pipe(pipe1_write);
+//            close_pipe(pipe1_write);
             exit(0);
         default:
             printf("S1: Signal not valid\n");

@@ -1,5 +1,5 @@
 #include "defines.h"
-#include "unistd.h"
+#include <unistd.h>
 #include "pipe.h"
 #include "err_exit.h"
 #include "semaphore.h"
@@ -12,11 +12,29 @@
 #include <sys/msg.h>
 #include <signal.h>
 #include <stdbool.h>
+#include "fifo.h"
 
 int pipe4_read;
 bool added_delay = false;
 bool remove_msg = false;
 bool send_msg = false;
+
+void send_message(Message_struct *message) {
+    char *time_arrival = (char *) malloc(sizeof(char) * 8);
+    char *time_departure = "-";
+    time_arrival = getTime(time_arrival);
+    sleep(message->DelS1);
+
+    int fd = my_open("OutputFiles/F6.csv", O_WRONLY | O_APPEND);
+    char *outputBuffer = concatenate(message, time_arrival, time_departure);
+    my_write(fd, outputBuffer, strlen(outputBuffer));
+
+    close(fd);
+
+    free(time_arrival);
+    free(time_departure);
+}
+
 
 /**
  * Signal handler
@@ -40,7 +58,7 @@ void sigHandler(int sig) {
             break;
         case SIGTERM:
             printf("Caught SIGTERM\n");
-            close_pipe(pipe4_read);
+//            close_pipe(pipe4_read);
             exit(0);
         default:
             printf("Signal not valid\n");
@@ -50,6 +68,7 @@ void sigHandler(int sig) {
 
 int main(int argc, char *argv[]) {
     pipe4_read = atoi(&argv[0][0]);
+    int fifoR1_R2 = open_fifo("OutputFiles/custom_fifo2.txt", O_RDWR);
 
     if (signal(SIGTERM, sigHandler) == SIG_ERR) {
         ErrExit("R1, SIGTERM");
@@ -88,47 +107,52 @@ int main(int argc, char *argv[]) {
 
     ssize_t status = 1;
 
-    // 2 --> 1. fifo
+
+    // 3 --> 1. pipe
     //   --> 2. shmem
-    int endFlag = 2;
+    //   --> 3. queue
+    int endFlag = 3;
 
-    do { //Read until it returns 0 (EOF)
-        char *time_arrival = (char *) malloc(sizeof(char) * 8);
-        char *time_departure = "-";
-
-        // read pipe
+    do {
+        // PIPE
         if (status > 0) {
             memcpy(last_message, message, sizeof(Message_struct));
-            // using read_pipe as a reader also for fifo (they works the same way)
+
             status = read_pipe(pipe4_read, message);
-            if (message->Id == last_message->Id)
-                continue;
+            if(message->Id != last_message->Id) {
+                send_message(message);
+            }
         } else
             endFlag--;
 
         // shmem
         if (strcmp(message->Message, "END") != 0) {
-            // write to shmem
+            // read from shmem
             memcpy(last_message, message, sizeof(Message_struct));
             memcpy(message, shmemPointer, sizeof(Message_struct));
-            if (message->Id == last_message->Id)
-                continue;
-            else if (strcmp(message->IdReceiver, "R1") == 0)
+            if (strcmp(message->IdReceiver, "R1") == 0 && message->Id != last_message->Id ) {
                 V(semaphore_array,0);
-            time_arrival = getTime(time_arrival);
-            sleep(message->DelS1);
-
-            int fd = my_open("OutputFiles/F6.csv", O_WRONLY | O_APPEND);
-            char *outputBuffer = concatenate(message, time_arrival, time_departure);
-            my_write(fd, outputBuffer, strlen(outputBuffer));
-
-            close(fd);
-            free(time_arrival);
-            free(time_departure);
+                send_message(message);
+            }
         } else
             endFlag--;
 
+        // MSG QUEUE
+
+        char *outputbuffer = msgRcv(fd_queue, outputbuffer);
+        struct msqid_ds buf;
+        if (outputbuffer == NULL || buf.msg_qnum == 0) {
+            endFlag--;
+        } else {
+            Message_struct *queue_message = parse_message(outputbuffer);
+            if (strcmp(queue_message->IdReceiver, "R1") == 0) {
+                send_message(queue_message);
+            } else {
+//                write_pipe(fifoR1_R2, queue_message);
+            }
+        }
     } while (endFlag > 0);
+
 
     close_pipe(pipe4_read);
     free(message);

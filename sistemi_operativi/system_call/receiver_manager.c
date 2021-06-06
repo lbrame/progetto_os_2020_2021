@@ -13,6 +13,8 @@
 #include "semaphore.h"
 #include "message_queue.h"
 #include "shared_memory.h"
+#include <fifo.h>
+
 
 /**
  * append a struct to the given array
@@ -85,6 +87,7 @@ void generate_child(child_struct *info_children, const int fd3[2], const int fd4
 
 
 int main(int argc, char * argv[]) {
+
     // Semaphore to protect shared memory writes
     int semaphore_array = createSem(1);
     if (semaphore_array == -1) {
@@ -115,6 +118,18 @@ int main(int argc, char * argv[]) {
     generate_pipe(pipe3);
     generate_pipe(pipe4);
 
+    // create fifos
+    // create fifo
+    // int fifo1 = generate_fifo("OutputFiles/custom_fifo1.txt");
+    // printf("fifo1: %d\n", fifo1);
+    // int fifo2 = generate_fifo("OutputFiles/custom_fifo2.txt");
+    // printf("fifo2: %d\n", fifo2);
+    // close_fifo(fifo1);
+    // printf("fifo1 closed\n");
+    // close_fifo(fifo2);
+    // printf("fifo2 closed\n");
+
+
     // create child processes
     generate_child(info_children, pipe3, pipe4);
     generate_child(info_children, pipe3, pipe4);
@@ -143,6 +158,8 @@ int main(int argc, char * argv[]) {
     free(outputBuffer);
     free(info_children);
     unlink("OutputFiles/my_fifo.txt");
+    unlink("OutputFiles/custom_fifo1.txt");
+    unlink("OutputFiles/custom_fifo2.txt");
     delete_msgqueue(msgGet());
     return 0;
 }

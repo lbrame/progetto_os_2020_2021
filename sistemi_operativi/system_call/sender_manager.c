@@ -117,8 +117,12 @@ int main(int argc, char *argv[]) {
 
     // create fifo
     int fifo = generate_fifo("OutputFiles/my_fifo.txt");
+    printf("fifo: %d\n", fifo);
     // close fifo
     close_fifo(fifo);
+
+
+
 
     // create pipes
     int pipe1[2];

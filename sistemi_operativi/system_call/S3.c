@@ -9,7 +9,7 @@
 #include "defines.h"
 #include <fcntl.h>
 #include "fifo.h"
-#include "unistd.h"
+#include <unistd.h>
 #include "semaphore.h"
 #include "files.h"
 #include "message_queue.h"
@@ -89,7 +89,7 @@ void sigHandler(int sig) {
             break;
         case SIGTERM:
             printf("S2: Caught SIGTERM\n");
-            close_pipe(pipe2_read);
+//            close_pipe(pipe2_read);
             exit(0);
         default:
             printf("S2: Signal not valid\n");
